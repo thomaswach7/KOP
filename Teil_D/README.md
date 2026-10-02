@@ -1,64 +1,48 @@
-# Teil D – Einzelteilzeichnungen Pos. 1 bis 5
+# Einzelteilzeichnungen – Fliehkraftkupplung
 
-| Datei | Teil | Blatt | Ansichten |
+Gezeichnet sind **nur Teile, für die im Datensatz eine Bemaßung vorhanden ist**, also eine Einzelteilzeichnung 14.2.5.x.
+Die Maße, Passungen, Oberflächen und Toleranzen folgen diesen Vorlagen und der Angabe Teil D.
+
+| Datei | Teil | Vorlage | Blatt / Maßstab |
 |---|---|---|---|
-| `Pos01_Antriebsnabe.pdf` | Antriebsnabe (Pos. 1) | A3, 1:1 | Ansicht von rechts + Schnitt A–A |
-| `Pos02_Abtriebsnabe.pdf` | Abtriebsnabe (Pos. 2) | A3, 1:1 | Ansicht von der Lagerseite + Schnitt A–A |
-| `Pos03_Gehaeuse.pdf` | Gehäuse (Pos. 3) | A4, 1:1 | Halbschnitt |
-| `Pos04_Deckel.pdf` | Deckel (Pos. 4) | A3, 1:1 | Ansicht von der Lagerseite + Halbschnitt A–A + Einzelheit Z (2:1) |
-| `Pos05_Fliehgewicht.pdf` | Fliehgewicht (Pos. 5) | A3, 1:1 | Vorderansicht + Schnitt A–A |
-| `Einzelteilzeichnungen_Pos1-5.pdf` | alle 5 Blätter in einer Datei | | |
+| `Pos01_Antriebsnabe.pdf` | Antriebsnabe | 14.2.5.2 | A3 / 1:1 |
+| `Pos03_Gehaeuse.pdf` | Gehäuse | 14.2.5.4 | A4 / 1:1 |
+| `Pos04_Deckel.pdf` | Deckel | 14.2.5.5 | A3 / 1:1, Einzelheit Z 2:1 |
+| `Pos05_Fliehgewicht.pdf` | Fliehgewicht (5.1 + 5.2) | 14.2.5.6 | A3 / 1:1 |
+| `Pos06_Scheibe.pdf` | Scheibe | 14.2.5.7 | A4 / 5:1 |
+| `Pos07_Zugfeder.pdf` | Zugfeder | 14.2.5.8 | A4 / 2:1 |
+| `Pos09_Zylinderstift.pdf` | Zylinderstift | 14.2.5.9 | A4 / 2:1 |
+| `Einzelteilzeichnungen_alle.pdf` | alle 7 Blätter in einer Datei | | |
 
-Die Geometrie ist mit HLR direkt aus den STEP-Modellen abgeleitet, die Maße stammen aus den Modellen.
-Die Toleranzen sind nach Angabe Teil D umgesetzt:
+## Nicht gezeichnet
 
-- ISO 2768-mK, Einheitsbohrung, Werkstückkanten ISO 13715 (−0,3 / +0,3), Oberflächen DIN EN ISO 1302, Gusstoleranzen DIN 1686 GTB 18 (nur Gussteile)
-- Oberflächen: Lagersitze und Zentrierungen z (Rz 4), Bohrungen und Anlageflächen y (Rz 16), sonstige bearbeitete Flächen x (Rz 63). Rohgussflächen über die Sammelangabe.
-- Form- und Lagetoleranzen:
+- **Pos. 2 Abtriebsnabe:** Im Datensatz gibt es keine Zeichnung (14.2.5.3 fehlt). Laut Angabe Teil D gehört sie aber
+  zur Abgabe. Frag bitte deine Lehrkraft nach der Zeichnung oder leite die Maße selbst aus dem STEP-Modell ab.
+- **Pos. 8, 10, 11, 12:** Das sind Normteile (DIN 6799, ISO 4762, DIN 625, DIN 5419). Sie brauchen keine Einzelteilzeichnung.
+
+## Form- und Lagetoleranzen (laut Angabe)
 
 | Teil | Toleranz | Bezug |
 |---|---|---|
 | Pos. 1 | Gesamtrundlauf linker Lagersitz 0,05 | A = Achse Ø30H7 |
 | | Koaxialität rechter Lagersitz Ø0,05 | B = Achse linker Lagersitz |
-| | Gesamtplanlauf Armflächen 0,05, beidseitig | A |
+| | Gesamtplanlauf Armflächen 0,05 (beidseitig) | A |
 | | Symmetrie Passfedernut 0,02 | A |
-| Pos. 2 | Gesamtrundlauf Ø136h6 0,05 | A = Achse Ø30H7 |
-| | Koaxialität Lagersitz Ø75H7 Ø0,05 | A |
-| | Gesamtplanlauf Anlagefläche Gehäuse 0,05 | A |
 | Pos. 3 | Gesamtplanlauf Anlagefläche Abtriebsnabe 0,05 | A = Achse Ø136H7 |
-| | Parallelität Anlagefläche Deckel 0,05 | B = Anlagefläche Abtriebsnabe |
+| | Parallelität Anlagefläche Deckel 0,05 | B |
 | Pos. 4 | Gesamtrundlauf Ø136h6 0,05 | A = Achse Ø75H7 |
 | | Gesamtplanlauf Anlagefläche Gehäuse 0,05 | A |
 | Pos. 5 | Rechtwinkligkeit 2× Ø8H9 Ø0,05 | A = Mittelebene Nut 20 |
-| | Parallelität Nutflächen 0,05 | B = eine Nutfläche |
+| | Parallelität Nutflächen 0,05 | B |
+| Pos. 6 | Parallelität Planflächen 0,05 | A |
 
-## Abtriebsnabe (Pos. 2): neu erstellt
+## Fehler in den Buchvorlagen (zum Nachfragen bei der Lehrkraft)
 
-Für dieses Teil gibt es im Datensatz keine Zeichnung (14.2.5.3 fehlt). Alle Maße stammen aus dem
-STEP-Modell und passen zu den Gegenstücken:
-
-- Ø136h6 ↔ Gehäuse Ø136H7
-- Ø75H7 ↔ Lager 6009
-- Lochbild 6× Ø9H13 / Senkung Ø15H13 ↧8,6 auf Ø150 ↔ Gehäusegewinde M8
-
-Die Sachnummer 14.2.5.3 ist angenommen und folgt der Nummerierung im Buch.
-
-## Abweichungen und Fehler, die mir aufgefallen sind
-
-1. **Fliehgewicht R52 / R51,5:** Die Buchzeichnung 14.2.5.6 gibt R52 an, das STEP-Modell hat R51,5.
-   Die Augenmitten liegen ebenfalls auf R51,5. Ich habe **R51,5** eingetragen.
-2. **Fliehgewicht 113° / 112,5°:** Das Modell ergibt 2 × 56,25° = 112,5°, das Buch rundet auf 113°. Eingetragen ist **112,5°**.
-3. **Fliehgewicht, Bohrungen und Augen nicht konzentrisch:** Die Bohrungen Ø8H9 (Abstand 95,77) liegen 0,3 mm neben
-   den Augenmitten (R51,5 / 135°). Das steht so in Modell und Buch. Ich habe die Bohrungen mit 95,77 und 19,24 bemaßt.
-4. **Belagenden:** Die Einlaufschräge ist nur als Hinweis „1,5 × 5 nach Zeichnung 14.2.5.6“ angegeben.
-   Im Modell sind es ≈ 1,7 × 5,3.
-5. **Gusstoleranz-Norm:** Die Buchzeichnung der Antriebsnabe nennt „DIN 1688“. Das ist die Norm für **Leichtmetall**guss
-   und für EN-GJS falsch. Richtig ist DIN 1686 (wie in der Angabe). Beide Normen sind übrigens zurückgezogen, aktuell gilt
-   DIN EN ISO 8062-3. Das wäre ein Verbesserungsvorschlag, wenn die Lehrkraft die aktuelle Norm sehen will.
-6. **Ø85,3 (Pos. 2) und Ø84 (Pos. 4):** Das sind Rohgussmaße an den Außendurchmessern der Lagerrohre mit 5° Aushebeschräge.
-   Sie sind im Modell nicht rund konstruiert (85,26 / 84,02) und deshalb gerundet eingetragen. Sie unterliegen der Gusstoleranz.
-
-> In Creo werden die Zeichnungen wieder aus deinen Modellen abgeleitet. Die PDFs zeigen dir, welche Maße,
-> Passungen, Oberflächen und Toleranzen pro Teil hineingehören und wo sie sinnvoll platziert werden.
-
-Die Python-Skripte in `Skripte/` (CadQuery + matplotlib) erzeugen die PDFs. Erwartet wird der entpackte Datensatz in `../Fliehkraftkupplung/`.
+1. **Deckel 14.2.5.5:** Der Gesamtplanlauf zeigt im Buch auf die Stirnfläche des Zentrierbunds. Die Angabe verlangt
+   die **Anlagefläche zum Gehäuse**, also die Flanschfläche. In meiner Zeichnung ist er an der Flanschfläche.
+2. **Antriebsnabe 14.2.5.2:** Dort steht „Gusstoleranz DIN 1688“. Das ist die Norm für Leichtmetallguss, richtig ist **DIN 1686**.
+3. **Fliehgewicht:** Die Buchmaße R52 und 113° weichen vom STEP-Modell ab (R51,5 und 112,5°). Gezeichnet ist nach Buch.
+4. **Zugfeder:** Laut Buch hat die Öse Ø8 außen bei Draht Ø1,1, also nur etwa Ø5,8 innen. Der Einstich im Zylinderstift hat aber Ø6,8.
+   Die Feder lässt sich so nicht einhängen.
+5. **Ergänzte Maße:** Im Buch fehlt am Deckel der Außendurchmesser des Lagerrohrs. Ich habe **Ø84** aus dem Modell ergänzt.
+   R60 am Fliehgewicht habe ich ebenfalls ergänzt.

@@ -217,7 +217,7 @@ class Sheet:
                 self.text(x0, my+1.0, main, H); self.text(x0+wm+0.8, my+3.5, up, 2.2); self.text(x0+wm+0.8, my+0.5, lo, 2.2)
             else:
                 y0 = my - (wm+wt+0.8)/2
-                self.text(mx-1.0, y0, main, H, rot=90); self.text(mx-3.0, y0+wm+0.8, up, 2.5, rot=90); self.text(mx-0.6, y0+wm+0.8, lo, 2.5, rot=90)
+                self.text(mx-1.0, y0, main, H, rot=90); self.text(mx-3.7, y0+wm+0.8, up, 2.2, rot=90); self.text(mx-0.9, y0+wm+0.8, lo, 2.2, rot=90)
             return a, b
         if orient == "h":
             self.text(mx, my+1.0, text, H, ha="center")

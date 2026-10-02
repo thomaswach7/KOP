@@ -33,8 +33,6 @@ sh.text(*S(0, 24), "A–A", 5, ha="center")
 # ---------------- Vorderansicht ----------------
 sh.dim(F(-47.89, -19.24), F(47.89, -19.24), FY+16, "95,77", "h")
 sh.dim(F(0, 0), F(-47.89, -19.24), FX-66, "19,24", "v", ext1=True, ext2=True) if False else None
-sh.line([F(-60, 0), F(-13, 0)]); sh.line([F(-60, -19.24), F(-56, -19.24)])
-sh.dim(F(-60, 0), F(-60, -19.24), FX-66, "19,24", "v", ext1=False, ext2=False)
 sh.leader(F(47.89+4*math.cos(math.radians(40)), -19.24+4*math.sin(math.radians(40))), F(64, 12), "2× Ø8H9", end_len=17)
 sh.gdt((F(64, 12)[0], F(64, 12)[1]-8.5), "perp", "Ø0,05", "A")
 # Radien
@@ -56,19 +54,38 @@ for sg in (1, -1):
     for half, rr in ((67.5, 43), (56.25, 60), (51.0, 62), (46.0, 62)):
         sh.line([F(*pol(4, half*sg)), F(*pol(rr, half*sg))])
 angdim(67.5, 14, "135°", 0)
-angdim(56.25, 22, "112,5°", 0)
+angdim(56.25, 22, "113°", 0)
 angdim(51.0, 30, "102°", 0)
 angdim(46.0, 38, "92°", 0)
-sh.text(FX-60, FY-84, "Belagenden mit Einlaufschräge 1,5 × 5 (nach Zeichnung 14.2.5.6)", 3.0)
+# Augenbreite 17 (linkes Auge, quer zur Radialrichtung)
+ec = pol(51.5, -67.5); u = (ec[0]/51.5, ec[1]/51.5); n = (u[1], -u[0])
+t1 = (ec[0]+8.5*u[0], ec[1]+8.5*u[1]); t2 = (ec[0]-8.5*u[0], ec[1]-8.5*u[1])
+off = 16
+e1 = (t1[0]+off*n[0], t1[1]+off*n[1]); e2 = (t2[0]+off*n[0], t2[1]+off*n[1])
+sh.line([F(*t1), F(t1[0]+(off+2)*n[0], t1[1]+(off+2)*n[1])]); sh.line([F(*t2), F(t2[0]+(off+2)*n[0], t2[1]+(off+2)*n[1])])
+sh.line([F(*e1), F(*e2)]); sh.arrow(F(*e1), F(*e2)); sh.arrow(F(*e2), F(*e1))
+rot = math.degrees(math.atan2(u[1], u[0])) + 180
+tm = ((e1[0]+e2[0])/2 + 1.2*n[0], (e1[1]+e2[1])/2 + 1.2*n[1])
+sh.text(*F(*tm), "17", H, rot=rot, ha="center")
+# Abwicklung Belag 5.2 (gestreckte Laenge 102, Einlaufschraege 1,5 x 5)
+AX, AY = FX-51, FY-92
+dd = dict(color="k", lw=TN, dashes=(14, 2.5, 1.5, 2.5, 1.5, 2.5))
+sh.ax.plot([AX, AX+102], [AY, AY], **dd)
+sh.ax.plot([AX, AX+5, AX+97, AX+102], [AY, AY-1.5, AY-1.5, AY], **dd)
+sh.dim((AX, AY), (AX+102, AY), AY-14, "102", "h")
+sh.dim((AX+97, AY-1.5), (AX+102, AY), AY-7, "5", "h")
+sh.dim((AX+102, AY), (AX+102, AY-1.5), AX+108, "1,5", "v")
+sh.text(AX, AY+3, "Abwicklung Belag 5.2", 3.0)
 
 # ---------------- Schnitt A-A ----------------
 # Radien von der Achse
-for zz, rr, txt in ((-36, 43, "R43"), (-43, 51.5, "R51,5"), (-50, 62, "R62")):
+for zz, rr, txt in ((-36, 43, "R43"), (-43, 52, "R52"), (-50, 62, "R62")):
     sh.line([S(-9.5 if rr == 43 else -27.5, -rr), S(zz-2, -rr)])
     sh.line([S(zz, 0), S(zz, -rr)]); sh.arrow(S(zz, -rr), S(zz, 0))
     sh.text(*S(zz-1, -rr/2), txt, H, rot=90, ha="center")
 sh.line([S(-52, 0), S(-30, 0)])
 sh.dim(S(27, -62), S(27, -65), SX+35, "3", "v", ext1=True, ext2=True)
+sh.leader(S(-14, -62.2), S(-38, -80), "geklebt", end_len=14)
 sh.dim(S(-27, -65), S(27, -65), SY-73, "54", "h")
 sh.dim(S(-9, -30), S(9, -30), SY-30, "18", "h", ext1=False, ext2=False)
 sh.dim(S(-10, -14), S(10, -14), SY-14, "20|+0,2|+0,1", "h", ext1=False, ext2=False)
