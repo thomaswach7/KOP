@@ -9,7 +9,7 @@
 |---|---|
 | **DIN 625** | Norm für einreihige Rillenkugellager |
 | **6** | Lagerart: Rillenkugellager, einreihig |
-| **0** | Maßreihe (Breiten-/Durchmesserreihe 10 → leichte Baureihe) |
+| **0** | Durchmesserreihe 0 (Breitenreihe 1 wird weggelassen → Maßreihe 10, sehr leichte Baureihe) |
 | **09** | Bohrungskennzahl: d = 09 · 5 = **45 mm** (gilt ab Kennzahl 04) |
 | **2Z** | Nachsetzzeichen: **beidseitig je eine Deckscheibe (Z)** |
 
