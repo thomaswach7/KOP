@@ -96,12 +96,20 @@ with PdfPages("Modellbaum_Einzelteile.pdf") as pdf:
         left_free = y - 10
         put3d_left = left_free >= 38
         top, bot = 188, (8 if put3d_left else 62)
-        hs = (top - bot)/len(sk)
-        yy = top
-        for f, cap in sk:
-            txt(ax, xr, yy, cap, 7.8, weight="bold")
-            img(fig, "mb/" + f, xr, yy - hs + 2, wr, hs - 6)
-            yy -= hs
+        if len(sk) == 3 and p["key"] == "pos1":   # Drehskizze oben, die zwei hohen Skizzen nebeneinander
+            h1 = (top - bot)*0.36
+            txt(ax, xr, top, sk[0][1], 7.8, weight="bold"); img(fig, "mb/" + sk[0][0], xr, top - h1 + 2, wr, h1 - 6)
+            for j, (f, cap) in enumerate(sk[1:]):
+                xx = xr + j*wr/2
+                txt(ax, xx, top - h1, cap.replace(" auf DTM1", "\nauf DTM1"), 7.3, weight="bold")
+                img(fig, "mb/" + f, xx, bot, wr/2 - 2, top - h1 - bot - 9)
+        else:
+            hs = (top - bot)/len(sk)
+            yy = top
+            for f, cap in sk:
+                txt(ax, xr, yy, cap, 7.8, weight="bold")
+                img(fig, "mb/" + f, xr, yy - hs + 2, wr, hs - 6)
+                yy -= hs
         if put3d_left:
             h3 = min(left_free - 6, 70)
             txt(ax, 10, y - 1, "Fertiges Teil", 7.8, weight="bold")

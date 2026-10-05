@@ -19,11 +19,11 @@ PARTS = [
    ("3", "Ebene DTM1", "parallel zu RIGHT", "Versatz 47 = Mitte der Arme"),
    ("4", "Extrudieren (Arme)", "Skizze auf DTM1", "Skizze 2: zwei Arme, je 18 breit, Halbkreis R9 außen, Augenmitten 104 auseinander (je 52 von der Achse). Rechteck innen bis R30 in den Körper ziehen. Tiefe symmetrisch 17."),
    ("5", "Rundung", "4 gerade Kanten, wo die Armseiten auf den Ø77 treffen", "R9. Erst jetzt, vor dem Fuß, sonst schlägt die Rundung fehl."),
-   ("6", "Extrudieren (Fuß)", "Skizze auf DTM1", "Je Arm Rechteck 18 breit von R30 bis R39,5 (1 mm über Ø77). Tiefe symmetrisch 20."),
+   ("6", "Extrudieren (Fuß)", "Skizze auf DTM1", "Skizze 3: je Arm Rechteck 18 breit von R30 bis Ø79 (1 mm über Ø77). Tiefe symmetrisch 20."),
    ("7", "Bohrung", "koaxial zur Achse des R9-Bogens, Platzierung auf der Armseite", "Ø8H8, Tiefe „Durch alle“. Zweiten Arm gleich (oder Spiegeln an TOP)."),
    ("8", "Extrudieren, Material entfernen (Passfedernut)", "Skizze auf RIGHT (Stirnfläche x = 0)", "Rechteck 8 breit, symmetrisch zu TOP, von der Bohrung bis 18,3 von der Achse (= Maß 33,3, t2 = 3,3). Um 90° zu den Armen versetzt. Tiefe „Durch alle“."),
   ],
-  skizzen=[("pos1_s1.png", "Skizze 1 – Drehen (KE 1)"), ("pos1_s4.png", "Skizze 2 – Arme auf DTM1 (KE 4)")],
+  skizzen=[("pos1_s1.png", "Skizze 1 – Drehen (KE 1)"), ("pos1_s4.png", "Skizze 2 – Arme auf DTM1 (KE 4)"), ("pos1_s6.png", "Skizze 3 – Fuß auf DTM1 (KE 6)")],
   hinweise=["Reihenfolge Arme → Rundung R9 → Fuß einhalten. Wer den Fuß vorher macht, bekommt bei R9 einen Fehler.",
             "Freistiche und Kantenbrüche aus der Zeichnung sind optional (ändern das Volumen kaum).",
             "Buchfehler: „Gusstoleranz DIN 1688“ → richtig DIN 1686."]),
@@ -56,14 +56,14 @@ PARTS = [
 
  dict(key="pos4", nr="4", name="Deckel", werkstoff="EN-GJS-700-2", quelle="Zeichnung 14.2.5.5",
   ke=[
-   ("1", "Drehen (Grundkörper)", "Skizze auf FRONT, Achse = Mittellinie", "Skizze 1: Flansch Ø170 × 12, Zentrierring Ø136 / Ø125 bis 19, Lagerrohr außen mit 5° Aushebeschräge (Ø84 bei 29), Lagersitz Ø75 (13 bis 29), Schulter Ø70 mit Bogen R2 (in der Skizze), Bohrung Ø46, Filzringnut Ø58: unten 4 breit, Flanken 7°. Winkel 360°."),
+   ("1", "Drehen (Grundkörper)", "Skizze auf FRONT, Achse = Mittellinie", "Skizze 1: Flansch Ø170 × 12, Zentrierring Ø136 / Ø125 bis 19, Lagerrohr außen mit 5° Aushebeschräge (Ø84 bei 29), Lagersitz Ø75 (13 bis 29), Schulter Ø70 mit Bogen R2 (in der Skizze), Bohrung Ø46, Filzringnut Ø58 (Maße in Skizze 1a: 3,5 / 4 / 7,5, Flanken je 7°). Winkel 360°."),
    ("2", "Rundung", "2 Innenkanten bei x = 12 (am Ø125 und am Lagerrohr)", "R5"),
    ("3", "Rundung", "Außenkante Ø170 bei x = 0", "R2"),
    ("4", "Fase", "Kante Ø136 bei x = 19", "1,5 × 45°"),
    ("5", "Bohrung (Senkung)", "Flanschfläche x = 0, Lochkreis Ø150, 0° zu FRONT", "Ø9 durchgehend, Senkung Ø15 × 8,6 tief"),
    ("6", "Muster", "Typ Achse, Deckelachse", "6 Stück, 60°"),
   ],
-  skizzen=[("pos4_s1.png", "Skizze 1 – Drehen (KE 1)")],
+  skizzen=[("pos4_s1.png", "Skizze 1 – Drehen (KE 1)"), ("pos4_s1z.png", "Skizze 1a – Einzelheit Filzringnut (gehört zu Skizze 1)")],
   hinweise=["Die Filzringnut und der Bogen R2 (Einzelheit Z) gehören in die Drehskizze. Eine eigene Rundung R2 schlägt dort fehl.",
             "Ø84 am Lagerrohr fehlt im Buch. Ich habe es aus dem Modell ergänzt."]),
 
@@ -122,7 +122,7 @@ PARTS = [
 
  dict(key="pos12", nr="12", name="Filzring DIN 5419 – 45", werkstoff="Filz", quelle="Norm DIN 5419 / Nut im Deckel",
   ke=[
-   ("1", "Drehen", "Skizze auf FRONT, Achse = Mittellinie", "Skizze 1: Trapez innen Ø45, außen Ø58, außen 4 breit, Flanken je 7° (genau wie die Nut im Deckel). Winkel 360°."),
+   ("1", "Drehen", "Skizze auf FRONT, Achse = Mittellinie", "Skizze 1: innen Ø45, Absatz Ø46, Trapez bis Ø58, außen 4 breit, Flanken je 7° (genau wie die Nut im Deckel). Winkel 360°."),
   ],
   skizzen=[("pos12_s1.png", "Skizze 1 – Drehen (KE 1)")],
   hinweise=["Der Filzring ist ein Normteil. Im Querschnitt entspricht er genau der Deckelnut, deshalb kannst du die Maße aus Pos. 4 übernehmen."]),

@@ -11,6 +11,23 @@ def r2(k, cx, cr, a_tip, rechts=True, lang=10.5):
     k.text(far[0] + (2 if rechts else -10), far[1] + 0.9, "R2", 3.5)
 S2 = math.sqrt(2)
 
+def winkel(k, v, a_ref, a_line, r, text, tx, ty, ref_len=None):
+    """Winkelmass: Scheitel v (Modellkoordinaten), Bezugslinie unter a_ref, Kante unter a_line (Grad), Bogenradius r."""
+    import numpy as np
+    if ref_len:
+        k.line([k.T(*v), k.T(v[0] + ref_len*math.cos(math.radians(a_ref)), v[1] + ref_len*math.sin(math.radians(a_ref)))], lw=0.35)
+    th = np.radians(np.linspace(a_ref, a_line, 40))
+    pts = [k.T(v[0] + r*math.cos(t), v[1] + r*math.sin(t)) for t in th]
+    k.line(pts); k.arrow(pts[0], pts[6]); k.arrow(pts[-1], pts[-7])
+    k.text(*k.T(v[0] + tx, v[1] + ty), text, 3.5)
+
+def winkel_pol(k, rr, a1, a2, text, tx, ty):
+    """Winkelmass um den Ursprung fuer Bogenteile (Winkel von -Y aus wie R.pol)."""
+    import numpy as np
+    pts = [k.T(*R.pol(rr, a)) for a in np.linspace(a1, a2, 80)]
+    k.line(pts); k.arrow(pts[0], pts[5]); k.arrow(pts[-1], pts[-6])
+    k.text(*k.T(tx, ty), text, 3.5)
+
 def s_pos3():
     k = SK(-30, 100, -12, 100, 1.4)
     k.prof([(0, 68), (70, 68), (70, 85), (0, 85)]); k.axis(-5, 75)
@@ -51,11 +68,13 @@ def s_pos6():
 from dimlib import TH
 
 def s_pos12():
-    k = SK(-6, 16, -6, 36, 3.0)
+    k = SK(-4, 15, -3, 33, 6.0)
     k.prof([(0, 22.5), (0, 23.0), (0.74, 29.0), (4.74, 29.0), (5.48, 23.0), (5.48, 22.5)])
     k.axis(-4, 14, 0)
-    k.hdim(0.74, 4.74, 29, 29, 32, "4"); k.ddim(5.48, 22.5, 9, "Ø45"); k.ddim(4.74, 29, 12.5, "Ø58")
-    k.text(*k.T(-5.5, 33.5), "7°", 3); k.text(*k.T(6.0, 33.5), "7°", 3)
+    k.hdim(0.74, 4.74, 29, 29, 31.5, "4"); k.ddim(5.48, 22.5, 9, "Ø45"); k.ddim(4.74, 29, 12.5, "Ø58")
+    k.ddim(5.48, 23, 11, "Ø46")
+    winkel(k, (0.74, 29), -90, -97.03, 5.3, "7°", -2.8, -4.4, ref_len=5.8)
+    winkel(k, (4.74, 29), -90, -82.97, 5.3, "7°", 1.0, -4.4, ref_len=5.8)
     k.png("mb/pos12_s1.png")
 
 def s_pos4():
@@ -67,10 +86,17 @@ def s_pos4():
     k.ddim(19, 68, 36, "Ø136"); k.ddim(19, 62.5, 42, "Ø125"); k.ddim(0, 85, -6, "Ø170")
     k.ddim(29, 42.01, 48, "Ø84"); k.ddim(29, 37.5, 54, "Ø75"); k.ddim(13, 35, 60, "Ø70")
     k.ddim(0, 23, -14, "Ø46"); k.ddim(3.5, 29, -22, "Ø58")
-    k.text(*k.T(31, 46), "5° (Aushebeschräge)", 3)
-    k.text(*k.T(-40, 34), "Nut: unten 4 breit,\nFlanken je 7°", 3)
+    winkel(k, (12, 43.49), 0, -5, 15, "5°", 16, -1.5, ref_len=17)
+    k.text(*k.T(-40, 36), "Nut: Maße siehe\nEinzelheit (Skizze 1a)", 3)
     r2(k, 13, 33, 135, lang=9)
     k.png("mb/pos4_s1.png")
+    # Einzelheit Filzringnut, M 6:1
+    k = SK(-2, 12, 17, 33, 6.0)
+    k.prof([(0, 31), (0, 23), (2.76, 23), (3.5, 29), (7.5, 29), (8.24, 23), (11, 23)], close=False)
+    k.hdim(0, 3.5, 23, 29, 31.5, "3,5"); k.hdim(3.5, 7.5, 29, 29, 31.5, "4"); k.hdim(0, 7.5, 23, 29, 20, "7,5")
+    winkel(k, (3.5, 29), -90, -97.03, 5.6, "7°", -2.6, -4.6, ref_len=6)
+    winkel(k, (7.5, 29), -90, -82.97, 5.6, "7°", 1.0, -4.6, ref_len=6)
+    k.png("mb/pos4_s1z.png")
 
 def s_pos2():
     k = SK(-30, 112, -8, 112, 1.5)
@@ -81,7 +107,7 @@ def s_pos2():
     k.ddim(0, 15, -6, "Ø30"); k.ddim(0, 25, -13, "Ø50"); k.ddim(43, 85, -21, "Ø170")
     k.ddim(62, 68, 80, "Ø136"); k.ddim(62, 62.5, 86, "Ø125"); k.ddim(72, 42.63, 92, "Ø85,3")
     k.ddim(72, 37.5, 98, "Ø75"); k.ddim(56, 35, 104, "Ø70")
-    k.text(*k.T(64, 46), "5°", 3)
+    winkel(k, (55, 44.12), 0, -5, 15, "5°", 16, -1.5, ref_len=17)
     r2(k, 56, 33, 135, lang=9)
     k.png("mb/pos2_s1.png")
 
@@ -92,7 +118,7 @@ def s_pos1():
     k.hdim(81, 63, 22.5, 38.5, 41, "18") ; k.hdim(81, 65, 22.5, 25.5, 30, "16")
     k.ddim(0, 15, -6, "Ø30"); k.ddim(0, 22.5, -13, "Ø45"); k.ddim(29, 25.5, -20, "Ø51")
     k.ddim(47, 38.5, 47, "Ø77") if False else k.ddim(81, 38.5, 89, "Ø77")
-    k.ddim(65, 25.5, 85, "Ø51")
+    k.ddim(65, 25.5, 85, "Ø51"); k.ddim(81, 22.5, 93, "Ø45")
     # R2 (Hohlkehle): Mittelpunkte (29|27,5) und (65|27,5); Hinweislinie von aussen durch den Mittelpunkt
     for (cx, cr), a_tip, txt_dx in (((29, 27.5), -45, -9.0), ((65, 27.5), 225, 2.0)):
         at = math.radians(a_tip)
@@ -111,7 +137,19 @@ def s_pos1():
     k.dim(k.T(-9, 30), k.T(9, 30), k.T(0, 25)[1] if False else k.T(0, 66)[1], "18", "h")
     k.dim(k.T(9, 52), k.T(9, -52), k.T(22, 0)[0], "104", "v")
     k.radius(k.T(0, 52), 9*1.6, 35, "R9", ext=10)
+    k.dim(k.T(-9, 30), k.T(0, 0), k.T(-24, 0)[0], "30", "v")
     k.png("mb/pos1_s4.png")
+    # Skizze Fuss (KE 6)
+    k = SK(-40, 40, -52, 52, 1.6)
+    k.line([k.T(38.5*math.cos(t), 38.5*math.sin(t)) for t in th], lw=0.35, ls="--")
+    for sg in (1, -1):
+        k.line([k.T(-9, sg*30), k.T(-9, sg*39.5), k.T(9, sg*39.5), k.T(9, sg*30), k.T(-9, sg*30)])
+    k.cl(k.T(-30, 0), k.T(30, 0)); k.cl(k.T(0, -48), k.T(0, 48))
+    k.dim(k.T(-9, 39.5), k.T(9, 39.5), k.T(0, 46)[1], "18", "h")
+    k.dim(k.T(9, 39.5), k.T(9, -39.5), k.T(20, 0)[0], "Ø79", "v")
+    k.dim(k.T(-9, 30), k.T(0, 0), k.T(-20, 0)[0], "30", "v")
+    k.text(*k.T(-36, -44), "gestrichelt: Ø77 (Körperkante als Bezug)", 2.8)
+    k.png("mb/pos1_s6.png")
 
 def s_pos51():
     import numpy as np
@@ -128,7 +166,10 @@ def s_pos51():
     k.line(pts)
     k.cl(k.T(0, 6), k.T(0, -68)); k.cl(k.T(-10, 0), k.T(10, 0))
     for a in (51, -51): k.line([k.T(0, 0), k.T(*pol(66, a))], lw=0.3)
-    k.text(*k.T(-6, -40), "102°", 3.5)
+    winkel_pol(k, 40, -51, 51, "102°", -5, -38)
+    for a in (52.13, -52.13): k.line([k.T(0, 0), k.T(*pol(55.75, a))], lw=0.3)
+    winkel_pol(k, 26, -52.13, 52.13, "104,26°", -8, -23)
+    k.text(*k.T(-70, -66), "Mittelpunkte R4,25 auf R55,75 (R4,25 tangential an R51,5 und R60)", 2.8)
     for r, a, t in ((62, 20, "R62"), (51.5, -15, "R51,5"), (60, 40, "R60")):
         p = k.T(*pol(r, a)); k.line([k.T(0, 0), p]); k.arrow(p, k.T(0, 0)); k.text(p[0]+1, p[1]+1, t, 3.2)
     k.radius(k.T(*pol(55.75, 52.13)), 4.25*1.4, 10, "R4,25", ext=8)
@@ -143,7 +184,8 @@ def s_pos51():
     pts.append(pts[0]); k.line(pts)
     for a in (67.5, -67.5): k.line([k.T(0, 0), k.T(*pol(51.5, a))], lw=0.3)
     k.cl(k.T(0, 6), k.T(0, -68))
-    k.text(*k.T(-6, -30), "135°", 3.5)
+    winkel_pol(k, 28, -67.5, 67.5, "135°", -6, -25)
+    k.text(*k.T(-70, -66), "Mittelpunkte R8,5 auf R51,5 (R8,5 tangential an R43 und R60)", 2.8)
     for r, a, t in ((60, 25, "R60"), (43, -20, "R43")):
         p = k.T(*pol(r, a)); k.line([k.T(0, 0), p]); k.arrow(p, k.T(0, 0)); k.text(p[0]+1, p[1]+1, t, 3.2)
     k.radius(k.T(*pol(51.5, 67.5)), 8.5*1.4, 20, "R8,5", ext=8)
@@ -154,10 +196,10 @@ def s_pos52():
     k = SK(-72, 72, -72, 8, 1.4)
     pol = R.pol
     a5 = 46 - math.degrees(5/65)
-    pts = [k.T(*pol(62, a)) for a in np.linspace(-46, 46, 80)] + [k.T(*pol(63.5, 46))] + [k.T(*pol(65, a)) for a in np.linspace(a5, -a5, 80)] + [k.T(*pol(63.5, -46)), k.T(*pol(62, -46))]
+    pts = [k.T(*pol(62, a)) for a in np.linspace(-46, 46, 80)] + [k.T(*pol(65, a)) for a in np.linspace(46, -46, 80)] + [k.T(*pol(62, -46))]
     k.line(pts)
     for a in (46, -46): k.line([k.T(0, 0), k.T(*pol(66, a))], lw=0.3)
-    k.cl(k.T(0, 6), k.T(0, -68)); k.text(*k.T(-5, -40), "92°", 3.5)
+    k.cl(k.T(0, 6), k.T(0, -68)); winkel_pol(k, 40, -46, 46, "92°", -4, -38)
     for r, a, t in ((62, 10, "R62"), (65, -20, "R65")):
         p = k.T(*pol(r, a)); k.line([k.T(0, 0), p]); k.arrow(p, k.T(0, 0)); k.text(p[0]+1, p[1]+1, t, 3.2)
     k.png("mb/pos52_s1.png")
@@ -168,12 +210,20 @@ def s_pos7():
     k.line([k.T(0.55, 3.45), k.T(14.85, 3.45)]); k.axis(-2, 17)
     k.hdim(0.55, 14.85, 3.45, 3.45, 7, "14,3"); k.ddim(14.85, 3.45, 19, "Ø6,9")
     k.ax.add_patch(__import__("matplotlib").patches.Circle(k.T(0.55, 3.45), 0.55*4, fill=False, lw=0.8, color="k"))
+    k.line([k.T(0.15, 3.85), k.T(-3, 7)]); k.line([k.T(-3, 7), k.T(-8, 7)]); k.text(*k.T(-8, 7.3), "Ø1,1", 3.5)
     k.png("mb/pos7_s1.png")
     k = SK(-12, 12, -10, 10, 4.0)
     gap = math.degrees(2/3.45)
     pts = [k.T(3.45*math.cos(math.radians(t)), 3.45*math.sin(math.radians(t))) for t in np.linspace(90 - gap/2 + 0, -270 + gap/2 + 0, 80)]
     k.line(pts); k.cl(k.T(-6, 0), k.T(6, 0)); k.cl(k.T(0, -6), k.T(0, 6))
     k.radius(k.T(0, 0), 3.45*4, -40, "R3,45", outside=False)
+    k.line([k.T(3, -6), k.T(3, 6)], lw=0.35, ls="--"); k.text(*k.T(3.4, -5.6), "Drahtende\nFederkörper", 2.8)
+    k.hdim(0, 3, 0, 0, -7.5, "3")
+    g = 1.0/3.45
+    xl, xr = 3.45*math.sin(-g), 3.45*math.sin(g); yy = 3.45*math.cos(g)
+    k.line([k.T(xl, yy), k.T(xl, 7.5)], lw=0.35); k.line([k.T(xr, yy), k.T(xr, 7.5)], lw=0.35)
+    k.line([k.T(xl - 2.5, 7), k.T(xr + 2.5, 7)]); k.arrow(k.T(xl, 7), k.T(xl - 1, 7)); k.arrow(k.T(xr, 7), k.T(xr + 1, 7))
+    k.text(*k.T(xr + 0.6, 7.4), "2 (Öffnung)", 3.2)
     k.png("mb/pos7_s2.png")
 
 if __name__ == "__main__":
