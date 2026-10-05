@@ -1,6 +1,14 @@
 import math
 from skizzen import SK
 import replay as R
+
+def r2(k, cx, cr, a_tip, rechts=True, lang=10.5):
+    """Radiusmass R2 an einer Hohlkehle: Hinweislinie von aussen durch den Mittelpunkt auf den Bogen."""
+    at = math.radians(a_tip)
+    tip = k.T(cx + 2*math.cos(at), cr + 2*math.sin(at)); far = k.T(cx - lang*math.cos(at), cr - lang*math.sin(at))
+    k.line([far, tip]); k.arrow(tip, far)
+    k.line([far, (far[0] + (12 if rechts else -12), far[1])])
+    k.text(far[0] + (2 if rechts else -10), far[1] + 0.9, "R2", 3.5)
 S2 = math.sqrt(2)
 
 def s_pos3():
@@ -61,7 +69,7 @@ def s_pos4():
     k.ddim(0, 23, -14, "Ø46"); k.ddim(3.5, 29, -22, "Ø58")
     k.text(*k.T(31, 46), "5° (Aushebeschräge)", 3)
     k.text(*k.T(-40, 34), "Nut: unten 4 breit,\nFlanken je 7°", 3)
-    k.text(*k.T(14, 31), "Bogen R2", 3)
+    r2(k, 13, 33, 135, lang=9)
     k.png("mb/pos4_s1.png")
 
 def s_pos2():
@@ -73,7 +81,8 @@ def s_pos2():
     k.ddim(0, 15, -6, "Ø30"); k.ddim(0, 25, -13, "Ø50"); k.ddim(43, 85, -21, "Ø170")
     k.ddim(62, 68, 80, "Ø136"); k.ddim(62, 62.5, 86, "Ø125"); k.ddim(72, 42.63, 92, "Ø85,3")
     k.ddim(72, 37.5, 98, "Ø75"); k.ddim(56, 35, 104, "Ø70")
-    k.text(*k.T(64, 46), "5°", 3); k.text(*k.T(45, 30), "Bogen R2", 3)
+    k.text(*k.T(64, 46), "5°", 3)
+    r2(k, 56, 33, 135, lang=9)
     k.png("mb/pos2_s1.png")
 
 def s_pos1():
@@ -83,7 +92,14 @@ def s_pos1():
     k.hdim(81, 63, 22.5, 38.5, 41, "18") ; k.hdim(81, 65, 22.5, 25.5, 30, "16")
     k.ddim(0, 15, -6, "Ø30"); k.ddim(0, 22.5, -13, "Ø45"); k.ddim(29, 25.5, -20, "Ø51")
     k.ddim(47, 38.5, 47, "Ø77") if False else k.ddim(81, 38.5, 89, "Ø77")
-    k.text(*k.T(33, 23), "Bögen R2", 3)
+    k.ddim(65, 25.5, 85, "Ø51")
+    # R2 (Hohlkehle): Mittelpunkte (29|27,5) und (65|27,5); Hinweislinie von aussen durch den Mittelpunkt
+    for (cx, cr), a_tip, txt_dx in (((29, 27.5), -45, -9.0), ((65, 27.5), 225, 2.0)):
+        at = math.radians(a_tip)
+        tip = k.T(cx + 2*math.cos(at), cr + 2*math.sin(at)); far = k.T(cx - 10.5*math.cos(at), cr - 10.5*math.sin(at))
+        k.line([far, tip]); k.arrow(tip, far)
+        k.line([far, (far[0] + txt_dx*1.8*0 + (12 if txt_dx > 0 else -12), far[1])])
+        k.text(far[0] + (2 if txt_dx > 0 else -10), far[1] + 0.9, "R2", 3.5)
     k.png("mb/pos1_s1.png")
     import matplotlib.pyplot as plt
     k = SK(-40, 40, -70, 70, 1.6)
