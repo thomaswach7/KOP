@@ -13,6 +13,7 @@ Die Maße, Passungen, Oberflächen und Toleranzen folgen diesen Vorlagen und der
 | `Pos07_Zugfeder.pdf` | Zugfeder | 14.2.5.8 | A4 / 2:1 |
 | `Pos09_Zylinderstift.pdf` | Zylinderstift | 14.2.5.9 | A4 / 2:1 |
 | `Einzelteilzeichnungen_alle.pdf` | alle 7 Blätter in einer Datei | | |
+| `Modellbaum/` | **Modellbaum je Teil für Creo**: KE-Reihenfolge, Skizzen mit Maßen, Sollvolumen (PDF + README) | | |
 
 ## Nicht gezeichnet
 
