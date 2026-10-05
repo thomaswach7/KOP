@@ -46,6 +46,23 @@ def nut(shape, x0, x1, b, t_bottom, richtung=1):
     box = cq.Solid.makeBox(x1-x0, b, t_bottom, Vector(x0, -b/2, z0))
     return shape.cut(box)
 
+
+# ---------------- Freistich DIN 509 - E 0,6 x 0,3 (r 0,6 / t1 0,3 / f 2,5 / 15 Grad) ----------------
+FR_R, FR_T, FR_F = 0.6, 0.3, 2.5
+FR_RAMPE = FR_T / math.tan(math.radians(15))      # 1,12 mm axialer Auslauf
+C45 = math.cos(math.radians(45))
+def freistich(xs, R, seite, innen=False):
+    """Punkte (x, r) des Freistichs an der Schulter-Planflaeche x = xs.
+    R = Radius der Zylinderflaeche, seite = -1: Zylinder liegt links der Schulter, +1: rechts.
+    innen = True: Bohrung (Einstich nach aussen). Reihenfolge: von der Zylinderflaeche zur Planflaeche."""
+    sg = 1 if innen else -1                            # Richtung des Einstichs in r
+    rb = R + sg*FR_T                                   # Einstichgrund
+    xe = xs + seite*FR_F                               # Ende Auslauf auf der Zylinderflaeche
+    xc = xs + seite*FR_R                               # Mittelpunkt Radius (axial)
+    rc = rb - sg*FR_R                                  # Mittelpunkt Radius (radial)
+    mid = (xc - seite*FR_R*C45, rc + sg*FR_R*C45)
+    return [(xe, R), (xe - seite*FR_RAMPE, rb), (xc, rb), ("A", mid, (xs, rc))]
+
 # ---------------- Pos. 3 Gehaeuse ----------------
 def pos3():
     s = drehen([(0, 68), (70, 68), (70, 85), (0, 85)])
@@ -59,8 +76,13 @@ def pos3():
     return s
 
 # ---------------- Pos. 4 Deckel ----------------
-DECKEL = [(0, 23), (0, 85), (12, 85), (12, 68), (19, 68), (19, 62.5), (12, 62.5), (12, 43.49), (29, 42.01),
-          (29, 37.5), (13, 37.5), (13, 35), ("A", (13 - 2/S2, 33 + 2/S2), (11, 33)), (11, 23), (8.24, 23), (7.5, 29), (3.5, 29), (2.76, 23)]
+def _rev(pts):
+    """Freistich-Punkte in Gegenrichtung (Planflaeche -> Zylinderflaeche)."""
+    p = [q for q in pts if q[0] != "A"]; a = [q for q in pts if q[0] == "A"][0]
+    # pts = [xe, rampe, floor, (A, mid, face)] -> [face, (A, mid, floor), rampe, xe]
+    return [a[2], ("A", a[1], p[2]), p[1], p[0]]
+DECKEL = ([(0, 23), (0, 85), (12, 85)] + _rev(freistich(12, 68, +1)) + [(19, 68), (19, 62.5), (12, 62.5), (12, 43.49), (29, 42.01),
+          (29, 37.5)] + freistich(13, 37.5, +1, innen=True) + [(13, 35), ("A", (13 - 2/S2, 33 + 2/S2), (11, 33)), (11, 23), (8.24, 23), (7.5, 29), (3.5, 29), (2.76, 23)])
 def pos4():
     s = drehen(DECKEL)
     s = rund(s, 5.0, [(12, 62.5), (12, 43.49)])
@@ -70,8 +92,8 @@ def pos4():
     return s
 
 # ---------------- Pos. 2 Abtriebsnabe ----------------
-ABTRIEB = [(0, 15), (0, 25), (43, 25), (43, 85), (55, 85), (55, 68), (62, 68), (62, 62.5), (55, 62.5),
-           (55, 44.12), (72, 42.63), (72, 37.5), (56, 37.5), (56, 35), ("A", (56 - 2/S2, 33 + 2/S2), (54, 33)), (54, 15)]
+ABTRIEB = ([(0, 15), (0, 25), (43, 25), (43, 85), (55, 85)] + _rev(freistich(55, 68, +1)) + [(62, 68), (62, 62.5), (55, 62.5),
+           (55, 44.12), (72, 42.63), (72, 37.5)] + freistich(56, 37.5, +1, innen=True) + [(56, 35), ("A", (56 - 2/S2, 33 + 2/S2), (54, 33)), (54, 15)])
 def pos2():
     s = drehen(ABTRIEB)
     s = rund(s, 10.0, [(43, 25)])
@@ -83,8 +105,8 @@ def pos2():
     return s
 
 # ---------------- Pos. 1 Antriebsnabe ----------------
-ANTRIEB = [(0, 15), (0, 22.5), (29, 22.5), (29, 25.5), ("A", (29 + 2/S2, 27.5 - 2/S2), (31, 27.5)), (31, 38.5), (63, 38.5),
-           (63, 27.5), ("A", (65 - 2/S2, 27.5 - 2/S2), (65, 25.5)), (65, 22.5), (81, 22.5), (81, 15)]
+ANTRIEB = ([(0, 15), (0, 22.5)] + freistich(29, 22.5, -1) + [(29, 25.5), ("A", (29 + 2/S2, 27.5 - 2/S2), (31, 27.5)), (31, 38.5), (63, 38.5),
+           (63, 27.5), ("A", (65 - 2/S2, 27.5 - 2/S2), (65, 25.5))] + _rev(freistich(65, 22.5, +1)) + [(81, 22.5), (81, 15)])
 def pos1(stop=None):
     s = drehen(ANTRIEB)                                                        # KE1 Drehen
     s = rund(s, 2.0, [(31, 38.5), (63, 38.5)])                                 # KE2 Rundung R2 Koerperkanten

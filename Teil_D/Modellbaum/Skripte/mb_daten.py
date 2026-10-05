@@ -7,6 +7,7 @@ ALLGEMEIN = [
     "Gezeichnet wird nur der halbe Querschnitt über der Achse. Durchmesser bemaßen: Linie → Mittellinie → nochmal Linie anklicken → mittlere Maustaste.",
     "Die x-Maße in den Skizzen zählen von der linken Stirnfläche (= Ebene RIGHT) aus.",
     "Jedes KE im Modellbaum umbenennen (Rechtsklick → Umbenennen, z. B. „Grundkörper“, „Arme“, „Passfedernut“). So kann die Lehrkraft den Aufbau sofort lesen.",
+    "Freistiche DIN 509-E0,6×0,3 (Pos. 1, 2, 4) gehören in die Drehskizze – Maße und Schritte auf Seite 2.",
     "Kontrolle am Ende: Analyse → Masseneigenschaften → Volumen. Weicht dein Wert um weniger als 0,5 % vom Sollvolumen ab, stimmt das Teil (Feder: 3 %).",
     "Klappt eine Rundung nicht („Rundung konnte nicht erzeugt werden“), ist meist der Radius so groß wie die Fläche daneben. Dann den Bogen gleich in die Skizze zeichnen, wie hier bei allen R2 an den Lagerschultern.",
 ]
@@ -14,7 +15,7 @@ ALLGEMEIN = [
 PARTS = [
  dict(key="pos1", nr="1", name="Antriebsnabe", werkstoff="EN-GJS-700-2", quelle="Zeichnung 14.2.5.2",
   ke=[
-   ("1", "Drehen (Grundkörper)", "Skizze auf FRONT, Achse = Mittellinie", "Skizze 1: Bohrung Ø30, Lagersitze Ø45 (links 29 lang, rechts 16 lang), Schultern Ø51 mit Bogen R2 (in der Skizze!), Mittelteil Ø77 von 31 bis 63, Länge 81. Winkel 360°."),
+   ("1", "Drehen (Grundkörper)", "Skizze auf FRONT, Achse = Mittellinie", "Skizze 1: Bohrung Ø30, Lagersitze Ø45 (links 29 lang, rechts 16 lang), Schultern Ø51 mit Bogen R2 (in der Skizze!), Mittelteil Ø77 von 31 bis 63, Länge 81. An beiden Lagersitzen Freistich DIN 509-E0,6×0,3 (Bild F1, Seite 2): Grund Ø44,4, 2,5 lang, 15°, R0,6. Winkel 360°."),
    ("2", "Rundung", "2 Außenkanten am Ø77 (x = 31 und x = 63)", "R2"),
    ("3", "Ebene DTM1", "parallel zu RIGHT", "Versatz 47 = Mitte der Arme"),
    ("4", "Extrudieren (Arme)", "Skizze auf DTM1", "Skizze 2: zwei Arme, je 18 breit, Halbkreis R9 außen, Augenmitten 104 auseinander (je 52 von der Achse). Rechteck innen bis R30 in den Körper ziehen. Tiefe symmetrisch 17."),
@@ -25,12 +26,12 @@ PARTS = [
   ],
   skizzen=[("pos1_s1.png", "Skizze 1 – Drehen (KE 1)"), ("pos1_s4.png", "Skizze 2 – Arme auf DTM1 (KE 4)"), ("pos1_s6.png", "Skizze 3 – Fuß auf DTM1 (KE 6)")],
   hinweise=["Reihenfolge Arme → Rundung R9 → Fuß einhalten. Wer den Fuß vorher macht, bekommt bei R9 einen Fehler.",
-            "Freistiche und Kantenbrüche aus der Zeichnung sind optional (ändern das Volumen kaum).",
+            "Freistiche DIN 509-E0,6×0,3 laut Zeichnung („Nicht bemaßte Freistiche“) an beiden Lagersitzen Ø45k6 – Maße und Creo-Schritte auf Seite 2 (Bild F1). Rechts gleich, nur gespiegelt.",
             "Buchfehler: „Gusstoleranz DIN 1688“ → richtig DIN 1686."]),
 
  dict(key="pos2", nr="2", name="Abtriebsnabe", werkstoff="EN-GJS-700-2", quelle="keine Zeichnung im Datensatz – Maße aus dem STEP-Modell",
   ke=[
-   ("1", "Drehen (Grundkörper)", "Skizze auf FRONT, Achse = Mittellinie", "Skizze 1: Bohrung Ø30 (Länge 54), Nabe Ø50 (Länge 43), Flansch Ø170 (43 bis 55), Zentrierring Ø136 / Ø125 bis 62, Lagerrohr außen mit 5° Aushebeschräge bis Ø85,3 bei 72, Lagersitz Ø75 (56 bis 72), Schulter Ø70 mit Bogen R2 (in der Skizze). Winkel 360°."),
+   ("1", "Drehen (Grundkörper)", "Skizze auf FRONT, Achse = Mittellinie", "Skizze 1: Bohrung Ø30 (Länge 54), Nabe Ø50 (Länge 43), Flansch Ø170 (43 bis 55), Zentrierring Ø136 / Ø125 bis 62, Lagerrohr außen mit 5° Aushebeschräge bis Ø85,3 bei 72, Lagersitz Ø75 (56 bis 72), Schulter Ø70 mit Bogen R2 (in der Skizze). Freistiche DIN 509-E0,6×0,3 am Zentrierring Ø136 (Bild F2, Grund Ø135,4) und im Lagersitz Ø75 (Bild F3, Grund Ø75,6), siehe Seite 2. Winkel 360°."),
    ("2", "Rundung", "Innenecke Nabe / Flansch (x = 43, Ø50)", "R10"),
    ("3", "Rundung", "2 Innenkanten am Flansch bei x = 55 (am Ø125 und am Lagerrohr)", "R5"),
    ("4", "Rundung", "Nabe außen bei x = 0 und Flansch Ø170 bei x = 43", "R2"),
@@ -40,7 +41,9 @@ PARTS = [
    ("8", "Muster", "Typ Achse, Kupplungsachse", "6 Stück, 60°"),
   ],
   skizzen=[("pos2_s1.png", "Skizze 1 – Drehen (KE 1)")],
-  hinweise=["Für Pos. 2 gibt es im Datensatz keine Zeichnung. Die Maße habe ich aus dem STEP-Modell abgelesen. Bitte mit der Lehrkraft abklären."]),
+  hinweise=["Für Pos. 2 gibt es im Datensatz keine Zeichnung. Die Maße habe ich aus dem STEP-Modell abgelesen. Bitte mit der Lehrkraft abklären.",
+            "Freistiche: Annahme wie beim Deckel (gleiche Passflächen Ø136h6 und Ø75H7). Bilder F2/F3 (Seite 2) zeigen die Maße am Deckel – hier sitzt die Planfläche bei x = 55 bzw. x = 56.",
+            "Freistich zeichnen: siehe Seite 2."]),
 
  dict(key="pos3", nr="3", name="Gehäuse", werkstoff="E295", quelle="Zeichnung 14.2.5.4",
   ke=[
@@ -56,7 +59,7 @@ PARTS = [
 
  dict(key="pos4", nr="4", name="Deckel", werkstoff="EN-GJS-700-2", quelle="Zeichnung 14.2.5.5",
   ke=[
-   ("1", "Drehen (Grundkörper)", "Skizze auf FRONT, Achse = Mittellinie", "Skizze 1: Flansch Ø170 × 12, Zentrierring Ø136 / Ø125 bis 19, Lagerrohr außen mit 5° Aushebeschräge (Ø84 bei 29), Lagersitz Ø75 (13 bis 29), Schulter Ø70 mit Bogen R2 (in der Skizze), Bohrung Ø46, Filzringnut Ø58 (Maße in Skizze 1a: 3,5 / 4 / 7,5, Flanken je 7°). Winkel 360°."),
+   ("1", "Drehen (Grundkörper)", "Skizze auf FRONT, Achse = Mittellinie", "Skizze 1: Flansch Ø170 × 12, Zentrierring Ø136 / Ø125 bis 19, Lagerrohr außen mit 5° Aushebeschräge (Ø84 bei 29), Lagersitz Ø75 (13 bis 29), Schulter Ø70 mit Bogen R2 (in der Skizze), Bohrung Ø46, Filzringnut Ø58 (Maße in Skizze 1a: 3,5 / 4 / 7,5, Flanken je 7°). Freistiche DIN 509-E0,6×0,3 am Zentrierring Ø136 (Bild F2, Grund Ø135,4) und im Lagersitz Ø75 (Bild F3, Grund Ø75,6), siehe Seite 2. Winkel 360°."),
    ("2", "Rundung", "2 Innenkanten bei x = 12 (am Ø125 und am Lagerrohr)", "R5"),
    ("3", "Rundung", "Außenkante Ø170 bei x = 0", "R2"),
    ("4", "Fase", "Kante Ø136 bei x = 19", "1,5 × 45°"),
@@ -64,7 +67,9 @@ PARTS = [
    ("6", "Muster", "Typ Achse, Deckelachse", "6 Stück, 60°"),
   ],
   skizzen=[("pos4_s1.png", "Skizze 1 – Drehen (KE 1)"), ("pos4_s1z.png", "Skizze 1a – Einzelheit Filzringnut (gehört zu Skizze 1)")],
-  hinweise=["Die Filzringnut und der Bogen R2 (Einzelheit Z) gehören in die Drehskizze. Eine eigene Rundung R2 schlägt dort fehl.",
+  hinweise=["Die Filzringnut, der Bogen R2 und die beiden Freistiche gehören in die Drehskizze. Eine eigene Rundung R2 schlägt dort fehl.",
+            "Freistiche DIN 509-E0,6×0,3 laut Zeichnung am Ø136h6 und im Lagersitz Ø75H7 – Maße und Creo-Schritte auf Seite 2 (Bilder F2, F3).",
+            "Gegenstücke: Gehäuse hat Fase 1 am Ø136, Lager-Außenring r = 1 → beide ≥ 0,4, liegen also plan an.",
             "Ø84 am Lagerrohr fehlt im Buch. Ich habe es aus dem Modell ergänzt."]),
 
  dict(key="pos51", nr="5.1", name="Gewicht (Teil des Fliehgewichts)", werkstoff="EN-GJS-700-2", quelle="Zeichnung 14.2.5.6 + STEP-Modell",
@@ -133,3 +138,24 @@ NORMTEILE = [
  ("10", "Zylinderschraube ISO 4762 – M8 × 20", "In der Baugruppe: Register „Intelligent Fastener“ → Schraube ISO 4762 M8 × 20 auf die Senkbohrung setzen. Creo setzt sie dann auf alle Musterbohrungen. Ohne Lizenz die STEP-Datei verwenden."),
  ("11", "Rillenkugellager 6009-2Z", "Herstellermodell laden (z. B. SKF oder Schaeffler, STEP) oder die STEP-Datei aus dem Repo. Für die Baugruppe reichen die Hauptmaße d 45 / D 75 / B 16."),
 ]
+
+FREISTICH = dict(
+ titel="Freistich DIN 509 – E 0,6 × 0,3 (Pos. 1, 2, 4)",
+ norm=[("r (Radius)", "0,6 ±0,1"), ("t1 (Tiefe)", "0,3 +0,1"), ("f (Breite)", "2,5 +0,2"), ("Auslaufwinkel", "15°"),
+       ("gilt für d", "über 18 bis 80 (übliche Beanspruchung)"), ("Mindestfase Gegenstück a", "0,4")],
+ quelle="DIN 509 / DIN EN ISO 18388, Tabelle 1 (im Roloff/Matek-Tabellenbuch: „Freistiche nach DIN 509“). Bitte die Werte in deinem RM nachschlagen und vergleichen.",
+ wo=[("F1", "Pos. 1 Antriebsnabe", "Lagersitz Ø45k6 an der Schulter x = 29 (rechts gespiegelt an x = 65)", "Grund Ø44,4"),
+     ("F2", "Pos. 4 Deckel / Pos. 2 Abtriebsnabe", "Zentrierring Ø136h6 an der Flanschfläche (x = 12 bzw. 55)", "Grund Ø135,4"),
+     ("F3", "Pos. 4 Deckel / Pos. 2 Abtriebsnabe", "Lagersitz Ø75H7 an der Schulter (x = 13 bzw. 56)", "Grund Ø75,6")],
+ schritte=[
+  "Den Freistich zeichnest du in die Drehskizze (KE 1). Ein eigenes Drehen-KE „Material entfernen“ geht nicht sauber, weil der Radius R0,6 laut Norm etwas über den Durchmesser hinausragt.",
+  "Die Zylinderlinie (z. B. Ø45) 2,5 mm vor der Planfläche enden lassen (Maß 2,5 von der Planfläche).",
+  "Eine schräge Linie bis zum Einstichgrund zeichnen, Winkel 15° zur Achse bemaßen.",
+  "Den Einstichgrund waagrecht bis an die Planfläche zeichnen und als Durchmesser bemaßen (Ø44,4 / Ø135,4 / Ø75,6).",
+  "Register Skizze → Verrundung → „Kreisförmig getrimmt“ → Einstichgrund anklicken → Planfläche anklicken → Radius R0,6 eintragen.",
+  "Prüfen: keine roten Endpunkte, alle Maße stark. Die Tiefe 0,3 ergibt sich aus den Durchmessern (45 − 44,4 = 0,6 → 0,3 je Seite).",
+  "In der Zeichnung reicht der Hinweis „Nicht bemaßte Freistiche DIN 509-E0,6×0,3“ (vereinfachte Angabe nach Norm).",
+ ],
+ bilder=[("fr_welle.png", "Bild F1 – Welle Ø45k6 (Pos. 1), M 12:1"), ("fr_bund.png", "Bild F2 – Zentrierring Ø136h6 (Pos. 4/2), M 12:1"),
+         ("fr_bohrung.png", "Bild F3 – Lagersitz-Bohrung Ø75H7 (Pos. 4/2), M 12:1")],
+)

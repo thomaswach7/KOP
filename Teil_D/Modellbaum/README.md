@@ -11,17 +11,59 @@ Ich habe jede Anleitung mit einem Skript Schritt für Schritt nachgebaut (`Skrip
 - Drehteile (Pos. 1, 2, 3, 4, 9, 12): Skizze auf FRONT. Zuerst eine Geometrie-Mittellinie auf die waagrechte Referenz legen (= Drehachse). Gezeichnet wird nur der halbe Querschnitt über der Achse. Durchmesser bemaßen: Linie → Mittellinie → nochmal Linie anklicken → mittlere Maustaste.
 - Die x-Maße in den Skizzen zählen von der linken Stirnfläche (= Ebene RIGHT) aus.
 - Jedes KE im Modellbaum umbenennen (Rechtsklick → Umbenennen, z. B. „Grundkörper“, „Arme“, „Passfedernut“). So kann die Lehrkraft den Aufbau sofort lesen.
+- Freistiche DIN 509-E0,6×0,3 (Pos. 1, 2, 4) gehören in die Drehskizze – Maße und Schritte auf Seite 2.
 - Kontrolle am Ende: Analyse → Masseneigenschaften → Volumen. Weicht dein Wert um weniger als 0,5 % vom Sollvolumen ab, stimmt das Teil (Feder: 3 %).
 - Klappt eine Rundung nicht („Rundung konnte nicht erzeugt werden“), ist meist der Radius so groß wie die Fläche daneben. Dann den Bogen gleich in die Skizze zeichnen, wie hier bei allen R2 an den Lagerschultern.
+
+## Freistich DIN 509 – E 0,6 × 0,3 (Pos. 1, 2, 4)
+
+| Größe | Wert |
+|---|---|
+| r (Radius) | 0,6 ±0,1 |
+| t1 (Tiefe) | 0,3 +0,1 |
+| f (Breite) | 2,5 +0,2 |
+| Auslaufwinkel | 15° |
+| gilt für d | über 18 bis 80 (übliche Beanspruchung) |
+| Mindestfase Gegenstück a | 0,4 |
+
+*DIN 509 / DIN EN ISO 18388, Tabelle 1 (im Roloff/Matek-Tabellenbuch: „Freistiche nach DIN 509“). Bitte die Werte in deinem RM nachschlagen und vergleichen.*
+
+| Bild | Teil | Stelle | Maß |
+|---|---|---|---|
+| F1 | Pos. 1 Antriebsnabe | Lagersitz Ø45k6 an der Schulter x = 29 (rechts gespiegelt an x = 65) | Grund Ø44,4 |
+| F2 | Pos. 4 Deckel / Pos. 2 Abtriebsnabe | Zentrierring Ø136h6 an der Flanschfläche (x = 12 bzw. 55) | Grund Ø135,4 |
+| F3 | Pos. 4 Deckel / Pos. 2 Abtriebsnabe | Lagersitz Ø75H7 an der Schulter (x = 13 bzw. 56) | Grund Ø75,6 |
+
+**So geht es in Creo:**
+
+1. Den Freistich zeichnest du in die Drehskizze (KE 1). Ein eigenes Drehen-KE „Material entfernen“ geht nicht sauber, weil der Radius R0,6 laut Norm etwas über den Durchmesser hinausragt.
+2. Die Zylinderlinie (z. B. Ø45) 2,5 mm vor der Planfläche enden lassen (Maß 2,5 von der Planfläche).
+3. Eine schräge Linie bis zum Einstichgrund zeichnen, Winkel 15° zur Achse bemaßen.
+4. Den Einstichgrund waagrecht bis an die Planfläche zeichnen und als Durchmesser bemaßen (Ø44,4 / Ø135,4 / Ø75,6).
+5. Register Skizze → Verrundung → „Kreisförmig getrimmt“ → Einstichgrund anklicken → Planfläche anklicken → Radius R0,6 eintragen.
+6. Prüfen: keine roten Endpunkte, alle Maße stark. Die Tiefe 0,3 ergibt sich aus den Durchmessern (45 − 44,4 = 0,6 → 0,3 je Seite).
+7. In der Zeichnung reicht der Hinweis „Nicht bemaßte Freistiche DIN 509-E0,6×0,3“ (vereinfachte Angabe nach Norm).
+
+*Bild F1 – Welle Ø45k6 (Pos. 1), M 12:1*
+
+![Bild F1 – Welle Ø45k6 (Pos. 1), M 12:1](Bilder/fr_welle.png)
+
+*Bild F2 – Zentrierring Ø136h6 (Pos. 4/2), M 12:1*
+
+![Bild F2 – Zentrierring Ø136h6 (Pos. 4/2), M 12:1](Bilder/fr_bund.png)
+
+*Bild F3 – Lagersitz-Bohrung Ø75H7 (Pos. 4/2), M 12:1*
+
+![Bild F3 – Lagersitz-Bohrung Ø75H7 (Pos. 4/2), M 12:1](Bilder/fr_bohrung.png)
 
 ## Übersicht
 
 | Pos. | Teil | Werkstoff | KE | Sollvolumen |
 |---|---|---|---|---|
-| 1 | [Antriebsnabe](#pos-1) | EN-GJS-700-2 | 8 | 180.856 mm³ |
-| 2 | [Abtriebsnabe](#pos-2) | EN-GJS-700-2 | 8 | 350.704 mm³ |
+| 1 | [Antriebsnabe](#pos-1) | EN-GJS-700-2 | 8 | 180.714 mm³ |
+| 2 | [Abtriebsnabe](#pos-2) | EN-GJS-700-2 | 8 | 350.370 mm³ |
 | 3 | [Gehäuse](#pos-3) | E295 | 6 | 559.933 mm³ |
-| 4 | [Deckel](#pos-4) | EN-GJS-700-2 | 6 | 276.618 mm³ |
+| 4 | [Deckel](#pos-4) | EN-GJS-700-2 | 6 | 276.284 mm³ |
 | 5.1 | [Gewicht (Teil des Fliehgewichts)](#pos-51) | EN-GJS-700-2 | 7 | 82.713 mm³ |
 | 5.2 | [Belag (Teil des Fliehgewichts)](#pos-52) | Reibbelag | 2 | 16.096 mm³ |
 | 6 | [Scheibe](#pos-6) | S235JR | 1 | 206 mm³ |
@@ -39,7 +81,7 @@ Werkstoff: **EN-GJS-700-2** · Vorlage: `mmns_part_solid_abs` · Grundlage: Zeic
 
 | Nr | Creo-KE | Ebene / Referenz | Eingaben / Maße |
 |---|---|---|---|
-| 1 | Drehen (Grundkörper) | Skizze auf FRONT, Achse = Mittellinie | Skizze 1: Bohrung Ø30, Lagersitze Ø45 (links 29 lang, rechts 16 lang), Schultern Ø51 mit Bogen R2 (in der Skizze!), Mittelteil Ø77 von 31 bis 63, Länge 81. Winkel 360°. |
+| 1 | Drehen (Grundkörper) | Skizze auf FRONT, Achse = Mittellinie | Skizze 1: Bohrung Ø30, Lagersitze Ø45 (links 29 lang, rechts 16 lang), Schultern Ø51 mit Bogen R2 (in der Skizze!), Mittelteil Ø77 von 31 bis 63, Länge 81. An beiden Lagersitzen Freistich DIN 509-E0,6×0,3 (Bild F1, Seite 2): Grund Ø44,4, 2,5 lang, 15°, R0,6. Winkel 360°. |
 | 2 | Rundung | 2 Außenkanten am Ø77 (x = 31 und x = 63) | R2 |
 | 3 | Ebene DTM1 | parallel zu RIGHT | Versatz 47 = Mitte der Arme |
 | 4 | Extrudieren (Arme) | Skizze auf DTM1 | Skizze 2: zwei Arme, je 18 breit, Halbkreis R9 außen, Augenmitten 104 auseinander (je 52 von der Achse). Rechteck innen bis R30 in den Körper ziehen. Tiefe symmetrisch 17. |
@@ -48,7 +90,7 @@ Werkstoff: **EN-GJS-700-2** · Vorlage: `mmns_part_solid_abs` · Grundlage: Zeic
 | 7 | Bohrung | koaxial zur Achse des R9-Bogens, Platzierung auf der Armseite | Ø8H8, Tiefe „Durch alle“. Zweiten Arm gleich (oder Spiegeln an TOP). |
 | 8 | Extrudieren, Material entfernen (Passfedernut) | Skizze auf RIGHT (Stirnfläche x = 0) | Rechteck 8 breit, symmetrisch zu TOP, von der Bohrung bis 18,3 von der Achse (= Maß 33,3, t2 = 3,3). Um 90° zu den Armen versetzt. Tiefe „Durch alle“. |
 
-**Kontrolle:** Analyse → Masseneigenschaften → Volumen = **180.856 mm³**
+**Kontrolle:** Analyse → Masseneigenschaften → Volumen = **180.714 mm³**
 
 *Skizze 1 – Drehen (KE 1)*
 
@@ -67,7 +109,7 @@ Werkstoff: **EN-GJS-700-2** · Vorlage: `mmns_part_solid_abs` · Grundlage: Zeic
 **Hinweise**
 
 - Reihenfolge Arme → Rundung R9 → Fuß einhalten. Wer den Fuß vorher macht, bekommt bei R9 einen Fehler.
-- Freistiche und Kantenbrüche aus der Zeichnung sind optional (ändern das Volumen kaum).
+- Freistiche DIN 509-E0,6×0,3 laut Zeichnung („Nicht bemaßte Freistiche“) an beiden Lagersitzen Ø45k6 – Maße und Creo-Schritte auf Seite 2 (Bild F1). Rechts gleich, nur gespiegelt.
 - Buchfehler: „Gusstoleranz DIN 1688“ → richtig DIN 1686.
 
 <a id="pos-2"></a>
@@ -77,7 +119,7 @@ Werkstoff: **EN-GJS-700-2** · Vorlage: `mmns_part_solid_abs` · Grundlage: kein
 
 | Nr | Creo-KE | Ebene / Referenz | Eingaben / Maße |
 |---|---|---|---|
-| 1 | Drehen (Grundkörper) | Skizze auf FRONT, Achse = Mittellinie | Skizze 1: Bohrung Ø30 (Länge 54), Nabe Ø50 (Länge 43), Flansch Ø170 (43 bis 55), Zentrierring Ø136 / Ø125 bis 62, Lagerrohr außen mit 5° Aushebeschräge bis Ø85,3 bei 72, Lagersitz Ø75 (56 bis 72), Schulter Ø70 mit Bogen R2 (in der Skizze). Winkel 360°. |
+| 1 | Drehen (Grundkörper) | Skizze auf FRONT, Achse = Mittellinie | Skizze 1: Bohrung Ø30 (Länge 54), Nabe Ø50 (Länge 43), Flansch Ø170 (43 bis 55), Zentrierring Ø136 / Ø125 bis 62, Lagerrohr außen mit 5° Aushebeschräge bis Ø85,3 bei 72, Lagersitz Ø75 (56 bis 72), Schulter Ø70 mit Bogen R2 (in der Skizze). Freistiche DIN 509-E0,6×0,3 am Zentrierring Ø136 (Bild F2, Grund Ø135,4) und im Lagersitz Ø75 (Bild F3, Grund Ø75,6), siehe Seite 2. Winkel 360°. |
 | 2 | Rundung | Innenecke Nabe / Flansch (x = 43, Ø50) | R10 |
 | 3 | Rundung | 2 Innenkanten am Flansch bei x = 55 (am Ø125 und am Lagerrohr) | R5 |
 | 4 | Rundung | Nabe außen bei x = 0 und Flansch Ø170 bei x = 43 | R2 |
@@ -86,7 +128,7 @@ Werkstoff: **EN-GJS-700-2** · Vorlage: `mmns_part_solid_abs` · Grundlage: kein
 | 7 | Bohrung (Senkung) | Flanschfläche x = 43, Lochkreis Ø150, 0° zu FRONT | Ø9 durchgehend, Senkung Ø15 × 8,6 tief (für ISO 4762 M8) |
 | 8 | Muster | Typ Achse, Kupplungsachse | 6 Stück, 60° |
 
-**Kontrolle:** Analyse → Masseneigenschaften → Volumen = **350.704 mm³**
+**Kontrolle:** Analyse → Masseneigenschaften → Volumen = **350.370 mm³**
 
 *Skizze 1 – Drehen (KE 1)*
 
@@ -97,6 +139,8 @@ Werkstoff: **EN-GJS-700-2** · Vorlage: `mmns_part_solid_abs` · Grundlage: kein
 **Hinweise**
 
 - Für Pos. 2 gibt es im Datensatz keine Zeichnung. Die Maße habe ich aus dem STEP-Modell abgelesen. Bitte mit der Lehrkraft abklären.
+- Freistiche: Annahme wie beim Deckel (gleiche Passflächen Ø136h6 und Ø75H7). Bilder F2/F3 (Seite 2) zeigen die Maße am Deckel – hier sitzt die Planfläche bei x = 55 bzw. x = 56.
+- Freistich zeichnen: siehe Seite 2.
 
 <a id="pos-3"></a>
 ## Pos. 3 – Gehäuse
@@ -131,14 +175,14 @@ Werkstoff: **EN-GJS-700-2** · Vorlage: `mmns_part_solid_abs` · Grundlage: Zeic
 
 | Nr | Creo-KE | Ebene / Referenz | Eingaben / Maße |
 |---|---|---|---|
-| 1 | Drehen (Grundkörper) | Skizze auf FRONT, Achse = Mittellinie | Skizze 1: Flansch Ø170 × 12, Zentrierring Ø136 / Ø125 bis 19, Lagerrohr außen mit 5° Aushebeschräge (Ø84 bei 29), Lagersitz Ø75 (13 bis 29), Schulter Ø70 mit Bogen R2 (in der Skizze), Bohrung Ø46, Filzringnut Ø58 (Maße in Skizze 1a: 3,5 / 4 / 7,5, Flanken je 7°). Winkel 360°. |
+| 1 | Drehen (Grundkörper) | Skizze auf FRONT, Achse = Mittellinie | Skizze 1: Flansch Ø170 × 12, Zentrierring Ø136 / Ø125 bis 19, Lagerrohr außen mit 5° Aushebeschräge (Ø84 bei 29), Lagersitz Ø75 (13 bis 29), Schulter Ø70 mit Bogen R2 (in der Skizze), Bohrung Ø46, Filzringnut Ø58 (Maße in Skizze 1a: 3,5 / 4 / 7,5, Flanken je 7°). Freistiche DIN 509-E0,6×0,3 am Zentrierring Ø136 (Bild F2, Grund Ø135,4) und im Lagersitz Ø75 (Bild F3, Grund Ø75,6), siehe Seite 2. Winkel 360°. |
 | 2 | Rundung | 2 Innenkanten bei x = 12 (am Ø125 und am Lagerrohr) | R5 |
 | 3 | Rundung | Außenkante Ø170 bei x = 0 | R2 |
 | 4 | Fase | Kante Ø136 bei x = 19 | 1,5 × 45° |
 | 5 | Bohrung (Senkung) | Flanschfläche x = 0, Lochkreis Ø150, 0° zu FRONT | Ø9 durchgehend, Senkung Ø15 × 8,6 tief |
 | 6 | Muster | Typ Achse, Deckelachse | 6 Stück, 60° |
 
-**Kontrolle:** Analyse → Masseneigenschaften → Volumen = **276.618 mm³**
+**Kontrolle:** Analyse → Masseneigenschaften → Volumen = **276.284 mm³**
 
 *Skizze 1 – Drehen (KE 1)*
 
@@ -152,7 +196,9 @@ Werkstoff: **EN-GJS-700-2** · Vorlage: `mmns_part_solid_abs` · Grundlage: Zeic
 
 **Hinweise**
 
-- Die Filzringnut und der Bogen R2 (Einzelheit Z) gehören in die Drehskizze. Eine eigene Rundung R2 schlägt dort fehl.
+- Die Filzringnut, der Bogen R2 und die beiden Freistiche gehören in die Drehskizze. Eine eigene Rundung R2 schlägt dort fehl.
+- Freistiche DIN 509-E0,6×0,3 laut Zeichnung am Ø136h6 und im Lagersitz Ø75H7 – Maße und Creo-Schritte auf Seite 2 (Bilder F2, F3).
+- Gegenstücke: Gehäuse hat Fase 1 am Ø136, Lager-Außenring r = 1 → beide ≥ 0,4, liegen also plan an.
 - Ø84 am Lagerrohr fehlt im Buch. Ich habe es aus dem Modell ergänzt.
 
 <a id="pos-51"></a>
@@ -323,10 +369,16 @@ Werkstoff: **Filz** · Vorlage: `mmns_part_solid_abs` · Grundlage: Norm DIN 541
 | 10 | Zylinderschraube ISO 4762 – M8 × 20 | In der Baugruppe: Register „Intelligent Fastener“ → Schraube ISO 4762 M8 × 20 auf die Senkbohrung setzen. Creo setzt sie dann auf alle Musterbohrungen. Ohne Lizenz die STEP-Datei verwenden. |
 | 11 | Rillenkugellager 6009-2Z | Herstellermodell laden (z. B. SKF oder Schaeffler, STEP) oder die STEP-Datei aus dem Repo. Für die Baugruppe reichen die Hauptmaße d 45 / D 75 / B 16. |
 
+## Kontrollmodelle (STEP)
+
+`CAD_Kontrollmodelle/` enthält jedes Teil genau so, wie es nach dieser Anleitung entsteht (inkl. Freistiche DIN 509-E0,6×0,3 bei Pos. 1, 2, 4).
+Zum Vergleichen: STEP in Creo öffnen, Volumen ansehen oder dein Teil darüberlegen. Ein Modellbaum ist in STEP-Dateien nicht enthalten – den baust du selbst nach der Anleitung.
+
 ## Skripte (zur Kontrolle)
 
 | Datei | Zweck |
 |---|---|
-| `Skripte/replay.py` | baut jedes Teil genau in der KE-Reihenfolge dieser Anleitung nach (CadQuery). Daraus stammen Sollvolumen und 3D-Bilder. |
+| `Skripte/replay.py` | baut jedes Teil genau in der KE-Reihenfolge dieser Anleitung nach (CadQuery), inkl. Freistich-Geometrie nach DIN 509 |
+| `Skripte/render_mb.py` | berechnet Sollvolumen und 3D-Bilder |
 | `Skripte/skizzen.py`, `Skripte/sk_all.py` | zeichnen die bemaßten Skizzenbilder |
 | `Skripte/mb_daten.py`, `Skripte/doc_modellbaum.py` | KE-Tabellen und Erzeugung von PDF und README |

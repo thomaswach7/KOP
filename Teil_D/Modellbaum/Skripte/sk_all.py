@@ -1,6 +1,8 @@
 import math
 from skizzen import SK
 import replay as R
+R_freistich = R.freistich
+FR = (R.FR_R, R.FR_T, R.FR_F, R.FR_RAMPE)
 
 def r2(k, cx, cr, a_tip, rechts=True, lang=10.5):
     """Radiusmass R2 an einer Hohlkehle: Hinweislinie von aussen durch den Mittelpunkt auf den Bogen."""
@@ -10,6 +12,15 @@ def r2(k, cx, cr, a_tip, rechts=True, lang=10.5):
     k.line([far, (far[0] + (12 if rechts else -12), far[1])])
     k.text(far[0] + (2 if rechts else -10), far[1] + 0.9, "R2", 3.5)
 S2 = math.sqrt(2)
+
+def fr_marke(k, x, r, text, dx, dy, rad=2.2):
+    """Kreis um einen Freistich + Hinweis auf die Einzelheit."""
+    import matplotlib.patches as mp
+    k.ax.add_patch(mp.Circle(k.T(x, r), rad*k.M, fill=False, lw=0.5, color="k"))
+    import math as _m
+    L = _m.hypot(dx, dy); ex, ey = x + dx/L*rad, r + dy/L*rad
+    k.line([k.T(ex, ey), k.T(x + dx, r + dy)], lw=0.4)
+    k.text(*k.T(x + dx + (0.4 if dx >= 0 else -0.4 - 0.55*len(text)), r + dy - 0.6), text, 3.0)
 
 def winkel(k, v, a_ref, a_line, r, text, tx, ty, ref_len=None):
     """Winkelmass: Scheitel v (Modellkoordinaten), Bezugslinie unter a_ref, Kante unter a_line (Grad), Bogenradius r."""
@@ -89,6 +100,7 @@ def s_pos4():
     winkel(k, (12, 43.49), 0, -5, 15, "5°", 16, -1.5, ref_len=17)
     k.text(*k.T(-40, 36), "Nut: Maße siehe\nEinzelheit (Skizze 1a)", 3)
     r2(k, 13, 33, 135, lang=9)
+    fr_marke(k, 13, 68, "Freistich F2", 10, 6, rad=3.2); fr_marke(k, 14, 37.5, "Freistich F3", 9, 12, rad=3.2)
     k.png("mb/pos4_s1.png")
     # Einzelheit Filzringnut, M 6:1
     k = SK(-2, 12, 17, 33, 6.0)
@@ -109,6 +121,7 @@ def s_pos2():
     k.ddim(72, 37.5, 98, "Ø75"); k.ddim(56, 35, 104, "Ø70")
     winkel(k, (55, 44.12), 0, -5, 15, "5°", 16, -1.5, ref_len=17)
     r2(k, 56, 33, 135, lang=9)
+    fr_marke(k, 56, 68, "Freistich F2", -14, 8, rad=3.2); fr_marke(k, 57, 37.5, "Freistich F3", -16, 10, rad=3.2)
     k.png("mb/pos2_s1.png")
 
 def s_pos1():
@@ -119,6 +132,7 @@ def s_pos1():
     k.ddim(0, 15, -6, "Ø30"); k.ddim(0, 22.5, -13, "Ø45"); k.ddim(29, 25.5, -20, "Ø51")
     k.ddim(47, 38.5, 47, "Ø77") if False else k.ddim(81, 38.5, 89, "Ø77")
     k.ddim(65, 25.5, 85, "Ø51"); k.ddim(81, 22.5, 93, "Ø45")
+    fr_marke(k, 28, 22.4, "Freistich F1", 6, -12); fr_marke(k, 66, 22.4, "Freistich F1", -6, -12)
     # R2 (Hohlkehle): Mittelpunkte (29|27,5) und (65|27,5); Hinweislinie von aussen durch den Mittelpunkt
     for (cx, cr), a_tip, txt_dx in (((29, 27.5), -45, -9.0), ((65, 27.5), 225, 2.0)):
         at = math.radians(a_tip)
@@ -226,6 +240,56 @@ def s_pos7():
     k.text(*k.T(xr + 0.6, 7.4), "2 (Öffnung)", 3.2)
     k.png("mb/pos7_s2.png")
 
+def s_freistich():
+    """Einzelheiten Freistich DIN 509 - E 0,6 x 0,3 (M 12:1) fuer Welle, Zentrierbund und Bohrung."""
+    from skizzen import arcpts
+    M = 12.0
+    r_, t1, f, rampe = FR
+    def bild(name, xs, R, seite, innen, r_von, r_bis, schulter_r, txt_d, txt_grund):
+        xe = xs + seite*f; xr = xe - seite*rampe
+        x_von, x_bis = (xe - 4.4, xs + 2.2) if seite < 0 else (xs - 2.2, xe + 4.4)
+        k = SK(x_von, x_bis, r_von, r_bis, M)
+        x_cyl = x_bis - 0.2 if seite > 0 else x_von + 0.2
+        kont = [(x_cyl, R)] + R_freistich(xs, R, seite, innen) + [(xs, schulter_r)]
+        P = [k.T(*kont[0])]; cur = kont[0]
+        for p in kont[1:]:
+            if p[0] == "A": P += arcpts(cur, p[1], p[2], k.T); cur = p[2]
+            else: P.append(k.T(*p)); cur = p
+        rand = r_bis - 0.2 if innen else r_von + 0.2
+        xw = xs - seite*2.0                                  # Schulter-Werkstoff liegt auf der anderen Seite
+        fill = P + [k.T(xw, schulter_r), k.T(xw, rand), k.T(x_cyl, rand)]
+        k.ax.fill([p[0] for p in fill], [p[1] for p in fill], color="0.88", zorder=0)
+        k.line(P, lw=0.9); k.line([k.T(xs, schulter_r), k.T(xw, schulter_r)], lw=0.9)
+        rb = R + (t1 if innen else -t1)
+        aussen = -1 if innen else 1                          # Richtung "weg vom Werkstoff" in r
+        k.line([k.T(xe, R), k.T(xs, R)], lw=0.4, ls="--")
+        # f = 2,5
+        k.hdim(min(xs, xe), max(xs, xe), R, R, R + aussen*1.2, "2,5")
+        # t1 = 0,3 (Pfeile von aussen)
+        xt = xe + seite*1.5
+        k.line([k.T(xr, rb), k.T(xt + seite*0.3, rb)], lw=0.35)
+        lo, hi = min(R, rb), max(R, rb)
+        k.line([k.T(xt, lo - 0.6), k.T(xt, hi + 0.6)])
+        k.arrow(k.T(xt, hi), k.T(xt, hi + 0.5)); k.arrow(k.T(xt, lo), k.T(xt, lo - 0.5))
+        k.text(*k.T(xt - seite*0.15 - (0.8 if seite > 0 else 0), R + aussen*0.75 - (0.25 if aussen < 0 else 0)), "0,3", 3.2)
+        # R0,6 (Mittelpunkt liegt im Freiraum)
+        xc = xs + seite*r_; rc = rb + (-r_ if innen else r_)
+        aw = {(-1, False): -45, (1, False): 225, (1, True): 135, (-1, True): 45}[(seite, innen)]
+        k.radius(k.T(xc, rc), r_*M, aw, "R0,6", outside=False)
+        # 15 Grad: Bezug = Verlaengerung Einstichgrund, Kante = Auslauf
+        a_ref = 180 if seite < 0 else 0
+        a_lin = math.degrees(math.atan2(R - rb, xe - xr))
+        winkel(k, (xr, rb), a_ref, a_lin, 1.6, "15°", (-1.9 if seite < 0 else 1.6), -aussen*0.55 - (0.25 if aussen > 0 else 0), ref_len=1.9)
+        k.text(*k.T(x_cyl + (0.1 if seite < 0 else -1.85), R + aussen*0.3 - (0.25 if aussen > 0 else 0)), txt_d, 3.4)
+        k.text(*k.T(xs + (0.2 if seite < 0 else -1.9), schulter_r - aussen*0.3 - (0.3 if aussen > 0 else 0)), "Planfläche", 2.8)
+        k.text(*k.T(x_von + 0.2, (r_von + 0.25) if not innen else (r_bis - 0.5)), txt_grund, 3.0)
+        k.png(f"mb/{name}.png")
+    bild("fr_welle", 29, 22.5, -1, False, 20.6, 26.0, 25.5, "Ø45k6", "Einstichgrund Ø44,4")
+    bild("fr_bund", 12, 68, +1, False, 66.1, 71.0, 70.8, "Ø136h6", "Einstichgrund Ø135,4")
+    bild("fr_bohrung", 13, 37.5, +1, True, 34.6, 39.5, 35.0, "Ø75H7", "Einstichgrund Ø75,6")
+
+
 if __name__ == "__main__":
-    for f in (s_pos3, s_pos9, s_pos6, s_pos12, s_pos4, s_pos2, s_pos1, s_pos51, s_pos52, s_pos7):
+    for f in (s_pos3, s_pos9, s_pos6, s_pos12, s_pos4, s_pos2, s_pos1, s_pos51, s_pos52, s_pos7, s_freistich):
         f(); print(f.__name__, "ok")
+
