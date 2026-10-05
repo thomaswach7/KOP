@@ -9,9 +9,9 @@ import build
 
 MM = 72/25.4
 TH, TN = 0.5*MM, 0.25*MM
-FV = (112.0, 180.0); SV = (222.0, 180.0)
-d = pickle.load(open("views.pkl","rb"))
-HATCH = {"1":(45,3.0),"2":(135,3.0),"3":(45,2.0),"4":(135,2.5),"5.1":(45,1.6),"5.2":("x",1.4),"6":(135,0.9)}
+FV = (112.0, 170.0); SV = (230.0, 170.0)
+d = pickle.load(open("views_full.pkl","rb"))
+HATCH = {"1":(45,3.0),"2":(135,3.0),"3":(45,2.0),"4":(135,2.5),"5.1":(45,1.6),"5.2":("x",1.4),"6":(135,0.9),"11":(135,0.9),"12":("x",0.8)}
 FONT = dict(family="DejaVu Sans")
 
 fig = plt.figure(figsize=(420/25.4, 297/25.4))
@@ -54,18 +54,21 @@ def hatch(poly, ang, sp):
 for pos, poly in d["polys"]:
     a, sp = HATCH[pos]; hatch(poly, a, sp)
 
-# Gewinde M8 im Gehaeuse (Pos. 3), Schnitt: Nenn-d schmal, Gewindeende breit
+# Gewinde M8: Schraube eingeschraubt (Kern-Ø schmal), freier Gewinderest im Gehaeuse (Nenn-Ø schmal, Gewindeende breit)
 for zs in (75, -75):
-    for x0, x1 in ((12, 32), (82, 62)):
-        for dz in (4, -4):
-            line([(SV[0]+x0, SV[1]+zs+dz), (SV[0]+x1, SV[1]+zs+dz)], lw=TN)
-        line([(SV[0]+x1, SV[1]+zs-4), (SV[0]+x1, SV[1]+zs+4)])
+    for x0, x1 in ((8.6, 28.6), (65.4, 85.4)):
+        for dz in (3.4, -3.4): line([(SV[0]+x0, SV[1]+zs+dz), (SV[0]+x1, SV[1]+zs+dz)], lw=TN)
+    for x0, x1 in ((28.6, 32), (62, 65.4)):
+        for dz in (4, -4): line([(SV[0]+x0, SV[1]+zs+dz), (SV[0]+x1, SV[1]+zs+dz)], lw=TN)
+    for xe in (32, 62): line([(SV[0]+xe, SV[1]+zs-4), (SV[0]+xe, SV[1]+zs+4)])
 # Mittellinien Schnitt
 cl((SV[0]-6, SV[1]), (SV[0]+143, SV[1]))
 for zs in (75,-75):
     cl((SV[0]+7, SV[1]+zs), (SV[0]+43, SV[1]+zs)); cl((SV[0]+51, SV[1]+zs), (SV[0]+87, SV[1]+zs))
 for zs in (52,-52):
     cl((SV[0]+17, SV[1]+zs), (SV[0]+77, SV[1]+zs))
+for zs in (30,-30):
+    cl((SV[0]+10, SV[1]+zs), (SV[0]+32, SV[1]+zs)); cl((SV[0]+62, SV[1]+zs), (SV[0]+84, SV[1]+zs))
 # Mittellinien Vorderansicht
 cl((FV[0]-91, FV[1]), (FV[0]+91, FV[1])); cl((FV[0], FV[1]-91), (FV[0], FV[1]+91))
 th = np.linspace(0, 2*math.pi, 400)
@@ -85,19 +88,10 @@ for sgn in (1,-1):
                 arrowprops=dict(arrowstyle="-|>", lw=TN, color="k", mutation_scale=9))
     text(FV[0]+9.5, y1-sgn*1.5-2.5, "A", size=5)
 text(SV[0]+100, SV[1]+94, "A–A", size=5, ha="center")
-text(FV[0], FV[1]-104, "(ohne Pos. 2 gezeichnet)", size=3.5, ha="center")
+text(FV[0], FV[1]+104, "(ohne Pos. 2 und Pos. 10 gezeichnet)", size=3.5, ha="center")
 
 # ---------------- Positionsnummern (im Uhrzeigersinn) ------------------------------------
-POS = [  # (Nr, Textpos (X,Z), Ziel (X,Z)) in Koordinaten der Schnittansicht
-    ("4", (-22, -40), (6, -50)),
-    ("5", (-22,  70), (33.5, 59.5)),
-    ("6", ( 40,  94), (37.75, 59.5)),
-    ("7", (152,  84), (72.5, 50.5)),
-    ("8", (152,  68), (64.65, 46)),
-    ("1", (152,  36), (75, 19)),
-    ("2", (152,  10), (118, 18)),
-    ("3", (152, -60), (47, -77)),
-]
+POS = [('1', (152, 48), (75, 19)), ('2', (152, -8), (128, -22)), ('3', (152, -66), (78, -80)), ('5', (84, -96), (60.5, -59.5)), ('6', (62, -96), (56.25, -58)), ('8', (40, -96), (29.5, -58)), ('9', (18, -96), (24, -52)), ('10', (-4, -96), (4.5, -75)), ('4', (-22, -58), (6, -50)), ('11', (-22, -18), (21, -33)), ('12', (-22, 22), (5.5, 26))]
 for nr, (tx,tz), (px,pz) in POS:
     T = (SV[0]+tx, SV[1]+tz); P = (SV[0]+px, SV[1]+pz)
     # Hinweislinie endet am Ziffernrand
@@ -107,6 +101,10 @@ for nr, (tx,tz), (px,pz) in POS:
     ax.add_patch(Circle(P, 0.6, color="k"))
     text(T[0], T[1], nr, size=5, ha="center", va="center")
 
+# Pos. 7 in der Vorderansicht (Feder gut sichtbar)
+_t = (FV[0]-18.5, FV[1]-44.5); _l = (FV[0]-62, FV[1]-96)
+ax.plot([_l[0]+2.5, _t[0]], [_l[1]+2.5, _t[1]], color="k", lw=TN); ax.add_patch(Circle(_t, 0.6, color="k"))
+text(_l[0], _l[1], "7", size=5, ha="center", va="center")
 # ---------------- Rahmen, Schriftfeld, Stueckliste ---------------------------------------
 def rect(x,y,w,h,lw=TH): ax.add_patch(plt.Rectangle((x,y),w,h,fill=False,lw=lw,color="k"))
 rect(20,10,390,277, lw=0.7*MM)
@@ -131,7 +129,7 @@ text(X0+61,Y0+25,"Dokumentenart",small); text(X0+64,Y0+20,"Gesamtzeichnung",3.5)
 text(X0+131,Y0+25,"Dokumentenstatus",small); text(X0+133,Y0+20,"in Bearbeitung",2.5)
 text(X0+61,Y0+16,"Titel, Zusätzlicher Titel",small)
 text(X0+95,Y0+8.5,"Fliehkraftkupplung",5,ha="center")
-text(X0+95,Y0+2.5,"mit Passfederverbindung – Pos. 1 bis 8",2.5,ha="center")
+text(X0+95,Y0+2.5,"mit Passfederverbindung",2.5,ha="center")
 text(X0+131,Y0+16,"Sachnummer",small); text(X0+133,Y0+11,"14.2.3",3.5)
 text(X0+131,Y0+7,"Änd.",small); text(X0+139,Y0+7,"Ausgabedatum",small); text(X0+164,Y0+7,"Spr.",small); text(X0+172,Y0+7,"Blatt",small)
 text(X0+132,Y0+2,"A",2.5); text(X0+140,Y0+2,datetime.date.today().isoformat(),2.5); text(X0+165,Y0+2,"de",2.5); text(X0+173,Y0+2,"1/1",2.5)
@@ -152,23 +150,26 @@ ROWS = [("1","1","Stk","Antriebsnabe","","EN-GJS-700-2"),
         ("5.2","2","Stk","Belag","","geklebt"),
         ("6","4","Stk","Scheibe","","S235JR"),
         ("7","4","Stk","Zugfeder","","Federstahl"),
-        ("8","8","Stk","Sicherungsscheibe","DIN 6799 – 7","")]
+        ("8","8","Stk","Sicherungsscheibe","DIN 6799 – 7",""),
+        ("9","4","Stk","Zylinderstift","ISO 2338 – 8 m6 × 50 – St",""),
+        ("10","12","Stk","Zylinderschraube","ISO 4762 – M8 × 20 – 8.8",""),
+        ("11","2","Stk","Rillenkugellager","DIN 625 – 6009 – 2Z",""),
+        ("12","1","Stk","Filzring","DIN 5419 – M5 × 45","")]
 COLS = [0,12,24,36,88,145,180]
 HDR = ["Pos.","Menge","Einh.","Benennung","Sachnummer/Norm – Kurzbezeichnung","Werkstoff/Bemerkung"]
-rh = 4.0; yb = Y0+36
-rect(X0, yb, W, rh*(len(ROWS)+1))
-for i in range(len(ROWS)+1): ax.plot([X0,X0+W],[yb+rh*i,yb+rh*i],color="k",lw=TN)
-ax.plot([X0,X0+W],[yb+rh,yb+rh],color="k",lw=TH)
-for c in COLS[1:-1]: ax.plot([X0+c,X0+c],[yb,yb+rh*(len(ROWS)+1)],color="k",lw=TN)
-for c,h in zip(COLS,HDR): text(X0+c+0.8, yb+1.0, h, 2.0)
+rh = 3.6; X0S = 20; yb = 12
+rect(X0S, yb, W, rh*(len(ROWS)+1))
+for i in range(len(ROWS)+1): ax.plot([X0S,X0S+W],[yb+rh*i,yb+rh*i],color="k",lw=TN)
+ax.plot([X0S,X0S+W],[yb+rh,yb+rh],color="k",lw=TH)
+for c in COLS[1:-1]: ax.plot([X0S+c,X0S+c],[yb,yb+rh*(len(ROWS)+1)],color="k",lw=TN)
+for c,h in zip(COLS,HDR): text(X0S+c+0.8, yb+0.9, h, 1.9)
 for i,row in enumerate(ROWS):
-    y = yb+rh*(i+1)+0.9
-    for c,v in zip(COLS,row): text(X0+c+1, y, v, 2.4)
+    y = yb+rh*(i+1)+0.8
+    for c,v in zip(COLS,row): text(X0S+c+1, y, v, 2.2)
 
-text(25, 19, "Hinweis: Stand Pos. 1 bis 8. Die Normteile Pos. 9 bis 12 (Zylinderstifte, Zylinderschrauben,", 2.5)
-text(25, 14, "Rillenkugellager, Filzring) sind noch nicht eingebaut.", 2.5)
 
-fig.savefig("Gesamtzeichnung_Fliehkraftkupplung_Pos1-8.pdf")
-fig.savefig("preview.png", dpi=110)
-fig.savefig("preview_hi.png", dpi=300)
+
+fig.savefig("Gesamtzeichnung_Fliehkraftkupplung.pdf")
+fig.savefig("preview_gz.png", dpi=110)
+fig.savefig("preview_gz_hi.png", dpi=300)
 print("ok")

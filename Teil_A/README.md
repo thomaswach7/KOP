@@ -1,62 +1,55 @@
-# Teil A – Gesamtzeichnung Fliehkraftkupplung (Stand: Pos. 1 bis 8)
+# Teil A – Baugruppe und Gesamtzeichnung Fliehkraftkupplung (komplett, Pos. 1 bis 12)
 
 ## Inhalt
 
 | Datei | Beschreibung |
 |---|---|
-| `Gesamtzeichnung_Fliehkraftkupplung_Pos1-8.pdf` | Gesamtzeichnung A3, M 1:1, Längsschnitt A–A + Vorderansicht ohne Pos. 2, Stückliste Pos. 1–8 |
-| `Gesamtzeichnung_Vorschau.png` | Vorschaubild der Zeichnung |
-| `CAD/Baugruppe_Fliehkraftkupplung_Pos1-8.step` | Komplette Baugruppe (alle Teile in Einbaulage, kollisionsgeprüft) |
-| `CAD/Einzelteile_neu/*.step` | Teile, für die im Datensatz **kein STEP** vorhanden war (Pos. 3, 6, 7 gespannt, 8) |
-| `Skripte/` | Python/CadQuery-Skripte, mit denen Baugruppe und Zeichnung erzeugt wurden (STEP-Ordner `../Fliehkraftkupplung/` neben `Skripte` erwartet) |
+| `Montageablauf/Montageablauf_Fliehkraftkupplung.pdf` | **Zusammenbau Schritt für Schritt** (12 Schritte mit 3D-Bildern und Erklärung) |
+| `Montageablauf/README.md` | derselbe Ablauf zum Lesen direkt auf GitHub |
+| `Gesamtzeichnung_Fliehkraftkupplung.pdf` | Gesamtzeichnung A3, M 1:1: Längsschnitt A–A, Vorderansicht ohne Pos. 2 und 10, Stückliste Pos. 1–12 |
+| `Gesamtzeichnung_Vorschau.png` | Vorschaubild der Gesamtzeichnung |
+| `CAD/Baugruppe_Fliehkraftkupplung_komplett.step` | komplette Baugruppe, 43 Einzelteile, kollisionsfrei |
+| `CAD/Einzelteile_neu/*.step` | Teile ohne STEP im Datensatz: Pos. 3, 6, 7 (gespannt), 8, 9, 10, 11, 12 |
+| `Skripte/` | Python/CadQuery-Skripte (Aufbau, Kollisionsprüfung, Renderbilder, Zeichnung) |
 
-> **Wichtig:** Die Abgabe verlangt eine Baugruppe **in eurem CAD-System**. Die STEP-Baugruppe
-> kannst du direkt importieren oder als Kontrollmodell neben deine eigene Baugruppe legen.
-> Die Einbaumaße unten gelten 1:1 für die Abhängigkeiten in Inventor, SolidWorks, Creo usw.
+> Die Abgabe verlangt die Baugruppe in **eurem CAD-System (Creo)**. Die STEP-Baugruppe und die Bilder sind
+> eine Vorlage zum Nachbauen und Kontrollieren.
 
 ## Koordinatensystem der Baugruppe
 
-- Kupplungsachse = **X-Achse**, X = 0 an der Außenplanfläche des Deckels (Pos. 4)
-- Vorderansicht = Blick aus +X (von der Abtriebsseite), rechts = +Y, oben = +Z
-- Schnittebene A–A = Ebene Y = 0 (geht durch die Drehpunkt-Bolzen und je 2 Schrauben)
+- Kupplungsachse = **X-Achse**, X = 0 an der Außenfläche des Deckels (Pos. 4)
+- Vorderansicht = Blick aus +X, rechts = +Y, oben = +Z
+- Schnittebene A–A = Ebene Y = 0 (durch die Drehpunkt-Stifte und je 2 Schrauben)
 
-## Einbaulage der Teile (Abhängigkeiten)
+## Einbaulage aller Teile
 
-| Pos. | Teil | Lage in der Baugruppe | Abhängigkeiten im CAD |
+| Pos. | Teil | Lage in der Baugruppe | Abhängigkeiten in Creo |
 |---|---|---|---|
-| 4 | Deckel | X = 0 … 29 (Flansch 0–12, Zentrierbund 12–19) | **Fixieren** (Basisteil); Bohrungen Ø9 auf Teilkreis Ø150 bei 30°, 90°, 150° … |
-| 3 | Gehäuse | X = 12 … 82, Ø170/Ø136 | Ø136 koaxial zum Zentrierbund Deckel; Planfläche an Deckel-Flansch (X = 12); Gewinde M8 fluchtend mit Deckelbohrungen |
-| 2 | Abtriebsnabe | X = 65 … 137, **gespiegelt** (Zentrierbund zeigt zum Deckel) | Zentrierbund koaxial Ø136; Flanschfläche an Gehäuse (X = 82); Bohrungen fluchtend mit Gehäusegewinde |
-| 1 | Antriebsnabe | X = 0 … 81, Arme nach oben/unten (Bohrungen Ø8 bei 90° und 270°, r = 52), Passfedernut nach +Y | koaxial; linker Lagersitz Ø45 bei X = 13…29 (Wellenschulter X = 29), rechter Lagersitz X = 65…81 |
-| 5 | Fliehgewicht (2×) | Mitte X = 47 (Breite 54: X = 20…74) | Gewicht A: Bohrung Ø8 koaxial Bohrung **oben** (90°) der Antriebsnabe, Nut (20 mm) symmetrisch zum Arm (17 mm). Gewicht B: dasselbe **unten** (270°). Freie Bohrungen liegen dann bei ≈ 46° bzw. 226°. Belag hat ≈ 2,7 mm Luft zum Gehäuse (Ruhelage). |
-| 6 | Scheibe 16 × 9 × 1,5 (4×) | Nur auf den **Drehpunkt-Bolzen**: X = 37…38,5 und 55,5…57 | koaxial zur Bohrung; Planfläche an Nabenarm (füllt Spalt 20 − 17 = 2 × 1,5) |
-| 7 | Zugfeder (4×) | Je 2 Federn pro Federpaar: X = 24,85 und 69,15 (Öse im Einstich R0,6 des Bolzens) | Öse koaxial: Feder 1 verbindet Bolzen 90° ↔ freier Bolzen Gewicht B (≈ 46°), Feder 2 verbindet 270° ↔ 226°. **Eingebaute Länge Ösenmitte–Ösenmitte = 38,8 mm** → gespannte Feder verwenden (`Pos07_Zugfeder_gespannt.step`) |
-| 8 | Sicherungsscheibe DIN 6799 – 7 (8×) | Auf allen 4 Bolzen, X = 28,89…29,79 und 64,21…65,11 (Nut Ø7 × 0,94 im Bolzen) | koaxial zur Bolzenbohrung; Planfläche 17,21 mm von der Mitte (X = 47) |
-
-Daten zu Pos. 8 (DIN 6799, Größe 7): Nut-Ø 7, Wellenbereich 8–11 mm, s = 0,9 mm, Nutbreite m = 0,94 mm,
-Außen-Ø ≈ 14,3 mm, Öffnung 5,84 mm. Die Kontur ist vereinfacht als C-Form modelliert. In deinem
-CAD-System das Teil aus der **Normteilbibliothek** nehmen.
+| 4 | Deckel | X 0 … 29 | Standard (Basisteil) |
+| 3 | Gehäuse | X 12 … 82 | Ø136 koaxial, Planfläche an Deckelflansch (X = 12), Gewinde fluchtend mit Bohrungen |
+| 2 | Abtriebsnabe | X 65 … 137, Zentrierbund zum Deckel | Ø136 koaxial, Flansch an Gehäuse (X = 82), Bohrungen fluchtend |
+| 1 | Antriebsnabe | X 0 … 81, Arme oben/unten | koaxial, Stirnfläche bündig mit Deckel-Außenfläche, FRONT ↔ FRONT Deckel |
+| 11 | Rillenkugellager 6009-2Z (2×) | X 13 … 29 und 65 … 81 | Innenring auf Ø45k6 an Wellenschulter, Außenring in Ø75H7 |
+| 12 | Filzring | X 2,8 … 8,2, in der Nut des Deckels | koaxial, in der Nut zentriert |
+| 6 | Scheibe (4×) | X 37 … 38,5 und 55,5 … 57 auf den Drehpunkten | koaxial Armbohrung, an Armseite |
+| 5 | Fliehgewicht (2×) | Mitte X = 47 | Bohrung koaxial Arm, Nut an Scheibe, Winkelversatz 68,1° |
+| 9 | Zylinderstift (4×) | X 22 … 72 (mittig) | koaxial Bohrung, mittig |
+| 8 | Sicherungsscheibe (8×) | in der Stiftnut 7 mm vom Ende: X 29,04 … 29,94 und 64,06 … 64,96 | koaxial Stift, an Nutflanke |
+| 7 | Zugfeder (4×) | Öse im Einstich R0,6, 3 mm vom Stiftende: X = 25 und 69 | Ösen koaxial zu zwei Stiften; eingebaut 38,8 mm Ösenabstand |
+| 10 | Zylinderschraube M8 × 20 (12×) | Kopf auf Senkungsgrund: Deckelseite X 0,6 … 28,6, Abtriebsseite X 65,4 … 93,4 | koaxial Bohrung, Kopfauflage an Senkungsgrund |
 
 ## Zeichnungsregeln, die umgesetzt sind
 
-- Schnittverlauf A–A durch Zylinderstift-Achsen (Drehpunkte 90°/270°) und Schrauben-/Gewindebohrungen
-- **Nicht geschnitten:** Normteil Pos. 8 und die Federn Pos. 7. Pos. 9 und 10 (Stifte, Schrauben) folgen in der nächsten Stufe.
-- Angrenzende Teile mit unterschiedlicher Schraffurrichtung/-abstand, Belag (5.2) kreuzschraffiert
-- Gewinde M8 im Gehäuse: Kernloch breit, Nenndurchmesser schmal, Gewindeende breit
-- Positionsnummern im Uhrzeigersinn (4 → 5 → 6 → 7 → 8 → 1 → 2 → 3), Hinweislinien mit Punkt in der Fläche
-- Stückliste über dem Schriftfeld (DIN EN ISO 7200), Projektionsmethode 1 (Symbol im Schriftfeld)
+- Schnitt A–A durch die Stiftachsen und Schrauben.
+- **Nicht geschnitten:** Wellen-ähnliche Normteile und Verbindungselemente, also Stifte (9), Schrauben (10), Sicherungsscheiben (8), Federn (7) und Lagerkugeln.
+- Lagerringe sind geschnitten, die Kugeln nicht. Filzring und Belag sind kreuzschraffiert.
+- Gewinde: Die Schraube ist eingeschraubt (Kern-Ø schmal), im Gehäuse bleibt ein freier Gewinderest mit Gewindeende.
+- Positionsnummern im Uhrzeigersinn wie in der Buchvorlage: rechts 1–3, unten 5–10, links 4, 11, 12. Pos. 7 steht in der Vorderansicht.
+- Stückliste nach DIN EN ISO 7200 links unten. Projektionsmethode 1.
 
-## Fehler / Unstimmigkeiten in den Unterlagen (bitte beachten)
+## Unstimmigkeiten in den Unterlagen
 
-1. **Zugfeder passt laut Zeichnung nicht auf den Bolzen:** Die Zeichnung (14.2.5.8) gibt einen Außen-Ø von 8 bei
-   Draht-Ø 1,1 an. Die Öse hat damit innen nur ≈ 5,8 mm, der Bolzen-Einstich hat aber Ø 6,8. Das STEP-Modell der
-   Feder hat dagegen ≈ Ø 9,2 außen. Die Öse ist deshalb mit Innen-Ø 6,8 modelliert, damit sie im Einstich sitzt.
-2. **Feder nur ungespannt vorhanden:** Die Ösen liegen im STEP-Modell ≈ 22,9 mm auseinander, eingebaut sind es aber 38,8 mm.
-   Im CAD die Feder deshalb gespannt modellieren, sonst entsteht keine Verbindung zum Bolzen.
-3. **STEP-Dateien fehlen** für das Gehäuse (Pos. 3), die Scheibe (Pos. 6) und den Zylinderstift (Pos. 9).
-   Pos. 3 und Pos. 6 sind nach den Einzelteilzeichnungen 14.2.5.4 und 14.2.5.7 nachmodelliert. Der Ordner 14.2.7 (Keilwelle) fehlt ebenfalls.
-4. **Falsche Positionsnummern in den Buchunterlagen:**
-   - Die Zeichnung der Zugfeder heißt „…_Pos_14“, richtig ist Pos. 7.
-   - Die Form- und Lagetoleranzen sprechen beim Fliehgewicht vom „Zylinderstift (Pos. 11)“, richtig ist Pos. 9.
-5. **Pos. 5 auf der Zeichnung:** Das Fliehgewicht ist als Baugruppe mit „5“ gekennzeichnet, wie im Original.
-   5.1 und 5.2 stehen nur in der Stückliste. Falls deine Lehrkraft 5.1 und 5.2 einzeln sehen will, zwei Hinweislinien ergänzen.
+1. **Zugfeder:** Laut Zeichnung ist die Öse innen nur etwa Ø5,8 groß, der Stifteinstich hat aber Ø6,8. Modelliert ist die Öse mit Ø6,8 innen.
+2. **Feder nur ungespannt im Datensatz:** Frei liegen die Ösen 22,9 mm auseinander, eingebaut sind es 38,8 mm.
+3. **STEP fehlt** für Pos. 3, 6 und 9. Die Teile sind nach den Zeichnungen 14.2.5.4, 14.2.5.7 und 14.2.5.9 modelliert.
+4. **Positionsnummern im Buch:** Die Zeichnung der Zugfeder heißt „…Pos_14“, im Fliehgewicht-Text steht „Zylinderstift Pos. 11“. Richtig sind Pos. 7 und Pos. 9.

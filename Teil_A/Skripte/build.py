@@ -48,8 +48,8 @@ def deckel():
     return rotx(load(4), 90)
 
 # ---------- Pos 5 Fliehgewicht (5.1 Gewicht, 5.2 Belag) ----------
-HOLE_L = (-47.89, -19.24)    # Bohrung Drehpunkt im STEP (lokal)
-HOLE_R = ( 47.89, -19.24)
+HOLE_L = (-47.88559214402024, -19.244699835932547)    # Bohrung Drehpunkt im STEP (lokal, exakt)
+HOLE_R = ( 47.88559214402021, -19.244699835932572)
 def _weight_tf(shape, pivot_deg):
     # lokal (x,y,z) -> global (X=z+X0, Y=x, Z=y)
     s = tf(shape, [[0,0,1,X0],[1,0,0,0],[0,1,0,0]])
