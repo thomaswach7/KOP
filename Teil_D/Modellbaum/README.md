@@ -3,6 +3,8 @@
 Für jedes Teil steht hier, wie man es in Creo **KE für KE** aufbaut: Reihenfolge, Skizzierebene, Skizze mit Maßen und das Sollvolumen zur Kontrolle.
 Die gleiche Anleitung gibt es als PDF: `Modellbaum_Einzelteile.pdf` (eine Seite pro Teil).
 
+> **Ausführliche Fassung:** `Anleitung_Schritt_fuer_Schritt.pdf` bzw. [`Schritt_fuer_Schritt.md`](Schritt_fuer_Schritt.md) – jedes Teil Klick für Klick, Konturtabellen für die Drehskizzen und das Volumen nach jedem KE.
+
 Ich habe jede Anleitung mit einem Skript Schritt für Schritt nachgebaut (`Skripte/replay.py`). Die Sollvolumen stammen aus diesem Nachbau.
 
 ## Grundregeln
