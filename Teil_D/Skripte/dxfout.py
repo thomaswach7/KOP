@@ -24,7 +24,7 @@ def export(sheet, ziel):
     doc.header["$LTSCALE"] = 1.0; doc.header["$INSUNITS"] = 4; doc.header["$MEASUREMENT"] = 1
     doc.header["$LIMMAX"] = (sheet.W, sheet.Hh)
     for name, lt, lw, col in (("KANTEN", "CONTINUOUS", 50, 7), ("DUENN", "CONTINUOUS", 25, 7),
-                              ("MITTELLINIEN", "CENTER", 25, 1), ("SCHRAFFUR", "CONTINUOUS", 25, 8),
+                              ("MITTELLINIEN", "CENTER", 25, 7), ("SCHRAFFUR", "CONTINUOUS", 25, 7),
                               ("TEXT", "CONTINUOUS", 25, 7), ("RAHMEN", "CONTINUOUS", 70, 7)):
         doc.layers.add(name, linetype=lt, lineweight=lw, color=col)
     st = doc.styles.get("Standard"); st.dxf.font = "arial.ttf"
