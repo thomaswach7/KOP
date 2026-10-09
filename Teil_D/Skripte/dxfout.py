@@ -27,7 +27,7 @@ def export(sheet, ziel):
                               ("MITTELLINIEN", "CENTER", 25, 1), ("SCHRAFFUR", "CONTINUOUS", 25, 8),
                               ("TEXT", "CONTINUOUS", 25, 7), ("RAHMEN", "CONTINUOUS", 70, 7)):
         doc.layers.add(name, linetype=lt, lineweight=lw, color=col)
-    st = doc.styles.get("Standard"); st.dxf.font = "isocp.shx"
+    st = doc.styles.get("Standard"); st.dxf.font = "arial.ttf"
     msp = doc.modelspace()
     ax = sheet.ax
     n = dict(lin=0, txt=0, sol=0, kreis=0)
@@ -78,7 +78,7 @@ def export(sheet, ziel):
             hgt = art.get_fontsize() * 0.72 / MM
             x, y = art.get_position()
             t = msp.add_text(s, height=hgt, rotation=art.get_rotation(),
-                             dxfattribs=dict(layer="TEXT", style="Standard", width=0.85))
+                             dxfattribs=dict(layer="TEXT", style="Standard", width=1.0))
             h, v = HA.get(art.get_ha(), 0), VA.get(art.get_va(), 0)
             t.dxf.halign = h; t.dxf.valign = v
             t.dxf.insert = (x, y); t.dxf.align_point = (x, y)

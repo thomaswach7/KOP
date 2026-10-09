@@ -4,7 +4,11 @@ import pickle, math
 from dimlib import *
 from shapely.geometry import LineString as _LS
 from shapely.ops import unary_union as _uu
-import dxfout
+import dxfout, dimlib
+dimlib.FONT = dict(family="Liberation Sans")      # metrisch gleich Arial (Schrift der Vorlage)
+def _rahmen(self):                                  # Vorlage: nur Rahmenlinie, keine Mittenmarken
+    self.ax.add_patch(plt.Rectangle((20, 10), self.W-30, self.Hh-20, fill=False, lw=TH, color="k"))
+Sheet.frame = _rahmen
 ZB = (11.0, 4.0, 2.8, 8.0)               # Zellenbreiten der Toleranzrahmen wie in der Vorlage
 
 d = pickle.load(open("p1_buch.pkl", "rb"))
@@ -51,7 +55,7 @@ yb1, yb2, ya = Y_(L(0, 985)), Y_(L(0, 1025)), Y_(L(0, 1003))
 sh.line([(cx, yb1), (cx, yb2)], lw=TH2)
 sh.line([(X_(L(757)), ya), (cx, ya)]); sh.arrow((cx, ya), (X_(L(757)), ya))
 sh.text(cx, Y_(L(0, 1068)), "A", 5, ha="center")
-sh.text(*R(122, 213), "A–A", 6, ha="center")
+sh.text(*R(122, 213), "A-A", 5, ha="center")
 
 # ---------------- Vorderansicht: Maße ----------------
 sh.dim(F(-9, 54), F(9, 54), Y_(L(0, 157)), "18", "h")
@@ -134,18 +138,45 @@ sh.line([(X_(R(345)), y2), (ox + 29, y2)])
 sh.surf_symbol((X_(R(368)), y2), "y")
 
 # ---------------- Oberflaechen allgemein, Kanten, Hinweise ----------------
-gx, gy = X_(L(65)), Y_(L(0, 1365))
-sh.surf_symbol((gx, gy), removal=False, prohibited=True)
-sh.text(gx + 9, gy + 0.5, "(", 7); sh.surf_symbol((gx + 15, gy), removal=True); sh.text(gx + 24, gy + 0.5, ")", 7)
-for row, (l, rz) in enumerate((("x", "Rz 63"), ("y", "Rz 16"), ("z", "Rz 4"))):
-    yy = Y_(L(0, 1470 + 70*row)); xx = X_(L(62))
-    sh.surf_symbol((xx, yy), l); sh.text(xx + 18, yy + 2, "=", 3.5); sh.surf_symbol((xx + 28, yy), text=rz)
+# allgemeine Oberflaechenangaben links unten, Groesse und Lage wie Vorlage
+SZ = 1.13                                      # Symbolhoehe 11,3 mm
+sh.surf_symbol((29.2, 55.95), removal=False, prohibited=True, size=SZ)
+sh.text(38.4, 57.2, "(", 7.9); sh.surf_symbol((43.8, 55.95), removal=True, size=SZ); sh.text(49.7, 57.2, ")", 7.9)
+for (l, rz), yt in zip((("x", "Rz 63"), ("y", "Rz 16"), ("z", "Rz 4")), (38.0, 26.06, 14.04)):
+    sh.surf_symbol((29.2, yt), l, size=SZ, th=3.5, bar=45.9 - 29.2, tpos=(8.5, 6.5))
+    sh.text(50.2, yt + 4.5, "=", 3.5)
+    sh.surf_symbol((59.2, yt), text=rz, size=SZ, th=3.5, bar=81.0 - 59.2, tpos=(8.9, 6.5))
 sh.edge_symbols(X_(R(135)), Y_(R(0, 1330)))
-for i, s in enumerate(["Nicht bemaßte Freistiche DIN 509 – E0,6×0,3", "Nicht bemaßte Radien R2",
+for yb, s in zip((41.0, 35.5, 30.25, 24.66, 18.82, 12.81), ["Nicht bemaßte Freistiche DIN 509 – E0,6×0,3", "Nicht bemaßte Radien R2",
                        "Oberflächen nach DIN EN ISO 1302", "Werkstückkanten nach DIN ISO 13715",
                        "Allgemeintoleranzen ISO 2768-mK", "Gusstoleranzen DIN 1686 – GTB 18"]):
-    sh.text(108, 41.2 - i*5.66, s, 3.2)
-sh.titleblock("Antriebsnabe (Pos. 1)", "14.2.5.2", "EN-GJS-700-2", "1:1")
+    sh.text(130.0, yb, s, 3.5)
+
+# ---------------- Schriftfeld 1:1 wie Vorlage 14.2.5.2 (Lagen aus dem Scan gemessen) ----------------
+def lin(a, b): sh.line([a, b], lw=TH)
+lin((229.97, 45.95), (410, 45.95)); lin((229.97, 37.0), (410, 37.0))
+lin((229.97, 10), (229.97, 45.95))
+for x in (254.99, 342.0, 385.0): lin((x, 37.0), (x, 45.95))
+lin((299.0, 10), (299.0, 45.95)); lin((359.0, 10), (359.0, 37.0))
+lin((299.0, 27.96), (410, 27.96)); lin((359.0, 19.0), (410, 19.0))
+for x in (366.0, 391.0, 401.0): lin((x, 10), (x, 19.0))
+T = lambda x, y, t, h=2.5, **k: sh.text(x, y, t, h, **k)
+T(231.17, 42.37, "Verantw. Abt.")
+T(256.25, 42.37, "Technische Referenz"); T(256.42, 38.34, "Projekt Fliehkraftkupplung")
+T(300.34, 42.37, "Erstellt durch"); T(343.25, 42.37, "Genehmigt von")
+T(300.42, 33.37, "Dokumentenart"); T(300.34, 29.44, "Einzelteilzeichnung")
+T(300.17, 24.37, "Titel, Zusätzlicher Titel"); T(329.0, 16.3, "Antriebsnabe (Pos.1)", 3.5, ha="center")
+T(360.34, 33.37, "Dokumentenstatus"); T(360.25, 24.28, "Sachnummer"); T(360.4, 20.5, "14.2.5.2")
+T(359.64, 15.3, "Änd."); T(367.15, 15.38, "Ausgabedatum"); T(392.23, 15.3, "Spr."); T(402.32, 15.38, "Blatt")
+# Werkstoff / Massstab ueber dem Schriftfeld
+T(230.43, 54.27, "Werkstoff:", 3.5); T(255.42, 54.27, "EN-GJS-700-2", 3.5)
+T(230.43, 48.3, "Maßstab:", 3.5); T(255.42, 48.3, "1:1", 3.5)
+# Projektionssymbol (Projektionsmethode 1) rechts ueber dem Schriftfeld
+sh.ax.add_patch(MPoly([(392.3, 49.9), (392.3, 53.8), (399.6, 55.5), (399.6, 48.5)], closed=True, fill=False, lw=TH, color="k"))
+sh.ax.add_patch(Circle((403.9, 51.8), 3.6, fill=False, lw=TH, color="k"))
+sh.ax.add_patch(Circle((403.9, 51.8), 1.75, fill=False, lw=TH, color="k"))
+sh.cl((390.8, 51.8), (408.2, 51.8)); sh.line([(403.9, 47.4), (403.9, 56.2)], lw=TN)
+
 print(dxfout.export(sh, "Pos01_Antriebsnabe.dxf"))
 sh.save("Pos01_Antriebsnabe.pdf", "prev_p1.png", dpi=150)
 print("ok")

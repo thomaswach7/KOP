@@ -106,7 +106,7 @@ class Sheet:
         self.text(x2+5.6, y+6.8, "+0,3", 2.5)
 
     # ---------- Oberflaechensymbol ISO 1302 ----------
-    def surf_symbol(self, tip, letter="", text="", removal=True, prohibited=False, rot=0, size=1.0):
+    def surf_symbol(self, tip, letter="", text="", removal=True, prohibited=False, rot=0, size=1.0, th=None, bar=None, tpos=None):
         """Spitze in tip; rot = Drehung in Grad (0: Symbol steht ueber der Flaeche)."""
         h = 5.0*size
         pts = {"tip": (0, 0), "s": (-h/math.sqrt(3)*1.0, h), "l": (2*h/math.sqrt(3), 2*h)}
@@ -118,10 +118,10 @@ class Sheet:
         if prohibited:
             cc = T((0, h*0.62)); self.ax.add_patch(Circle(cc, h*0.30, fill=False, lw=TN, color="k"))
         if letter or text:
-            L = 2*h/math.sqrt(3) + (6 if text else 4)*size + (len(text)*1.9*size if text else 0)
+            L = bar if bar is not None else 2*h/math.sqrt(3) + (6 if text else 4)*size + (len(text)*1.9*size if text else 0)
             self.line([T(pts["l"]), T((L, 2*h))], lw=TN)
             s = text if text else letter
-            self.text(*T((2*h/math.sqrt(3)+0.8, h+0.9)), s, 3.5*size, rot=rot)
+            self.text(*T(tpos if tpos else (2*h/math.sqrt(3)+0.8, h+0.9)), s, th if th else 3.5*size, rot=rot)
 
     def surf_leader(self, p_surf, p_ref, letter, removal=True):
         """Hinweislinie mit Pfeil auf Flaeche, Symbol sitzt am Ende."""

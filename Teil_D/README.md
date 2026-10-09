@@ -5,7 +5,7 @@ Die Maße, Passungen, Oberflächen und Toleranzen folgen diesen Vorlagen und der
 
 | Datei | Teil | Vorlage | Blatt / Maßstab |
 |---|---|---|---|
-| `Pos01_Antriebsnabe.pdf` | Antriebsnabe, Aufbau wie Vorlage: A–A als Halbschnitt, Nut links, Freistiche | 14.2.5.2 | A3 / 1:1 |
+| `Pos01_Antriebsnabe.pdf` | Antriebsnabe, Aufbau, Schriftfeld und Schrift (Arial) wie Vorlage; A–A Halbschnitt, Nut links, Freistiche | 14.2.5.2 | A3 / 1:1 |
 | `Pos01_Antriebsnabe.dxf` | Antriebsnabe als DXF zum Öffnen in Creo (→ .drw) | 14.2.5.2 | A3 / 1:1 |
 | `Pos03_Gehaeuse.pdf` | Gehäuse | 14.2.5.4 | A4 / 1:1 |
 | `Pos04_Deckel.pdf` | Deckel | 14.2.5.5 | A3 / 1:1, Einzelheit Z 2:1 |
