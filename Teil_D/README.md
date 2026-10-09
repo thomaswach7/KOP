@@ -5,7 +5,8 @@ Die Maße, Passungen, Oberflächen und Toleranzen folgen diesen Vorlagen und der
 
 | Datei | Teil | Vorlage | Blatt / Maßstab |
 |---|---|---|---|
-| `Pos01_Antriebsnabe.pdf` | Antriebsnabe | 14.2.5.2 | A3 / 1:1 |
+| `Pos01_Antriebsnabe.pdf` | Antriebsnabe (mit Freistichen im Schnitt A–A) | 14.2.5.2 | A3 / 1:1 |
+| `Pos01_Antriebsnabe.dxf` | Antriebsnabe als DXF zum Öffnen in Creo (→ .drw) | 14.2.5.2 | A3 / 1:1 |
 | `Pos03_Gehaeuse.pdf` | Gehäuse | 14.2.5.4 | A4 / 1:1 |
 | `Pos04_Deckel.pdf` | Deckel | 14.2.5.5 | A3 / 1:1, Einzelheit Z 2:1 |
 | `Pos05_Fliehgewicht.pdf` | Fliehgewicht (5.1 + 5.2) | 14.2.5.6 | A3 / 1:1 |
@@ -14,6 +15,19 @@ Die Maße, Passungen, Oberflächen und Toleranzen folgen diesen Vorlagen und der
 | `Pos09_Zylinderstift.pdf` | Zylinderstift | 14.2.5.9 | A4 / 2:1 |
 | `Einzelteilzeichnungen_alle.pdf` | alle 7 Blätter in einer Datei | | |
 | `Modellbaum/` | **Modellbaum je Teil für Creo**: KE-Reihenfolge, Skizzen mit Maßen, Sollvolumen (PDF + README) | | |
+
+## Antriebsnabe als Creo-Zeichnung (DXF → .drw)
+
+1. In Creo: **Datei → Öffnen → Typ „DXF (*.dxf)“ → `Pos01_Antriebsnabe.dxf`**. Creo legt dabei eine neue Zeichnung an.
+2. Im Importdialog Blattgröße **A3** und Einheit **mm** wählen. Die Zeichnung hat Maßstab 1:1, Ursprung links unten.
+3. **Datei → Speichern** → es entsteht `pos01_antriebsnabe.drw`.
+
+Wichtig: Die DXF-Zeichnung ist **nicht mit dem 3D-Modell verknüpft**. Maße sind Linien und Text, keine Creo-Bemaßungen.
+Ändert sich das Modell, ändert sich die Zeichnung nicht mit. Wird eine aus dem Modell abgeleitete Zeichnung verlangt
+(Ansichten aus der `.prt`), dient die DXF/PDF nur als Vorlage.
+
+Layer: KANTEN 0,5 · DUENN 0,25 · MITTELLINIEN (CENTER) · TEXT · RAHMEN 0,7.
+Erzeugt mit `Skripte/gen_p1.py` (Ansichten aus dem Kontrollmodell mit Freistichen) → `Skripte/d_pos1.py` (PDF + DXF über `dxfout.py`).
 
 ## Nicht gezeichnet
 

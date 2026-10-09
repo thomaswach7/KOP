@@ -211,7 +211,7 @@ class Sheet:
         mx, my = a[0]+(b[0]-a[0])*tpos, a[1]+(b[1]-a[1])*tpos
         if "|" in text:          # Nennmass|oberes Abmass|unteres Abmass
             main, up, lo = text.split("|")
-            wm = len(main)*H*0.62; wt = max(len(up), len(lo))*2.2*0.62
+            wm = len(main)*H*0.9; wt = max(len(up), len(lo))*2.2*0.62
             if orient == "h":
                 x0 = mx - (wm+wt+0.8)/2
                 self.text(x0, my+1.0, main, H); self.text(x0+wm+0.8, my+3.5, up, 2.2); self.text(x0+wm+0.8, my+0.5, lo, 2.2)

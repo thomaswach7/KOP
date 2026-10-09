@@ -8,7 +8,14 @@ S = lambda x, r: (SX + x, SY + r)
 TS = lambda u, v: (SX + u, SY + v)
 TF = lambda a, b: (FX + a, FY + b)
 
-sh.polylines(d["sec_l"], TS)
+from shapely.geometry import LineString as _LS
+from shapely.ops import unary_union as _uu
+_sp = _uu(d["sec_p"]).buffer(-0.05)
+from shapely.geometry import Point as _Pt
+def _naht(pl):
+    L = _LS(pl); pts = [L.interpolate(t, normalized=True) for t in (0.25, 0.5, 0.75)]
+    return sum(_sp.contains(p) for p in pts) >= 2
+sh.polylines([pl for pl in d["sec_l"] if not _naht(pl)], TS)
 for p in d["sec_p"]: sh.hatch(p, TS, 45, 2.5)
 sh.polylines(d["fv_l"], TF)
 sh.cl((SX-6, SY), (SX+87, SY))
@@ -92,5 +99,7 @@ for i, (l, rz) in enumerate((("x", "Rz 63"), ("y", "Rz 16"), ("z", "Rz 4"))):
 sh.edge_symbols(206, 50)
 sh.notes(25, 16, guss=True, freistich="E0,6×0,3", radien="R2")
 sh.titleblock("Antriebsnabe (Pos. 1)", "14.2.5.2", "EN-GJS-700-2", "1:1")
-sh.save("Pos01_Antriebsnabe.pdf", "prev_p1.png")
+import dxfout
+print(dxfout.export(sh, "Pos01_Antriebsnabe.dxf"))
+sh.save("Pos01_Antriebsnabe.pdf", "prev_p1.png", dpi=150)
 print("ok")
