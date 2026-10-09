@@ -10,10 +10,13 @@ def compound(shapes):
     for s in shapes: b.Add(c, s.wrapped)
     return c
 
-def project(shapes, normal, xdir):
+from OCP.BRepLib import BRepLib
+def project(shapes, normal, xdir, regularity=False):
     """Liefert Listen von Polylinien (sichtbare Kanten + Umrisse) in Bildkoordinaten."""
     algo = HLRBRep_Algo()
-    algo.Add(compound(shapes))
+    c = compound(shapes)
+    if regularity: BRepLib.EncodeRegularity_s(c, 1e-3)   # tangentiale Kanten nicht zeichnen
+    algo.Add(c)
     algo.Projector(HLRAlgo_Projector(gp_Ax2(gp_Pnt(0,0,0), gp_Dir(*normal), gp_Dir(*xdir))))
     algo.Update(); algo.Hide()
     h = HLRBRep_HLRToShape(algo)

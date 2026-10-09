@@ -2,8 +2,8 @@ import cadquery as cq, numpy as np
 from shapely.geometry import Polygon
 import hlr
 
-def project(shapes, N, Vx):
-    return hlr.project(shapes if isinstance(shapes, list) else [shapes], N, Vx)
+def project(shapes, N, Vx, regularity=False):
+    return hlr.project(shapes if isinstance(shapes, list) else [shapes], N, Vx, regularity)
 
 def section_view(shape, N, Vx, keep_box, plane_pt, plane_n):
     """Schnittansicht: Teil mit keep_box schneiden, HLR + Schnittflaechen (Polygone in Ansichtskoordinaten)."""
@@ -24,10 +24,10 @@ def section_view(shape, N, Vx, keep_box, plane_pt, plane_n):
         polys.append(Polygon(ring(f.outerWire()), [ring(w) for w in f.innerWires()]).buffer(0))
     return lines, polys
 
-def half_section_view(shape, N, Vx, remove_box, plane_pt, plane_n):
+def half_section_view(shape, N, Vx, remove_box, plane_pt, plane_n, regularity=False):
     """Halbschnitt: remove_box wird abgezogen; Linien auf der Achse (v=0, waagrecht) werden entfernt."""
     c = shape.cut(remove_box)
-    lines = project([c], N, Vx)
+    lines = project([c], N, Vx, regularity)
     lines = [pl for pl in lines if not all(abs(p[1]) < 1e-6 for p in pl)]
     N = np.array(N, float); Vx = np.array(Vx, float); Vy = np.cross(N, Vx)
     pn = np.array(plane_n, float); pp = np.array(plane_pt, float)

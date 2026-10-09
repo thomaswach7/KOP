@@ -5,7 +5,7 @@ Die Maße, Passungen, Oberflächen und Toleranzen folgen diesen Vorlagen und der
 
 | Datei | Teil | Vorlage | Blatt / Maßstab |
 |---|---|---|---|
-| `Pos01_Antriebsnabe.pdf` | Antriebsnabe (mit Freistichen im Schnitt A–A) | 14.2.5.2 | A3 / 1:1 |
+| `Pos01_Antriebsnabe.pdf` | Antriebsnabe, Aufbau wie Vorlage: A–A als Halbschnitt, Nut links, Freistiche | 14.2.5.2 | A3 / 1:1 |
 | `Pos01_Antriebsnabe.dxf` | Antriebsnabe als DXF zum Öffnen in Creo (→ .drw) | 14.2.5.2 | A3 / 1:1 |
 | `Pos03_Gehaeuse.pdf` | Gehäuse | 14.2.5.4 | A4 / 1:1 |
 | `Pos04_Deckel.pdf` | Deckel | 14.2.5.5 | A3 / 1:1, Einzelheit Z 2:1 |
@@ -27,6 +27,7 @@ Wichtig: Die DXF-Zeichnung ist **nicht mit dem 3D-Modell verknüpft**. Maße sin
 (Ansichten aus der `.prt`), dient die DXF/PDF nur als Vorlage.
 
 Layer: KANTEN 0,5 · DUENN 0,25 · MITTELLINIEN (CENTER) · TEXT · RAHMEN 0,7.
+Lage von Ansichten und Maßen aus dem Scan der Vorlage 14.2.5.2 übernommen (Überlagerung geprüft).
 Erzeugt mit `Skripte/gen_p1.py` (Ansichten aus dem Kontrollmodell mit Freistichen) → `Skripte/d_pos1.py` (PDF + DXF über `dxfout.py`).
 
 ## Nicht gezeichnet

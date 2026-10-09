@@ -152,10 +152,10 @@ class Sheet:
             self.line([a, b], lw=TN)
             self.ax.add_patch(MPoly([b, (b[0]-1.4, b[1]-0.3), (b[0]-0.3, b[1]-1.4)], closed=True, color="k", lw=0))
 
-    def gdt(self, pos, kind, value, datum=None, leader_to=None, leader_via=None, side="left"):
+    def gdt(self, pos, kind, value, datum=None, leader_to=None, leader_via=None, side="left", zellen=(7.0, 3.0, 2.5, 7.0)):
         """Toleranzrahmen; pos = linke untere Ecke; leader_to = Pfeilspitze."""
         x, y = pos; hgt = 7.0
-        w1 = 7.0; w2 = 3.0 + len(value)*2.5; w3 = 7.0 if datum else 0
+        w1 = zellen[0]; w2 = zellen[1] + len(value)*zellen[2]; w3 = zellen[3] if datum else 0
         cells = [w1, w2] + ([w3] if datum else [])
         xx = x
         for w in cells:
