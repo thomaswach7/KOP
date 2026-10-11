@@ -6,6 +6,7 @@
 |---|---|
 | `Montageablauf/Montageablauf_Fliehkraftkupplung.pdf` | **Zusammenbau Schritt für Schritt** (12 Schritte mit 3D-Bildern und Erklärung) |
 | `Montageablauf/README.md` | derselbe Ablauf zum Lesen direkt auf GitHub |
+| `Montageablauf/Creo_Zusammenbau.md` / `.pdf` | **Creo 12 Klick für Klick:** jede Abhängigkeit für deine eigenen Teile, Normteile, Prüfung, typische Fehler |
 | `Gesamtzeichnung_Fliehkraftkupplung.pdf` | Gesamtzeichnung A3, M 1:1: Längsschnitt A–A, Vorderansicht ohne Pos. 2 und 10, Stückliste Pos. 1–12 |
 | `Gesamtzeichnung_Vorschau.png` | Vorschaubild der Gesamtzeichnung |
 | `CAD/Baugruppe_Fliehkraftkupplung_komplett.step` | komplette Baugruppe, 43 Einzelteile, kollisionsfrei |
