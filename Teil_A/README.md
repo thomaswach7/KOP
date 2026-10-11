@@ -7,7 +7,8 @@
 | `Montageablauf/Montageablauf_Fliehkraftkupplung.pdf` | **Zusammenbau Schritt für Schritt** (12 Schritte mit 3D-Bildern und Erklärung) |
 | `Montageablauf/README.md` | derselbe Ablauf zum Lesen direkt auf GitHub |
 | `Montageablauf/Creo_Zusammenbau.md` / `.pdf` | **Creo 12 Klick für Klick:** jede Abhängigkeit für deine eigenen Teile, Normteile, Prüfung, typische Fehler |
-| `Gesamtzeichnung_Fliehkraftkupplung.pdf` | Gesamtzeichnung A3, M 1:1: Längsschnitt A–A, Vorderansicht ohne Pos. 2 und 10, Stückliste Pos. 1–12 |
+| `Gesamtzeichnung_Fliehkraftkupplung.pdf` | Gesamtzeichnung A3, M 1:1 nach Angabe Teil A und Vorlage 14.2.3: Längsschnitt A–A als Halbschnitt (unten Schnitt durch Stifte und Schrauben, oben Ansicht), Vorderansicht ohne Pos. 2 und 10, Stückliste Pos. 1–12, Schriftfeld wie Vorlage |
+| `Gesamtzeichnung_Fliehkraftkupplung.dxf` | dieselbe Zeichnung als DXF zum Öffnen in Creo (Datei → Öffnen → DXF → wird zur .drw). **Nicht mit dem 3D-Modell verknüpft.** Schrift nach dem Import auf Arial stellen (wie bei Pos01 in `Teil_D/README.md`). |
 | `Gesamtzeichnung_Vorschau.png` | Vorschaubild der Gesamtzeichnung |
 | `CAD/Baugruppe_Fliehkraftkupplung_komplett.step` | komplette Baugruppe, 43 Einzelteile, kollisionsfrei |
 | `CAD/Einzelteile_neu/*.step` | Teile ohne STEP im Datensatz: Pos. 3, 6, 7 (gespannt), 8, 9, 10, 11, 12 |
@@ -41,7 +42,8 @@
 
 ## Zeichnungsregeln, die umgesetzt sind
 
-- Schnitt A–A durch die Stiftachsen und Schrauben.
+- Schnitt A–A durch die Stiftachsen und Schrauben, als Halbschnitt wie in der Vorlage 14.2.3 (Lage der Ansichten und Positionsnummern aus dem Scan übernommen, Überlagerung geprüft).
+- Abtriebsnabe so gedreht, dass ihre Passfedernut mit der Nut der Antriebsnabe fluchtet (wie Vorlage). Das Lochbild 6 × 60° bleibt dabei gleich.
 - **Nicht geschnitten:** Wellen-ähnliche Normteile und Verbindungselemente, also Stifte (9), Schrauben (10), Sicherungsscheiben (8), Federn (7) und Lagerkugeln.
 - Lagerringe sind geschnitten, die Kugeln nicht. Filzring und Belag sind kreuzschraffiert.
 - Gewinde: Die Schraube ist eingeschraubt (Kern-Ø schmal), im Gehäuse bleibt ein freier Gewinderest mit Gewindeende.
