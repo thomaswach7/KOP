@@ -105,14 +105,14 @@ PARTS = [
  dict(key="pos7", nr="7", name="Zugfeder", werkstoff="Federstahl (46Si7 laut Zeichnung)", quelle="Zeichnung 14.2.5.8",
   ke=[
    ("1", "Schraubenförmiges Zug-KE (Federkörper)", "Profilskizze auf FRONT: Mittellinie = Federachse", "Skizze 1: Profillinie parallel zur Achse im Abstand 3,45 (mittlerer Ø6,9), Länge 14,3. Steigung 1,1, rechtsgängig. Querschnitt: Kreis Ø1,1 am Profilanfang. Ergibt 13 anliegende Windungen."),
-   ("2", "Zug-KE (Öse 1)", "Leitkurve skizziert auf FRONT", "Skizze 2: Kreisbogen R3,45, Mittelpunkt auf der Achse 3 mm vor dem Drahtende, Öffnung 2 mm. Querschnitt Kreis Ø1,1."),
+   ("2", "Zug-KE (Öse 1)", "Leitkurve skizziert auf FRONT, Start im Drahtanfang von KE 1", "Skizze 2: Gerade vom Drahtanfang (0,55 rechts von RIGHT, 3,45 über der Achse) parallel zur Achse bis 3 links von RIGHT, daran tangential Bogen R3,45 (Mittelpunkt auf der Achse 3 links von RIGHT) um die Achse herum bis 2 links von RIGHT (Öffnung 2). Querschnitt Kreis Ø1,1. So ist die Öse mit dem Federkörper verbunden (ganze deutsche Öse)."),
    ("3", "Ebene DTM1", "parallel zu RIGHT", "genau in der Mitte des Federkörpers"),
-   ("4", "Spiegeln", "Öse aus KE 2 an DTM1", "Öse 2"),
+   ("4", "Spiegeln", "Öse aus KE 2 an DTM1", "Öse 2. Sie sitzt automatisch am Drahtende, weil der Körper genau 13 volle Windungen hat."),
   ],
   skizzen=[("pos7_s1.png", "Skizze 1 – Profil Zug-KE (KE 1)"), ("pos7_s2.png", "Skizze 2 – Öse (KE 2)")],
   hinweise=["Gebaut ist die Feder ungespannt nach Zeichnung. In der Baugruppe ist sie gespannt (Ösenabstand 38,8). Dafür die gespannte STEP-Datei nehmen oder die Steigung als flexibles Maß freigeben.",
             "Buchfehler: Die Öse hat außen Ø8, innen also nur Ø5,8. Der Einstich im Stift hat aber Ø6,8, deshalb passt die Feder nicht. Bei der Lehrkraft nachfragen.",
-            "Der Übergang von der Windung zur Öse ist hier nur angenähert. Für Zeichnung und Baugruppe reicht das."]),
+            "Am Übergang Windung → Öse entsteht ein Knick (Draht biegt um 90° in die Ösenebene). Das ist bei einer ganzen deutschen Öse so und reicht für Zeichnung und Baugruppe."]),
 
  dict(key="pos9", nr="9", name="Zylinderstift", werkstoff="C45E", quelle="Zeichnung 14.2.5.9",
   ke=[

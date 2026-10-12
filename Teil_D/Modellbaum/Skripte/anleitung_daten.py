@@ -214,11 +214,14 @@ TEILE = [
     "✔ → Steigung 1,1 → rechtsgängig → Querschnitt skizzieren: Kreis Ø1,1 am Startpunkt → ✔ → ✔.",
    ], None, v("pos7", 0)),
    ("KE 2 – Zug-KE: Öse 1", [
-    "Skizze auf VORNE: Bogen R3,45, Mittelpunkt auf der Achse 3 mm links von RECHTS, Öffnung 2 mm oben (Skizze 2).",
-    "Modell → Zug-KE → diese Skizze als Leitkurve → Querschnitt: Kreis Ø1,1 am Startpunkt → ✔.",
+    "Skizze auf VORNE. Referenzen: RECHTS, OBEN und den Anfangspunkt des Drahts aus KE 1 (Kante/Scheitel anklicken).",
+    "Gerade vom Drahtanfang (0,55 rechts von RECHTS, 3,45 über der Achse) waagrecht nach links bis 3 links von RECHTS.",
+    "Daran tangential einen Bogen R3,45: Mittelpunkt auf der Achse 3 links von RECHTS, um die Achse herum (links vorbei nach unten) bis 2 links von RECHTS (Skizze 2).",
+    "Modell → Zug-KE → diese Skizze als Leitkurve, Startpunkt = Drahtanfang → Querschnitt: Kreis Ø1,1 am Startpunkt → ✔.",
+    "! Der Startpunkt muss genau auf dem Drahtanfang liegen, sonst hängt die Öse lose neben dem Federkörper.",
    ], "pos7_s2.png", v("pos7", 1)),
    ("KE 3 – Ebene DTM1", ["Ebene → RECHTS → Versatz 7,7 (Mitte Federkörper = 0,55 + 14,3/2)."], None, None),
-   ("KE 4 – Spiegeln", ["Öse 1 anklicken → Spiegeln → DTM1 → ✔."], None, v("pos7", 2)),
+   ("KE 4 – Spiegeln", ["Öse 1 anklicken → Spiegeln → DTM1 → ✔. Öse 2 sitzt dann genau am Drahtende (13 volle Windungen)."], None, v("pos7", 2)),
   ]),
 
  dict(key="pos9", titel="Pos. 9 – Zylinderstift", datei="POS09_ZYLINDERSTIFT", werkstoff="C45E",

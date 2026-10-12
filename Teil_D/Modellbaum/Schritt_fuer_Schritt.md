@@ -442,12 +442,15 @@ Dateiname `POS07_ZUGFEDER` · Werkstoff Federstahl · Vorlage `mmns_part_solid_a
 
 ### KE 2 – Zug-KE: Öse 1
 
-- Skizze auf VORNE: Bogen R3,45, Mittelpunkt auf der Achse 3 mm links von RECHTS, Öffnung 2 mm oben (Skizze 2).
-- Modell → Zug-KE → diese Skizze als Leitkurve → Querschnitt: Kreis Ø1,1 am Startpunkt → ✔.
+- Skizze auf VORNE. Referenzen: RECHTS, OBEN und den Anfangspunkt des Drahts aus KE 1 (Kante/Scheitel anklicken).
+- Gerade vom Drahtanfang (0,55 rechts von RECHTS, 3,45 über der Achse) waagrecht nach links bis 3 links von RECHTS.
+- Daran tangential einen Bogen R3,45: Mittelpunkt auf der Achse 3 links von RECHTS, um die Achse herum (links vorbei nach unten) bis 2 links von RECHTS (Skizze 2).
+- Modell → Zug-KE → diese Skizze als Leitkurve, Startpunkt = Drahtanfang → Querschnitt: Kreis Ø1,1 am Startpunkt → ✔.
+- ⚠ Der Startpunkt muss genau auf dem Drahtanfang liegen, sonst hängt die Öse lose neben dem Federkörper.
 
 ![KE 2 – Zug-KE: Öse 1](Bilder/pos7_s2.png)
 
-✅ **Volumen nach diesem KE: 286 mm³**
+✅ **Volumen nach diesem KE: 282 mm³**
 
 ### KE 3 – Ebene DTM1
 
@@ -455,9 +458,9 @@ Dateiname `POS07_ZUGFEDER` · Werkstoff Federstahl · Vorlage `mmns_part_solid_a
 
 ### KE 4 – Spiegeln
 
-- Öse 1 anklicken → Spiegeln → DTM1 → ✔.
+- Öse 1 anklicken → Spiegeln → DTM1 → ✔. Öse 2 sitzt dann genau am Drahtende (13 volle Windungen).
 
-✅ **Volumen nach diesem KE: 305 mm³**
+✅ **Volumen nach diesem KE: 297 mm³**
 
 ## Pos. 9 – Zylinderstift
 

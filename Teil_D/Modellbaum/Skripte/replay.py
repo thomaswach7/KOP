@@ -186,19 +186,22 @@ def pos12():
 
 # ---------------- Pos. 7 Zugfeder (ungespannt, nach Zeichnung) ----------------
 def pos7(steigung=1.1, laenge=14.3):
-    d, rm = 1.1, 3.45
-    helix = cq.Wire.makeHelix(steigung*1.0005, laenge, rm, center=Vector(0, 0, 0), dir=Vector(0, 0, 1))
-    prof = cq.Wire.makeCircle(d/2, center=Vector(rm, 0, 0), normal=Vector(0, 1, 0))
-    body = cq.Solid.sweep(prof, [], helix, isFrenet=True).rotate((0, 0, 0), (0, 1, 0), 90).translate((0.55, 0, 0))
-    gap = 2.0/rm
-    out = [body]
-    for cx, sg in ((-3.0, 1), (0.55 + laenge + 0.55 + 3.0, -1)):
-        a0 = math.pi/2 + sg*gap/2 if sg > 0 else math.pi/2 - gap/2
-        traj = cq.Workplane("XY").moveTo(cx + rm*math.cos(math.pi/2 + gap/2*sg), rm*math.sin(math.pi/2 + gap/2*sg))
-        mid = (cx + rm*math.cos(math.pi/2 + math.pi*sg), rm*math.sin(math.pi/2 + math.pi*sg))
-        end = (cx + rm*math.cos(math.pi/2 - gap/2*sg + 2*math.pi*sg*0), rm*math.sin(math.pi/2 - gap/2*sg))
-        traj = traj.threePointArc(mid, end).val()
-        start = traj.startPoint(); tng = traj.tangentAt(0)
-        sec = cq.Wire.makeCircle(d/2, center=start, normal=tng)
-        out.append(cq.Solid.sweep(sec, [], cq.Wire.assembleEdges([traj])))
+    """Federkoerper + 2 ganze deutsche Oesen. Oese = Zug-KE in der Ebene des Drahtanfangs (VORNE):
+    Gerade vom Drahtanfang parallel zur Achse bis ueber den Oesenmittelpunkt (3 vor RECHTS), dann tangential
+    Bogen R3,45 um den Mittelpunkt, Ende 2 mm vor dem Federkoerper (Oeffnung 2). Oese 2 = Spiegelung an DTM1."""
+    d, rm, x0 = 1.1, 3.45, 0.55
+    # lokal: Achse z, Drahtanfang bei (rm, 0, x0) in der Ebene y = 0
+    helix = cq.Wire.makeHelix(steigung*1.0005, laenge, rm, center=Vector(0, 0, x0), dir=Vector(0, 0, 1))
+    prof = cq.Wire.makeCircle(d/2, center=Vector(rm, 0, x0), normal=Vector(0, 1, 0))
+    body = cq.Solid.sweep(prof, [], helix, isFrenet=True)
+    zc = -3.0
+    t_end = -(180 + math.degrees(math.asin((-2.0 - zc)/rm)))
+    pt = lambda t: Vector(rm*math.cos(math.radians(t)), 0, zc + rm*math.sin(math.radians(t)))
+    path = cq.Wire.assembleEdges([cq.Edge.makeLine(Vector(rm, 0, x0), Vector(rm, 0, zc)),
+                                  cq.Edge.makeThreePointArc(pt(0), pt(t_end/2), pt(t_end))])
+    oese = cq.Solid.sweep(cq.Wire.makeCircle(d/2, center=Vector(rm, 0, x0), normal=Vector(0, 0, -1)), [], path,
+                          True, False, None, "round")
+    oese2 = oese.mirror("XY", (0, 0, x0 + laenge/2))
+    # Achse z -> X (Drahtanfang liegt dann bei X = 0,55, Z = -3,45)
+    out = [s.rotate((0, 0, 0), (0, 1, 0), 90) for s in (body, oese, oese2)]
     return cq.Compound.makeCompound(out)

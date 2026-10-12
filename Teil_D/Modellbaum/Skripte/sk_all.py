@@ -226,18 +226,21 @@ def s_pos7():
     k.ax.add_patch(__import__("matplotlib").patches.Circle(k.T(0.55, 3.45), 0.55*4, fill=False, lw=0.8, color="k"))
     k.line([k.T(0.15, 3.85), k.T(-3, 7)]); k.line([k.T(-3, 7), k.T(-8, 7)]); k.text(*k.T(-8, 7.3), "Ø1,1", 3.5)
     k.png("mb/pos7_s1.png")
-    k = SK(-12, 12, -10, 10, 4.0)
-    gap = math.degrees(2/3.45)
-    pts = [k.T(3.45*math.cos(math.radians(t)), 3.45*math.sin(math.radians(t))) for t in np.linspace(90 - gap/2 + 0, -270 + gap/2 + 0, 80)]
-    k.line(pts); k.cl(k.T(-6, 0), k.T(6, 0)); k.cl(k.T(0, -6), k.T(0, 6))
-    k.radius(k.T(0, 0), 3.45*4, -40, "R3,45", outside=False)
-    k.line([k.T(3, -6), k.T(3, 6)], lw=0.35, ls="--"); k.text(*k.T(3.4, -5.6), "Drahtende\nFederkörper", 2.8)
-    k.hdim(0, 3, 0, 0, -7.5, "3")
-    g = 1.0/3.45
-    xl, xr = 3.45*math.sin(-g), 3.45*math.sin(g); yy = 3.45*math.cos(g)
-    k.line([k.T(xl, yy), k.T(xl, 7.5)], lw=0.35); k.line([k.T(xr, yy), k.T(xr, 7.5)], lw=0.35)
-    k.line([k.T(xl - 2.5, 7), k.T(xr + 2.5, 7)]); k.arrow(k.T(xl, 7), k.T(xl - 1, 7)); k.arrow(k.T(xr, 7), k.T(xr + 1, 7))
-    k.text(*k.T(xr + 0.6, 7.4), "2 (Öffnung)", 3.2)
+    # Skizze 2: Leitkurve Oese = Gerade vom Drahtanfang (KE 1) + tangentialer Bogen R3,45, Ende 2 vor RECHTS
+    k = SK(-11, 15, -10, 9, 4.0)
+    rm, zc = 3.45, -3.0
+    t_end = 360 - math.degrees(math.acos(1.0/rm))           # Endpunkt bei x = -2 unter der Achse
+    k.line([k.T(0.55, rm), k.T(zc, rm)], lw=0.8)
+    k.line([k.T(zc + rm*math.cos(math.radians(t)), rm*math.sin(math.radians(t))) for t in np.linspace(90, t_end, 80)], lw=0.8)
+    k.cl(k.T(-8, 0), k.T(1.8, 0)); k.cl(k.T(zc, -5.5), k.T(zc, 5.5))
+    k.line([k.T(0, -7.5), k.T(0, 7.5)], lw=0.35, ls="--"); k.text(*k.T(0.3, -7.2), "RECHTS", 2.8)
+    k.ax.add_patch(__import__("matplotlib").patches.Circle(k.T(0.55, rm), 0.55*4, fill=False, lw=0.6, color="k"))
+    k.text(*k.T(1.3, rm + 0.9), "Start = Drahtanfang\nFederkörper (KE 1)", 2.8)
+    k.radius(k.T(zc, 0), rm*4, 215, "R3,45", outside=False)
+    k.hdim(zc, 0, 0, 0, 6.3, "3")
+    xe, ye = -2.0, -math.sqrt(rm**2 - 1.0)
+    k.hdim(xe, 0, ye, 0, -6.0, "2")
+    k.text(*k.T(3.0, -3.0), "Gerade tangential\nin den Bogen,\nEnde 2 vor RECHTS\n(= Öffnung 2)", 2.6)
     k.png("mb/pos7_s2.png")
 
 def s_freistich():

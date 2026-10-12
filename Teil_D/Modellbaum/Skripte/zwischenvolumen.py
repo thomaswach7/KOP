@@ -67,6 +67,6 @@ s = rec("pos9", "KE 3 Einstich", s.cut(cq.Solid.makeTorus(4.0, 0.6, pnt=Vector(3
 rec("pos9", "KE 5 Spiegeln", R.pos9())
 # Pos 7
 p7 = R.pos7(); sol = p7.Solids()
-rec("pos7", "KE 1 Federkörper", sol[0]); rec("pos7", "KE 2 Öse 1", cq.Compound.makeCompound(sol[:2])); rec("pos7", "KE 4 Spiegeln (Öse 2)", p7)
+rec("pos7", "KE 1 Federkörper", sol[0]); rec("pos7", "KE 2 Öse 1", sol[0].fuse(sol[1])); rec("pos7", "KE 4 Spiegeln (Öse 2)", sol[0].fuse(sol[1]).fuse(sol[2]))
 pickle.dump(V, open("mb/zwischenvolumen.pkl", "wb"))
 for k, v in V.items(): print(k, v)
