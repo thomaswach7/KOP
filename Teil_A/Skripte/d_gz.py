@@ -6,6 +6,8 @@ from dimlib import *
 from shapely.geometry import LineString as LS, box, MultiLineString
 from shapely.ops import unary_union as uu
 import dxfout, dimlib, build
+# VARIANTE=vorlage: Blatt genau wie Vorlage 14.2.3 (ohne Schnittverlauf, ohne Stueckliste); sonst Abgabe nach Angabe Teil A
+VORLAGE = os.environ.get("VARIANTE") == "vorlage"
 dimlib.FONT = dict(family="Liberation Sans")
 def _rahmen(self):
     self.ax.add_patch(plt.Rectangle((20, 10), self.W-30, self.Hh-20, fill=False, lw=TH, color="k"))
@@ -72,14 +74,17 @@ for k in range(6):
     sh.cl((x-7*math.cos(a), y-7*math.sin(a)), (x+7*math.cos(a), y+7*math.sin(a)))
 
 # Schnittverlauf A-A: senkrecht durch Stifte und Schrauben, Blick in +Y (Pfeile nach rechts)
-for sgn in (1, -1):
-    y0, y1 = cy+sgn*91, cy+sgn*97
-    sh.line([(cx, y0), (cx, y1)], lw=2*TH)
-    ya = y1-sgn*1.5
-    sh.line([(cx-0.3, ya), (cx+8, ya)]); sh.arrow((cx+8, ya), (cx-0.3, ya))
-    sh.text(cx+9.5, ya-2.5, "A", 5)
-sh.text(ox+60, oy+92, "A-A", 5, ha="center")
-sh.text(cx, 64.5, "(ohne Pos. 2 und Pos. 10 gezeichnet)", 3.5, ha="center")
+if not VORLAGE:
+    for sgn in (1, -1):
+        y0, y1 = cy+sgn*91, cy+sgn*97
+        sh.line([(cx, y0), (cx, y1)], lw=2*TH)
+        ya = y1-sgn*1.5
+        sh.line([(cx-0.3, ya), (cx+8, ya)]); sh.arrow((cx+8, ya), (cx-0.3, ya))
+        sh.text(cx+9.5, ya-2.5, "A", 5)
+    sh.text(ox+60, oy+92, "A-A", 5, ha="center")
+    sh.text(cx, 64.5, "(ohne Pos. 2 und Pos. 10 gezeichnet)", 3.5, ha="center")
+else:
+    sh.text(116.84, 54.78, "(ohne Pos.2 und Pos.10 gezeichnet)", 3.5, ha="center")    # Lage wie Vorlage
 
 # ---------------- Positionsnummern im Uhrzeigersinn (Lage wie Vorlage) ----------------
 # Nr, Textmitte (X,Z) im Schnitt, Hinweislinie von, Punkt
@@ -102,24 +107,25 @@ sh.text(*F(-7.6, -102.6), "7", 5, ha="center", va="center")
 sh.line([F(-8.6, -96.3), F(-18.7, -47.8)], lw=TN)
 
 # ---------------- Stueckliste (DIN EN ISO 7200), links unten ----------------
-ROWS = [("1", "1", "Stk", "Antriebsnabe", "", "EN-GJS-700-2"), ("2", "1", "Stk", "Abtriebsnabe", "", "EN-GJS-700-2"),
-        ("3", "1", "Stk", "Gehäuse", "", "E295"), ("4", "1", "Stk", "Deckel", "", "EN-GJS-700-2"),
-        ("5", "2", "Stk", "Fliehgewicht (komplett)", "", ""), ("5.1", "2", "Stk", "Gewicht", "", "EN-GJS-700-2"),
-        ("5.2", "2", "Stk", "Belag", "", "geklebt"), ("6", "4", "Stk", "Scheibe", "", "S235JR"),
-        ("7", "4", "Stk", "Zugfeder", "", "Federstahl"), ("8", "8", "Stk", "Sicherungsscheibe", "DIN 6799 – 7", ""),
-        ("9", "4", "Stk", "Zylinderstift", "ISO 2338 – 8 m6 × 50 – St", ""),
-        ("10", "12", "Stk", "Zylinderschraube", "ISO 4762 – M8 × 20 – 8.8", ""),
-        ("11", "2", "Stk", "Rillenkugellager", "DIN 625 – 6009 – 2Z", ""), ("12", "1", "Stk", "Filzring", "DIN 5419 – M5 × 45", "")]
-COLS = [0, 12, 24, 36, 88, 145, 180]
-HDR = ["Pos.", "Menge", "Einh.", "Benennung", "Sachnummer/Norm – Kurzbezeichnung", "Werkstoff/Bemerkung"]
-rh, X0S, yb = 3.4, 20.0, 10.0
-n = len(ROWS)+1
-sh.ax.add_patch(plt.Rectangle((X0S, yb), 180, rh*n, fill=False, lw=TH, color="k"))
-for i in range(1, n): sh.line([(X0S, yb+rh*i), (X0S+180, yb+rh*i)], lw=TH if i == 1 else TN)
-for c in COLS[1:-1]: sh.line([(X0S+c, yb), (X0S+c, yb+rh*n)], lw=TN)
-for c, h in zip(COLS, HDR): sh.text(X0S+c+0.8, yb+0.8, h, 1.8)
-for i, row in enumerate(ROWS):
-    for c, v in zip(COLS, row): sh.text(X0S+c+1, yb+rh*(i+1)+0.8, v, 2.1)
+if not VORLAGE:
+    ROWS = [("1", "1", "Stk", "Antriebsnabe", "", "EN-GJS-700-2"), ("2", "1", "Stk", "Abtriebsnabe", "", "EN-GJS-700-2"),
+            ("3", "1", "Stk", "Gehäuse", "", "E295"), ("4", "1", "Stk", "Deckel", "", "EN-GJS-700-2"),
+            ("5", "2", "Stk", "Fliehgewicht (komplett)", "", ""), ("5.1", "2", "Stk", "Gewicht", "", "EN-GJS-700-2"),
+            ("5.2", "2", "Stk", "Belag", "", "geklebt"), ("6", "4", "Stk", "Scheibe", "", "S235JR"),
+            ("7", "4", "Stk", "Zugfeder", "", "Federstahl"), ("8", "8", "Stk", "Sicherungsscheibe", "DIN 6799 – 7", ""),
+            ("9", "4", "Stk", "Zylinderstift", "ISO 2338 – 8 m6 × 50 – St", ""),
+            ("10", "12", "Stk", "Zylinderschraube", "ISO 4762 – M8 × 20 – 8.8", ""),
+            ("11", "2", "Stk", "Rillenkugellager", "DIN 625 – 6009 – 2Z", ""), ("12", "1", "Stk", "Filzring", "DIN 5419 – M5 × 45", "")]
+    COLS = [0, 12, 24, 36, 88, 145, 180]
+    HDR = ["Pos.", "Menge", "Einh.", "Benennung", "Sachnummer/Norm – Kurzbezeichnung", "Werkstoff/Bemerkung"]
+    rh, X0S, yb = 3.4, 20.0, 10.0
+    n = len(ROWS)+1
+    sh.ax.add_patch(plt.Rectangle((X0S, yb), 180, rh*n, fill=False, lw=TH, color="k"))
+    for i in range(1, n): sh.line([(X0S, yb+rh*i), (X0S+180, yb+rh*i)], lw=TH if i == 1 else TN)
+    for c in COLS[1:-1]: sh.line([(X0S+c, yb), (X0S+c, yb+rh*n)], lw=TN)
+    for c, h in zip(COLS, HDR): sh.text(X0S+c+0.8, yb+0.8, h, 1.8)
+    for i, row in enumerate(ROWS):
+        for c, v in zip(COLS, row): sh.text(X0S+c+1, yb+rh*(i+1)+0.8, v, 2.1)
 
 # ---------------- Schriftfeld (wie Vorlage 14.2.3 / 14.2.5.x) ----------------
 def lin(a, b): sh.line([a, b], lw=TH)
@@ -138,12 +144,13 @@ T(300.17, 24.37, "Titel, Zusätzlicher Titel")
 T(329.0, 17.3, "Fliehkraftkupplung", 3.7, ha="center"); T(329.0, 13.3, "mit Passfederverbindung", 2.5, ha="center")
 T(360.34, 33.37, "Dokumentenstatus"); T(360.25, 24.28, "Sachnummer"); T(360.4, 20.5, "14.2.3")
 T(359.64, 15.3, "Änd."); T(367.15, 15.38, "Ausgabedatum"); T(392.23, 15.3, "Spr."); T(402.32, 15.38, "Blatt")
-T(230.43, 48.3, "Maßstab:", 3.5); T(255.42, 48.3, "1:1", 3.5)
+T(230.4, 49.57, "Maßstab", 3.5); T(253.6, 49.57, "1:1", 3.5)          # wie Vorlage 14.2.3
 sh.ax.add_patch(MPoly([(392.3, 49.9), (392.3, 53.8), (399.6, 55.5), (399.6, 48.5)], closed=True, fill=False, lw=TH, color="k"))
 sh.ax.add_patch(Circle((403.9, 51.8), 3.6, fill=False, lw=TH, color="k"))
 sh.ax.add_patch(Circle((403.9, 51.8), 1.75, fill=False, lw=TH, color="k"))
 sh.cl((390.8, 51.8), (408.2, 51.8)); sh.line([(403.9, 47.4), (403.9, 56.2)], lw=TN)
 
-print(dxfout.export(sh, "Gesamtzeichnung_Fliehkraftkupplung.dxf"))
-sh.save("Gesamtzeichnung_Fliehkraftkupplung.pdf", "prev_gz.png", dpi=150)
+name = "Gesamtzeichnung_Fliehkraftkupplung" + ("_wie_Vorlage" if VORLAGE else "")
+print(dxfout.export(sh, name + ".dxf"))
+sh.save(name + ".pdf", "prev_gz" + ("_vorlage" if VORLAGE else "") + ".png", dpi=150)
 print("ok")

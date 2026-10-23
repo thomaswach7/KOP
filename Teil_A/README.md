@@ -9,6 +9,7 @@
 | `Montageablauf/Creo_Zusammenbau.md` / `.pdf` | **Creo 12 Klick für Klick:** jede Abhängigkeit für deine eigenen Teile, Normteile, Prüfung, typische Fehler |
 | `Gesamtzeichnung_Fliehkraftkupplung.pdf` | Gesamtzeichnung A3, M 1:1 nach Angabe Teil A und Vorlage 14.2.3: Längsschnitt A–A als Halbschnitt (unten Schnitt durch Stifte und Schrauben, oben Ansicht), Vorderansicht ohne Pos. 2 und 10, Stückliste Pos. 1–12, Schriftfeld wie Vorlage |
 | `Gesamtzeichnung_Fliehkraftkupplung.dxf` | dieselbe Zeichnung als DXF zum Öffnen in Creo (Datei → Öffnen → DXF → wird zur .drw). **Nicht mit dem 3D-Modell verknüpft.** Schrift nach dem Import auf Arial stellen (wie bei Pos01 in `Teil_D/README.md`). |
+| `Gesamtzeichnung_Fliehkraftkupplung_wie_Vorlage.pdf` / `.dxf` | dasselbe Blatt **genau wie Vorlage 14.2.3**: ohne Schnittverlauf A–A und ohne Stückliste, Vermerk und Maßstab an derselben Stelle wie im Buch (Überlagerung mit dem Scan geprüft). Für die Abgabe nach Angabe Teil A die Fassung **mit** Stückliste nehmen. |
 | `Gesamtzeichnung_Vorschau.png` | Vorschaubild der Gesamtzeichnung |
 | `CAD/Baugruppe_Fliehkraftkupplung_komplett.step` | komplette Baugruppe, 43 Einzelteile, kollisionsfrei |
 | `CAD/Einzelteile_neu/*.step` | Teile ohne STEP im Datensatz: Pos. 3, 6, 7 (gespannt), 8, 9, 10, 11, 12 |
