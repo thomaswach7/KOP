@@ -7,9 +7,6 @@ from shapely.ops import unary_union
 import build2, hlr
 
 parts = build2.build_all()
-# Abtriebsnabe um 180 Grad um die Achse gedreht: Lochbild (6 x 60 Grad) bleibt gleich, Passfedernut fluchtet
-# mit der Nut der Antriebsnabe (+Y) wie in der Vorlage 14.2.3
-parts = [(p, n, s.rotate((0, 0, 0), (1, 0, 0), 180) if p == "2" else s) for p, n, s in parts]
 CUT = {"1", "2", "3", "4", "5.1", "5.2", "6", "11", "12"}
 keep = cq.Solid.makeBox(400, 200, 400, cq.Vector(-100, 0, -200))
 sec_shapes, sec_faces, overlay = [], [], []
@@ -28,6 +25,7 @@ for pos, name, s in parts:
         else:
             cy = (bb.ymin + bb.ymax) / 2
             if bb.ymax <= 0.5: continue
+            if is_ball and abs(cy) > 1.0: continue      # vereinfacht wie Vorlage: nur die Kugel in der Schnittebene
             if pos == "7" and cy < 0: continue
             sec_shapes.append(sub)
             if bb.ymin < 0.5 and pos in ("9", "10") or is_ball:

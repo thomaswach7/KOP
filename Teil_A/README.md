@@ -8,10 +8,10 @@
 | `Montageablauf/README.md` | derselbe Ablauf zum Lesen direkt auf GitHub |
 | `Montageablauf/Creo_Zusammenbau.md` / `.pdf` | **Creo 12 Klick für Klick:** jede Abhängigkeit für deine eigenen Teile, Normteile, Prüfung, typische Fehler |
 | `Gesamtzeichnung_Fliehkraftkupplung.pdf` | Gesamtzeichnung A3, M 1:1 nach Angabe Teil A und Vorlage 14.2.3: Längsschnitt A–A als Halbschnitt (unten Schnitt durch Stifte und Schrauben, oben Ansicht), Vorderansicht ohne Pos. 2 und 10, Stückliste Pos. 1–12, Schriftfeld wie Vorlage |
-| `Gesamtzeichnung_Fliehkraftkupplung.dxf` | dieselbe Zeichnung als DXF zum Öffnen in Creo (Datei → Öffnen → DXF → wird zur .drw). **Nicht mit dem 3D-Modell verknüpft.** Schrift nach dem Import auf Arial stellen (wie bei Pos01 in `Teil_D/README.md`). |
-| `Gesamtzeichnung_Fliehkraftkupplung_wie_Vorlage.pdf` / `.dxf` | dasselbe Blatt **genau wie Vorlage 14.2.3**: ohne Schnittverlauf A–A und ohne Stückliste, Vermerk und Maßstab an derselben Stelle wie im Buch (Überlagerung mit dem Scan geprüft). Für die Abgabe nach Angabe Teil A die Fassung **mit** Stückliste nehmen. |
+| `Gesamtzeichnung_Fliehkraftkupplung.dxf` | dieselbe Zeichnung als DXF für Creo (Datei → Öffnen → DXF → wird zur .drw), **1:1 deckungsgleich mit der PDF** (geprüft: 99,7 % Pixeldeckung). Texte sind als Geometrie (Buchstabenumriss + Füllung) enthalten, damit Creo die Schrift nicht durch eine eigene ersetzt; sie sind deshalb nicht als Text editierbar. Strich-Punkt-Linien sind als einzelne Striche enthalten. Layer: KANTEN 0,5 · DUENN 0,25 · MITTELLINIEN · TEXT · RAHMEN. **Nicht mit dem 3D-Modell verknüpft.** |
+| `Gesamtzeichnung_Fliehkraftkupplung_wie_Vorlage.pdf` / `.dxf` | dasselbe Blatt **genau wie Vorlage 14.2.3** (DXF wie oben): ohne Schnittverlauf A–A und ohne Stückliste, Vermerk und Maßstab an derselben Stelle wie im Buch (Überlagerung mit dem Scan geprüft). Für die Abgabe nach Angabe Teil A die Fassung **mit** Stückliste nehmen. |
 | `Gesamtzeichnung_Vorschau.png` | Vorschaubild der Gesamtzeichnung |
-| `CAD/Baugruppe_Fliehkraftkupplung_komplett.step` | komplette Baugruppe, 43 Einzelteile, kollisionsfrei |
+| `CAD/Baugruppe_Fliehkraftkupplung_komplett.step` | komplette Baugruppe, 43 Einzelteile. Kollisionsprüfung (`Skripte/kollision.py`): nur gewollte Überschneidungen (Schrauben im Gewinde) und 0,003 mm Flächenanlage rechtes Lager/Abtriebsnabe (Rundung im Datensatz) |
 | `CAD/Einzelteile_neu/*.step` | Teile ohne STEP im Datensatz: Pos. 3, 6, 7 (gespannt), 8, 9, 10, 11, 12 |
 | `Skripte/` | Python/CadQuery-Skripte (Aufbau, Kollisionsprüfung, Renderbilder, Zeichnung) |
 
@@ -44,7 +44,10 @@
 ## Zeichnungsregeln, die umgesetzt sind
 
 - Schnitt A–A durch die Stiftachsen und Schrauben, als Halbschnitt wie in der Vorlage 14.2.3 (Lage der Ansichten und Positionsnummern aus dem Scan übernommen, Überlagerung geprüft).
-- Abtriebsnabe so gedreht, dass ihre Passfedernut mit der Nut der Antriebsnabe fluchtet (wie Vorlage). Das Lochbild 6 × 60° bleibt dabei gleich.
+- Abtriebsnabe so gedreht, dass ihre Passfedernut mit der Nut der Antriebsnabe fluchtet (wie Vorlage). Das Lochbild 6 × 60° bleibt dabei gleich (gilt auch für die STEP-Baugruppe).
+- Schraffur: aneinandergrenzende Schnittflächen haben verschiedene Richtung oder verschiedenen Abstand (geprüft mit `Skripte/check_gz.py`). Abweichend vom Buch ist der Deckel (4) gegenläufig zur Antriebsnabe (1) schraffiert, weil beide nur 0,5 mm auseinanderliegen.
+- Hinweislinien: Jeder Punkt liegt im richtigen Teil (geprüft mit `Skripte/check_gz.py`).
+- Wälzlager vereinfacht wie im Buch: nur die Kugel in der Schnittebene, mit Mittellinienkreuz.
 - **Nicht geschnitten:** Wellen-ähnliche Normteile und Verbindungselemente, also Stifte (9), Schrauben (10), Sicherungsscheiben (8), Federn (7) und Lagerkugeln.
 - Lagerringe sind geschnitten, die Kugeln nicht. Filzring und Belag sind kreuzschraffiert.
 - Gewinde: Die Schraube ist eingeschraubt (Kern-Ø schmal), im Gehäuse bleibt ein freier Gewinderest mit Gewindeende.

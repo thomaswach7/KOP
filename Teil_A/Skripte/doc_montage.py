@@ -66,7 +66,7 @@ STEPS = [
  ("Fertige Fliehkraftkupplung",
   "Alle 12 Positionen sind eingebaut (43 Einzelteile).",
   "Kontrolle: Antriebsnabe von Hand drehen → sie muss sich leicht drehen lassen, das Gehäuse bleibt stehen (Kupplung offen).",
-  "Die Kollisionsprüfung der kompletten Baugruppe ergibt 0 Überschneidungen."),
+  "Die Kollisionsprüfung ergibt nur gewollte Überschneidungen (Schrauben im Gewinde) und eine 0,003-mm-Flächenanlage am rechten Lager."),
 ]
 
 with PdfPages("Montageablauf_Fliehkraftkupplung.pdf") as pdf:
@@ -94,10 +94,10 @@ with PdfPages("Montageablauf_Fliehkraftkupplung.pdf") as pdf:
                        "Vereinfacht sind nur Normteile (Gewinde, Lager-Innenleben, Form der Sicherungsscheibe).", 9, width=70)
         img(fig, "steps/overview.png", 150, 85, 140, 72)
         txt(ax, 152, 80, "Gefundene Überschneidungen und Korrektur", 10, weight="bold")
-        fixes = [("Lager ↔ Nabe / Abtriebsnabe", "Lagerringe hatten scharfe Kanten → Fase 0,8 mm (echte Lager: r = 1 mm)"),
+        fixes = [("Lager ↔ Nabe / Abtriebsnabe", "Lagerringe hatten scharfe Kanten → Kantenradius r = 1 mm wie Lager 6009"),
                  ("Fliehgewicht ↔ Stift", "Bohrungsmitte war gerundet → exakter Wert aus dem STEP"),
                  ("Filzring ↔ Deckel", "Rechenungenauigkeit an der Nutflanke → 0,02 mm Luft"),
-                 ("Lager ↔ Schulter", "0,003 mm Überdeckung = reine Anlage → 0,005 mm Luft"),
+                 ("Lager ↔ Schultern", "Einbauraum im Datensatz 15,997 statt 16 mm → 0,003 mm Flächenanlage (ohne Bedeutung)"),
                  ("Feder / Sicherungsscheibe", "Lage nach Stiftzeichnung korrigiert (Nut 7 mm, Einstich 3 mm vom Ende)")]
         y = 73
         for a, b in fixes:

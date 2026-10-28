@@ -39,17 +39,18 @@ def schrauben():
 # ---- Pos. 11 Rillenkugellager DIN 625 6009-2Z (d 45, D 75, B 16) vereinfacht ----
 def lager_lokal():
     B = 16.0
-    ir = cq.Workplane("YZ").circle(26.0).circle(22.5).extrude(B).edges().chamfer(0.8).val()
-    orr = cq.Workplane("YZ").circle(37.5).circle(34.0).extrude(B).edges().chamfer(0.8).val()
+    ir = cq.Workplane("YZ").circle(26.0).circle(22.5).extrude(B).edges().fillet(1.0).val()     # Kantenradius r = 1 wie 6009 (r_s min 1)
+    orr = cq.Workplane("YZ").circle(37.5).circle(34.0).extrude(B).edges().fillet(1.0).val()
     race = cq.Solid.makeTorus(30.0, 4.6, pnt=Vector(B/2, 0, 0), dir=Vector(1, 0, 0))
     ir, orr = ir.cut(race), orr.cut(race)
-    balls = [cq.Solid.makeSphere(4.5, Vector(B/2, 30*math.cos(2*math.pi*i/12), 30*math.sin(2*math.pi*i/12)))
+    balls = [cq.Solid.makeSphere(4.5, Vector(B/2, 30*math.cos(2*math.pi*i/12), 30*math.sin(2*math.pi*i/12)),
+                              angleDegrees1=-90, angleDegrees2=90)   # volle Kugel (Standard waere Halbkugel)
              for i in range(12)]
     shields = [cq.Workplane("YZ").workplane(offset=xo).circle(34.0).circle(26.6).extrude(0.6).val() for xo in (0.8, B - 1.4)]
     return [ir, orr] + balls + shields
 def lager():
     out = []
-    for x0 in (13.0, 64.995):   # rechts 0,005 mm Luft zur Schulter (reine Anlage)
+    for x0 in (13.0, 65.0):     # rechts an der Wellenschulter; Einbauraum im Datensatz 15,997 statt 16 -> 0,003 mm Flaechenueberdeckung zur Abtriebsnabe
         out.append([p.translate((x0, 0, 0)) for p in lager_lokal()])
     return out
 

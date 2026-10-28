@@ -22,7 +22,7 @@ def antriebsnabe():
 def abtriebsnabe():
     s = load(2).rotate((0,0,0),(0,0,1),180)   # x -> -x
     s = s.translate((137,0,0))                # X = 137 - x_lokal
-    return rotx(s, 90)
+    return rotx(s, 270)                       # Passfedernut nach +Y wie Antriebsnabe (Vorlage 14.2.3), Lochbild 6 x 60 Grad gleich
 
 # ---------- Pos 3 Gehaeuse (nach Zeichnung 14.2.5.4) ----------
 def gehaeuse():

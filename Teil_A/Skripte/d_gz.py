@@ -1,11 +1,11 @@
 """Gesamtzeichnung Fliehkraftkupplung (14.2.3) im Halbschnitt, Lage und Schriftfeld wie Vorlage.
 Ansichten aus gen_gz.py (gz_buch.pkl). Lagen aus dem Scan der Vorlage (200 dpi, Rahmen 390 x 277 mm) gemessen."""
 import pickle, math, os, sys
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../Teil_D/Skripte"))   # dimlib, dxfout
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../Teil_D/Skripte"))   # dimlib, dxfout_geo
 from dimlib import *
 from shapely.geometry import LineString as LS, box, MultiLineString
 from shapely.ops import unary_union as uu
-import dxfout, dimlib, build
+import dxfout_geo as dxfout, dimlib, build
 # VARIANTE=vorlage: Blatt genau wie Vorlage 14.2.3 (ohne Schnittverlauf, ohne Stueckliste); sonst Abgabe nach Angabe Teil A
 VORLAGE = os.environ.get("VARIANTE") == "vorlage"
 dimlib.FONT = dict(family="Liberation Sans")
@@ -36,15 +36,24 @@ for pos, p in d["polys"]:
     p = p.intersection(box(-1e3, -1e3, 1e3, 0))
     for g in getattr(p, "geoms", [p]):
         if g.geom_type == "Polygon" and g.area > 1e-3: polys.append((pos, g))
-sp = uu([p for _, p in polys]).buffer(-0.05)
-def weg(pl):
-    l = LS(pl)
-    return sum(sp.contains(l.interpolate(t, normalized=True)) for t in (0.25, 0.5, 0.75)) >= 2
-sec = [pl for pl in clip(d["sec_lines"], lower) if not weg(pl)]
+# Linienstuecke, die im Inneren einer Schnittflaeche liegen, sind unsichtbar (Kanten hinter der Schnittebene,
+# z. B. Kreiskanten genau in einer Stossebene) -> je Teil herausschneiden. Grenzen zwischen zwei Teilen bleiben.
+innen = [p.buffer(-0.05) for _, p in polys]
+def sichtbar(pls):
+    out = []
+    for pl in pls:
+        g = LS(pl)
+        for q in innen:
+            if not q.is_empty and g.intersects(q): g = g.difference(q)
+            if g.is_empty: break
+        for t in getattr(g, "geoms", [g]):
+            if t.geom_type == "LineString" and t.length > 0.05: out.append(list(t.coords))
+    return out
+sec = sichtbar(clip(d["sec_lines"], lower))
 sec = [pl for pl in sec if not all(abs(p[1]) < 1e-6 for p in pl)]
 ext = [pl for pl in clip(d["ext_lines"], upper) if not all(abs(p[1]) < 1e-6 for p in pl)]
 sh.polylines(sec, S); sh.polylines(ext, S)
-HATCH = {"1": (45, 3.0), "2": (135, 3.0), "3": (45, 2.0), "4": (45, 3.0), "5.1": (45, 1.6), "5.2": ("x", 1.4),
+HATCH = {"1": (45, 3.0), "2": (135, 3.0), "3": (45, 2.0), "4": (135, 3.0), "5.1": (45, 1.6), "5.2": ("x", 1.4),
          "6": (135, 0.9), "11": (135, 0.9), "12": ("x", 0.8)}
 for pos, p in polys:
     a, s = HATCH[pos]; sh.hatch(p, S, a, s)
@@ -93,7 +102,7 @@ POS = [("1", (111.1, -30.6), (105.7, -28.6), (77.1, -17.7)),
        ("3", (111.1, -61.0), (105.7, -62.2), (77.9, -69.6)),
        ("5", (44.2, -102.4), (46.5, -96.5), (60.6, -57.4)),
        ("6", (30.5, -102.4), (31.4, -96.5), (37.7, -58.2)),
-       ("8", (16.5, -102.4), (18.4, -96.5), (29.5, -59.8)),
+       ("8", (16.5, -102.4), (18.4, -96.5), (29.5, -57.6)),
        ("9", (2.5, -102.4), (5.6, -96.5), (23.5, -53.7)),
        ("10", (-13.1, -102.4), (-8.6, -96.5), (4.8, -77.6)),
        ("4", (-21.5, -40.0), (-15.6, -43.2), (5.7, -54.7)),
@@ -141,7 +150,19 @@ T(256.25, 42.37, "Technische Referenz"); T(256.42, 38.34, "Projekt Fliehkraftkup
 T(300.34, 42.37, "Erstellt durch"); T(343.25, 42.37, "Genehmigt von")
 T(300.42, 33.37, "Dokumentenart"); T(300.34, 29.44, "Gesamtzeichnung")
 T(300.17, 24.37, "Titel, Zusätzlicher Titel")
-T(329.0, 17.3, "Fliehkraftkupplung", 3.7, ha="center"); T(329.0, 13.3, "mit Passfederverbindung", 2.5, ha="center")
+# Titel und Untertitel sind in der Vorlage schmaler gesetzt als die uebrigen Texte -> Umriss gestaucht (Lage/Groesse aus dem Scan)
+from matplotlib.textpath import TextPath
+from matplotlib.patches import PathPatch
+from matplotlib.font_manager import FontProperties
+import matplotlib.transforms as mtr
+def text_gestaucht(xm, y, s, h, sx):
+    tp = TextPath((0, 0), s, size=h*MM/0.72, prop=FontProperties(family="Liberation Sans"))
+    PTMM = 25.4/72
+    ext = tp.get_extents()
+    tr = mtr.Affine2D().scale(PTMM*sx, PTMM).translate(xm - (ext.x0 + ext.x1)/2*PTMM*sx, y)
+    sh.ax.add_patch(PathPatch(tr.transform_path(tp), facecolor="k", edgecolor="none", lw=0))
+text_gestaucht(329.06, 17.35, "Fliehkraftkupplung", 3.87, 0.910)
+text_gestaucht(328.87, 12.98, "mit Passfederverbindung", 2.915, 0.863)
 T(360.34, 33.37, "Dokumentenstatus"); T(360.25, 24.28, "Sachnummer"); T(360.4, 20.5, "14.2.3")
 T(359.64, 15.3, "Änd."); T(367.15, 15.38, "Ausgabedatum"); T(392.23, 15.3, "Spr."); T(402.32, 15.38, "Blatt")
 T(230.4, 49.57, "Maßstab", 3.5); T(253.6, 49.57, "1:1", 3.5)          # wie Vorlage 14.2.3

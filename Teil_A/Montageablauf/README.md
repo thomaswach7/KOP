@@ -12,12 +12,13 @@ Die Druckversion steht in `Montageablauf_Fliehkraftkupplung.pdf`.
 3. **Fehlende Teile modelliert:** nach den Einzelteilzeichnungen (Pos. 3, 6, 9) oder nach den Normen (Pos. 8 DIN 6799, Pos. 10 ISO 4762, Pos. 11 DIN 625, Pos. 12 DIN 5419). Die Zugfeder ist gespannt modelliert.
 4. **Zusammengebaut** in Montagereihenfolge (siehe unten).
 5. **Kollisionsprüfung:** jedes Teil gegen jedes andere (903 Paare). Gefunden und behoben:
-   - Lager ↔ Nabe und Abtriebsnabe: Die Lagerringe hatten scharfe Kanten → Fase 0,8 mm, echte Lager haben r = 1 mm.
+   - Lager ↔ Nabe und Abtriebsnabe: Die Lagerringe hatten scharfe Kanten → Kantenradius r = 1 mm wie beim echten Lager 6009.
    - Fliehgewicht ↔ Stift: Die Bohrungsmitte war gerundet eingegeben → exakter Wert aus dem STEP.
    - Filzring ↔ Deckel: Rechenungenauigkeit an der Nutflanke → 0,02 mm Luft.
-   - Lager ↔ Schulter: 0,003 mm Überdeckung, das ist reine Flächenanlage → 0,005 mm Luft.
+   - Lager ↔ Schultern: Im Datensatz ist der Platz zwischen Wellenschulter (Pos. 1) und Lagerschulter (Pos. 2) 15,997 mm, das Lager ist 16 mm breit. Das Lager liegt an der Wellenschulter an, zur Abtriebsnabe bleibt eine Flächenüberdeckung von 0,003 mm (Rundung im Datensatz, ohne Bedeutung).
    - Feder und Sicherungsscheibe: Die Lage habe ich nach der Stiftzeichnung korrigiert (Nut 7 mm, Einstich 3 mm vom Stiftende).
-   - Ergebnis: **0 Überschneidungen** (die Schrauben im Gewinde sind gewollt und ausgenommen).
+   - Ergebnis (Prüfung 28.10.2026, `Skripte/kollision.py`): außer den gewollten Schrauben im Gewinde nur diese 0,003-mm-Flächenüberdeckung, sonst keine Überschneidung.
+   - Korrektur 28.10.2026: Die Lagerkugeln waren im Modell nur Halbkugeln. Jetzt sind es Vollkugeln (STEP-Baugruppe und Pos. 11 neu exportiert). Die Renderbilder unten sind noch mit dem alten Modell erstellt; die Kugeln liegen dort hinter den Deckscheiben (2Z) und sind kaum zu sehen.
 6. **Bilder gerendert:** pro Schritt ein Bild, bei den kleinen Teilen zusätzlich eine Detailansicht.
 
 ## Datengrundlage je Teil
@@ -143,4 +144,4 @@ Für jedes Teil gab es genug Informationen. Kein Teil musste weggelassen werden.
 
 - **Was:** Alle 12 Positionen sind eingebaut (43 Einzelteile).
 - **Creo:** Kontrolle: Antriebsnabe von Hand drehen → sie muss sich leicht drehen lassen, das Gehäuse bleibt stehen (Kupplung offen).
-- **Hinweis:** Die Kollisionsprüfung der kompletten Baugruppe ergibt 0 Überschneidungen.
+- **Hinweis:** Die Kollisionsprüfung der kompletten Baugruppe ergibt nur gewollte Überschneidungen (Schrauben im Gewinde) und eine 0,003-mm-Flächenanlage am rechten Lager.
