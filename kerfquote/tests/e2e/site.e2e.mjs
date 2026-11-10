@@ -145,6 +145,11 @@ test('Barrierefreiheit (axe-core, WCAG 2.1 A/AA): keine Verstöße auf allen Sei
     await page.locator('#layers li', { hasText: 'HILFSLINIE' }).locator('input').check();
     await page.evaluate(() => { document.querySelector('#toast').textContent = ''; });
     await scan(page, `App mit Teilen ${colorScheme}`);
+    await page.fill('#p-qty', '0');
+    await page.locator('#p-qty').blur();
+    await page.waitForSelector('#p-qty-error');
+    await scan(page, `App mit Fehlermeldung ${colorScheme}`);
+    await page.fill('#p-qty', '1');
     await page.click('#btn-settings');
     await scan(page, `Einstellungen Firma ${colorScheme}`);
     await page.locator('#dlg-settings summary', { hasText: 'Kalkulation' }).click();

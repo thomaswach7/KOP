@@ -9,7 +9,7 @@ import { verifyLicense, FREE_LIMITS } from '../license.js';
 import { DxfError } from '../dxf/parse.js';
 import { decodeDxfBytes } from '../dxf/decode.js';
 import { createPart, refreshGeometry, pricePart, normalizePart } from './part.js';
-import { $, h, clear, renderPreview, download, confirmClick } from './dom.js';
+import { $, h, clear, renderPreview, download, confirmClick, enableFieldErrors } from './dom.js';
 import { createFormat, todayIso, defaultQuoteNumber } from './format.js';
 import { quoteCsv } from './csv.js';
 import { renderQuoteDoc } from './quote-doc.js';
@@ -573,6 +573,7 @@ async function init() {
   $('#q-date').value = state.quote.date;
   syncQuoteNumber();
   bindEvents();
+  enableFieldErrors(document);
   applyLanguage();
 
   const token = load(KEYS.license);

@@ -148,6 +148,25 @@ test('ungültige Mengen werden nicht übernommen (Feld bleibt markiert, Preis bl
     assert.equal(await costRow(page, 'Stückpreis'), before, `Menge "${bad}"`);
   }
   assert.equal(await page.locator('#p-qty').evaluate((el) => el.checkValidity()), false);
+
+  // Fehlermeldung als Text (nicht nur Farbe), für Screenreader verknüpft; verschwindet nach Korrektur
+  await page.fill('#p-qty', '0');
+  await page.locator('#p-qty').blur();
+  const error = page.locator('#p-qty-error');
+  assert.ok(await error.isVisible());
+  assert.ok((await error.innerText()).trim().length > 5);
+  assert.equal(await page.locator('#p-qty').getAttribute('aria-invalid'), 'true');
+  assert.equal(await page.locator('#p-qty').getAttribute('aria-describedby'), 'p-qty-error');
+  await page.fill('#p-tol', '0');
+  await page.locator('#p-tol').blur();
+  assert.equal(await page.locator('#p-tol').getAttribute('aria-describedby'), 'p-tol-hint p-tol-error', 'vorhandener Hinweis bleibt verknüpft');
+  await page.fill('#p-qty', '4');
+  assert.equal(await error.count(), 0);
+  assert.equal(await page.locator('#p-qty').getAttribute('aria-invalid'), null);
+  assert.equal(await page.locator('#p-qty').getAttribute('aria-describedby'), null);
+  await page.fill('#p-tol', '0.05');
+  assert.equal(await page.locator('#p-tol').getAttribute('aria-describedby'), 'p-tol-hint');
+  assert.notEqual(await costRow(page, 'Stückpreis'), before, 'gültige Menge wird wieder übernommen');
   await done();
 });
 

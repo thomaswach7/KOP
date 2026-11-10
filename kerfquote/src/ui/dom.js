@@ -86,3 +86,38 @@ export function confirmClick(button, getQuestion, action) {
     timer = setTimeout(disarm, 5000);
   });
 }
+
+/**
+ * Zeigt zu ungültigen Eingabefeldern eine Fehlermeldung als Text an (nicht nur als rote Farbe)
+ * und verknüpft sie für Screenreader. Die Meldung erscheint erst, wenn das Feld verlassen oder
+ * die Eingabe bestätigt wurde, und verschwindet, sobald der Wert wieder gültig ist.
+ * Der Text stammt aus der Prüfung des Browsers (z. B. "Wert muss größer als oder gleich 1 sein").
+ */
+export function enableFieldErrors(root = document) {
+  const sync = (el, mayShow) => {
+    if (!(el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement)) return;
+    if (!el.willValidate || !el.id) return;
+    const holder = el.closest('.field, td');
+    if (!holder) return;
+    const errorId = `${el.id}-error`;
+    let message = holder.querySelector('.field-error');
+    const described = (el.getAttribute('aria-describedby') ?? '').split(/\s+/).filter((id) => id && id !== errorId);
+    if (el.validity.valid) {
+      message?.remove();
+      el.removeAttribute('aria-invalid');
+    } else if (mayShow || message) {
+      if (!message) {
+        message = h('span', { class: 'field-error', id: errorId });
+        holder.append(message);
+      }
+      message.textContent = el.validationMessage;
+      el.setAttribute('aria-invalid', 'true');
+      described.push(errorId);
+    }
+    if (described.length) el.setAttribute('aria-describedby', described.join(' '));
+    else el.removeAttribute('aria-describedby');
+  };
+  root.addEventListener('input', (e) => sync(e.target, false));
+  root.addEventListener('change', (e) => sync(e.target, true));
+  root.addEventListener('focusout', (e) => sync(e.target, true));
+}
