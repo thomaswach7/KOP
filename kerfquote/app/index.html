@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self'; script-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'">
+  <meta name="robots" content="noindex">
+  <title>KerfQuote – Zuschnitt-Kalkulation aus DXF</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/base.css">
+  <link rel="stylesheet" href="../assets/app.css">
+  <script type="module" src="../src/ui/app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="../" id="brand-link">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#c2410c"/><path d="M8 23 L17 9" stroke="#fff" stroke-width="3" stroke-linecap="round"/><path d="M19.5 23 L24 16" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".55"/><circle cx="17" cy="9" r="2.6" fill="#ffd9c2"/></svg>
+      <span>KerfQuote</span>
+    </a>
+    <div class="topbar-actions">
+      <label class="sr-only" for="lang" data-i18n="nav.language">Sprache</label>
+      <select id="lang">
+        <option value="de">Deutsch</option>
+        <option value="en">English</option>
+      </select>
+      <button type="button" class="btn" id="btn-settings" data-i18n="nav.settings">Einstellungen</button>
+      <button type="button" class="btn btn-plan" id="btn-license">Free</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <h1 class="sr-only" data-i18n="app.title">KerfQuote – Zuschnitt-Kalkulation aus DXF</h1>
+
+    <section class="panel parts" aria-labelledby="parts-h">
+      <h2 id="parts-h" data-i18n="parts.title">Teile</h2>
+      <label class="dropzone" id="dropzone">
+        <input type="file" id="file-input" class="sr-only" accept=".dxf" multiple>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+        <span class="dropzone-title" data-i18n="parts.drop">DXF-Dateien hierher ziehen oder klicken</span>
+        <span class="dropzone-hint" data-i18n="parts.dropHint">Mehrere Dateien möglich · ASCII-DXF</span>
+      </label>
+      <button type="button" class="btn btn-ghost" id="btn-sample" data-i18n="parts.sample">Beispielteile laden</button>
+      <ul class="part-list" id="part-list"></ul>
+      <p class="muted" id="parts-empty" data-i18n="parts.empty">Noch keine Teile. Laden Sie eine DXF-Datei oder die Beispielteile.</p>
+      <p class="privacy" data-i18n="parts.privacy">Ihre Zeichnungen bleiben auf Ihrem Rechner – es wird nichts hochgeladen.</p>
+    </section>
+
+    <section class="panel detail" aria-labelledby="detail-h">
+      <div class="empty-state" id="detail-empty">
+        <svg viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" aria-hidden="true"><path d="M20 30h62l18 18v42H20z"/><circle cx="42" cy="68" r="9"/><circle cx="76" cy="68" r="9"/><path d="M36 44h30" stroke-dasharray="5 5"/></svg>
+        <h2 id="detail-h" data-i18n="detail.emptyTitle">In 30 Sekunden vom DXF zum Angebot</h2>
+        <p data-i18n="detail.emptyText">Laden Sie links eine Zeichnung. KerfQuote ermittelt Schnittlänge, Einstiche, Fläche und Gewicht und rechnet mit Ihren Maschinensätzen den Preis.</p>
+      </div>
+
+      <div class="stack" id="detail" hidden>
+        <div class="field">
+          <label for="part-name" data-i18n="detail.name">Bezeichnung</label>
+          <input type="text" id="part-name" maxlength="120" autocomplete="off">
+        </div>
+
+        <figure class="preview-box">
+          <div class="preview" id="preview" role="img" aria-label="Vorschau des Teils"></div>
+          <figcaption class="legend">
+            <span><i class="l-outer"></i><span data-i18n="legend.outer">Außenkontur</span></span>
+            <span><i class="l-inner"></i><span data-i18n="legend.inner">Innenkontur</span></span>
+            <span><i class="l-open"></i><span data-i18n="legend.open">Offene Kontur</span></span>
+          </figcaption>
+        </figure>
+
+        <dl class="metrics" id="metrics"></dl>
+
+        <section class="stack" aria-labelledby="warn-h">
+          <h3 id="warn-h" data-i18n="warn.title">Hinweise</h3>
+          <ul class="warnings" id="warnings"></ul>
+        </section>
+
+        <section class="stack" aria-labelledby="params-h">
+          <h3 id="params-h" data-i18n="p.title">Kalkulation</h3>
+          <div class="form-grid">
+            <div class="field">
+              <label for="p-material" data-i18n="p.material">Material</label>
+              <select id="p-material"></select>
+            </div>
+            <div class="field">
+              <label for="p-thickness" data-i18n="p.thickness">Dicke (mm)</label>
+              <select id="p-thickness"></select>
+            </div>
+            <div class="field">
+              <label for="p-qty" data-i18n="p.qty">Menge</label>
+              <input type="number" id="p-qty" min="1" max="1000000" step="1" required inputmode="numeric">
+            </div>
+            <div class="field">
+              <label for="p-bends" data-i18n="p.bends">Biegungen</label>
+              <input type="number" id="p-bends" min="0" max="999" step="1" required inputmode="numeric">
+            </div>
+            <div class="field">
+              <label for="p-extra" data-i18n="p.extra">Zusatzkosten je Stück</label>
+              <input type="number" id="p-extra" min="0" max="1000000" step="any" required inputmode="decimal">
+            </div>
+            <div class="field">
+              <label for="p-units" data-i18n="p.units">Zeichnungseinheit</label>
+              <select id="p-units"></select>
+            </div>
+            <div class="field">
+              <label for="p-tol" data-i18n="p.tol">Lückentoleranz (mm)</label>
+              <input type="number" id="p-tol" min="0.001" max="10" step="any" required inputmode="decimal" aria-describedby="p-tol-hint">
+              <span class="hint" id="p-tol-hint" data-i18n="p.tolHint">Lücken bis zu diesem Wert gelten als geschlossen.</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="stack" aria-labelledby="layers-h">
+          <h3 id="layers-h" data-i18n="layers.title">Layer</h3>
+          <p class="hint" data-i18n="layers.hint">Nur angehakte Layer werden geschnitten.</p>
+          <ul class="layers" id="layers"></ul>
+        </section>
+
+        <div class="two-col">
+          <section class="stack" aria-labelledby="cost-h">
+            <h3 id="cost-h" data-i18n="cost.title">Kosten je Stück</h3>
+            <table id="cost-table"><tbody></tbody></table>
+            <p class="notice" id="cost-none" hidden data-i18n="cost.noPrice">Für dieses Material ist die gewählte Dicke nicht hinterlegt.</p>
+          </section>
+          <section class="stack" aria-labelledby="breaks-h">
+            <h3 id="breaks-h" data-i18n="breaks.title">Staffelpreise</h3>
+            <table id="breaks-table">
+              <thead><tr>
+                <th scope="col" data-i18n="breaks.qty">Menge</th>
+                <th scope="col" class="r" data-i18n="breaks.unit">Stückpreis</th>
+                <th scope="col" class="r" data-i18n="breaks.total">Gesamt</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel quote" aria-labelledby="quote-h">
+      <h2 id="quote-h" data-i18n="quote.title">Angebot</h2>
+      <div class="field">
+        <label for="q-customer" data-i18n="quote.customer">Kunde (Name und Anschrift)</label>
+        <textarea id="q-customer" maxlength="600" autocomplete="off"></textarea>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label for="q-number" data-i18n="quote.number">Angebotsnummer</label>
+          <input type="text" id="q-number" maxlength="40" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="q-date" data-i18n="quote.date">Datum</label>
+          <input type="date" id="q-date" required>
+        </div>
+      </div>
+      <table class="quote-table" id="quote-table" hidden>
+        <thead><tr>
+          <th scope="col" data-i18n="quote.pos">Pos.</th>
+          <th scope="col" data-i18n="quote.desc">Bezeichnung</th>
+          <th scope="col" class="r" data-i18n="quote.qty">Menge</th>
+          <th scope="col" class="r" data-i18n="quote.unit">Einzelpreis</th>
+          <th scope="col" class="r" data-i18n="quote.total">Gesamt</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="muted" id="quote-empty" data-i18n="quote.empty">Noch keine Positionen.</p>
+      <dl class="totals" id="quote-totals"></dl>
+      <div class="actions">
+        <button type="button" class="btn btn-primary" id="btn-print" data-i18n="quote.print">Angebot drucken / PDF</button>
+        <button type="button" class="btn" id="btn-csv"><span data-i18n="quote.csv">CSV exportieren</span> <span class="tag" id="csv-tag">Pro</span></button>
+        <button type="button" class="btn btn-ghost" id="btn-clear" data-i18n="quote.clear">Angebot leeren</button>
+      </div>
+      <p class="free-note" id="free-note">
+        <span id="free-note-text"></span>
+        <button type="button" class="link" id="btn-unlock" data-i18n="quote.unlock">Pro freischalten</button>
+      </p>
+    </section>
+  </main>
+
+  <dialog id="dlg-settings" aria-labelledby="dlg-settings-h">
+    <div class="dlg-head">
+      <h2 id="dlg-settings-h" data-i18n="settings.title">Einstellungen</h2>
+    </div>
+    <div class="dlg-body" id="settings-body"></div>
+    <form method="dialog" class="dlg-foot">
+      <button class="btn btn-primary" value="close" data-i18n="btn.close">Schließen</button>
+    </form>
+  </dialog>
+
+  <dialog id="dlg-license" class="dlg-narrow" aria-labelledby="dlg-license-h">
+    <div class="dlg-head">
+      <h2 id="dlg-license-h" data-i18n="license.title">KerfQuote Pro</h2>
+    </div>
+    <div class="dlg-body">
+      <p class="status" id="license-status"></p>
+      <p data-i18n="license.benefits">Pro: unbegrenzt viele Positionen je Angebot, eigenes Logo, Angebot ohne KerfQuote-Hinweis, CSV-Export.</p>
+      <p id="license-buy"></p>
+      <div class="field">
+        <label for="license-key" data-i18n="license.key">Lizenzschlüssel</label>
+        <textarea id="license-key" class="key-input" spellcheck="false" autocomplete="off" autocapitalize="off" aria-describedby="license-error"></textarea>
+        <p class="error-msg" id="license-error" role="alert"></p>
+      </div>
+      <div class="row-actions">
+        <button type="button" class="btn btn-primary" id="btn-activate" data-i18n="license.activate">Aktivieren</button>
+        <button type="button" class="btn btn-danger" id="btn-remove-license" data-i18n="license.remove" hidden>Lizenz entfernen</button>
+      </div>
+    </div>
+    <form method="dialog" class="dlg-foot">
+      <button class="btn" value="close" data-i18n="btn.close">Schließen</button>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div id="print-root"></div>
+</body>
+</html>

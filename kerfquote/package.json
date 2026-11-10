@@ -1,0 +1,14 @@
+{
+  "name": "kerfquote",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Angebotskalkulation für Laser-, Plasma- und Wasserstrahlzuschnitte direkt aus der DXF-Datei – läuft vollständig im Browser.",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "test": "node --test",
+    "serve": "node tools/serve.mjs",
+    "build:landing": "node tools/build-landing.mjs",
+    "license": "node tools/license.mjs"
+  }
+}
