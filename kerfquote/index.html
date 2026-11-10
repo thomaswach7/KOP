@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'">
+  <title>Laserschneiden kalkulieren aus der DXF-Datei – KerfQuote</title>
+  <meta name="description" content="Laser-, Plasma- und Wasserstrahlzuschnitte direkt aus der DXF kalkulieren: Schnittlänge, Einstiche, Gewicht und Preis – im Browser, ohne Upload. Kostenlos testen.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="KerfQuote">
+  <meta property="og:title" content="Laserschneiden kalkulieren aus der DXF-Datei – KerfQuote">
+  <meta property="og:description" content="Laser-, Plasma- und Wasserstrahlzuschnitte direkt aus der DXF kalkulieren: Schnittlänge, Einstiche, Gewicht und Preis – im Browser, ohne Upload. Kostenlos testen.">
+  <meta property="og:locale" content="de_DE">
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./assets/base.css">
+  <link rel="stylesheet" href="./assets/landing.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"KerfQuote","applicationCategory":"BusinessApplication","operatingSystem":"Web","inLanguage":["de","en"],"description":"Laser-, Plasma- und Wasserstrahlzuschnitte direkt aus der DXF kalkulieren: Schnittlänge, Einstiche, Gewicht und Preis – im Browser, ohne Upload. Kostenlos testen.","offers":[{"@type":"Offer","name":"Free","price":"0","priceCurrency":"EUR"},{"@type":"Offer","name":"Pro","price":"468","priceCurrency":"EUR"}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Welche DXF-Dateien werden unterstützt?","acceptedAnswer":{"@type":"Answer","text":"ASCII-DXF ab Version R12 mit Linien, Bögen, Kreisen, Polylinien, Ellipsen, Splines und Blockreferenzen. Binäres DXF und DWG werden nicht gelesen – speichern Sie die Zeichnung im CAD als ASCII-DXF."}},{"@type":"Question","name":"Werden meine Zeichnungen hochgeladen?","acceptedAnswer":{"@type":"Answer","text":"Nein. Die Datei wird ausschließlich in Ihrem Browser ausgewertet. Ihre Einstellungen bleiben ebenfalls lokal auf Ihrem Rechner gespeichert."}},{"@type":"Question","name":"Wie genau ist die Kalkulation?","acceptedAnswer":{"@type":"Answer","text":"Schnittlänge, Einstiche und Fläche werden exakt aus der Geometrie berechnet. Der Preis ist so genau wie die hinterlegten Werte: Vorschübe, Stundensatz und Materialpreise sollten Sie einmal auf Ihren Betrieb abstimmen."}},{"@type":"Question","name":"Funktioniert das auch für Plasma, Wasserstrahl oder Autogen?","acceptedAnswer":{"@type":"Answer","text":"Ja. Das Modell ist verfahrensunabhängig: Sie hinterlegen je Material und Dicke Vorschub und Einstechzeit Ihrer Maschine."}},{"@type":"Question","name":"Wird die Schachtelung (Nesting) berücksichtigt?","acceptedAnswer":{"@type":"Answer","text":"Nein. Der Materialbedarf wird über das kleinste umschließende Rechteck des Teils plus Stegzugabe angesetzt. Das ist für Angebote üblich und liegt auf der sicheren Seite."}},{"@type":"Question","name":"Wie erhalte ich die Pro-Version?","acceptedAnswer":{"@type":"Answer","text":"Nach dem Kauf bekommen Sie einen Lizenzschlüssel, den Sie in der App unter „Lizenz“ einfügen. Die Lizenz gilt für zwölf Monate."}},{"@type":"Question","name":"Brauche ich ein Benutzerkonto?","acceptedAnswer":{"@type":"Answer","text":"Nein. Sie öffnen die App und legen los."}}]}</script>
+</head>
+<body>
+  <header class="site-head">
+    <div class="wrap">
+      <a class="brand" href="./"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#c2410c"/><path d="M8 23 L17 9" stroke="#fff" stroke-width="3" stroke-linecap="round"/><path d="M19.5 23 L24 16" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".55"/><circle cx="17" cy="9" r="2.6" fill="#ffd9c2"/></svg><span>KerfQuote</span></a>
+      <nav class="site-nav" aria-label="Hauptnavigation">
+        <a class="nav-link" href="#features">Funktionen</a>
+        <a class="nav-link" href="#calc">Rechenweg</a>
+        <a class="nav-link" href="#pricing">Preise</a>
+        <a class="nav-link" href="#faq">Fragen</a>
+        <a href="en/" lang="en" hreflang="en">English</a>
+        <a class="btn btn-primary" href="./app/">App öffnen</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <div>
+          <h1>Laserzuschnitte kalkulieren: vom DXF zum Angebot in <em>30 Sekunden</em>.</h1>
+          <p class="lead">KerfQuote kalkuliert Laser-, Plasma- und Wasserstrahlzuschnitte direkt aus der Zeichnung: Schnittlänge, Einstiche, Gewicht und Preis – mit Ihren eigenen Maschinensätzen.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary btn-lg" href="./app/">Kostenlos ausprobieren</a>
+            <a class="btn btn-lg" href="#calc">So wird gerechnet</a>
+          </div>
+          <p class="trust">Ohne Anmeldung, ohne Installation. Ihre Zeichnungen verlassen Ihren Rechner nicht.</p>
+        </div>
+        <figure class="mock" role="img" aria-label="Beispiel: Flansch mit sieben Innenkonturen, 672 mm Schnittlänge, 8 Einstiche">
+        <div class="mock-bar" aria-hidden="true"><i></i><i></i><i></i></div>
+        <svg viewBox="0 0 400 260" aria-hidden="true">
+          <circle class="m-fill" cx="200" cy="130" r="90"/>
+          <circle class="m-outer" cx="200" cy="130" r="90"/>
+          <circle class="m-inner" cx="200" cy="130" r="30"/>
+          <circle class="m-inner" cx="267.5" cy="130.0" r="6.75"/><circle class="m-inner" cx="233.8" cy="71.5" r="6.75"/><circle class="m-inner" cx="166.3" cy="71.5" r="6.75"/><circle class="m-inner" cx="132.5" cy="130.0" r="6.75"/><circle class="m-inner" cx="166.2" cy="188.5" r="6.75"/><circle class="m-inner" cx="233.8" cy="188.5" r="6.75"/>
+          <path class="m-kerf" d="M290 130 A90 90 0 0 0 200 40"/>
+          <circle class="m-spark" cx="200" cy="40" r="5"/>
+        </svg>
+        <dl class="mock-stats" aria-hidden="true">
+          <div><dt>Schnittlänge</dt><dd>672,3 mm</dd></div>
+          <div><dt>Einstiche</dt><dd>8</dd></div>
+          <div class="is-price"><dt>Stückpreis ab 100</dt><dd>1,48 €</dd></div>
+        </dl>
+      </figure>
+      </div>
+    </section>
+
+    <section class="band" aria-labelledby="why-h">
+      <div class="wrap">
+        <p class="eyebrow">Warum KerfQuote</p>
+        <h2 id="why-h">Wer zuerst anbietet, bekommt den Auftrag.</h2>
+        <p class="lead">Viele Anfragen bleiben liegen, weil das Kalkulieren von Hand zu lange dauert. KerfQuote nimmt Ihnen das Ausmessen ab.</p>
+        <div class="cards">
+        <article class="card">
+          <h3>Minuten statt Stunden</h3>
+          <p>DXF hineinziehen, Material und Menge wählen, fertig. Schnittlänge und Einstiche werden exakt aus der Geometrie ermittelt.</p>
+        </article>
+        <article class="card">
+          <h3>Nachvollziehbar statt Bauchgefühl</h3>
+          <p>Jeder Preis ist aufgeschlüsselt: Material, Schneidzeit, Rüsten, Zuschlag. Sie sehen sofort, wo die Kosten entstehen.</p>
+        </article>
+        <article class="card">
+          <h3>Vertraulich aus Prinzip</h3>
+          <p>Die Zeichnung wird in Ihrem Browser ausgewertet und nicht hochgeladen. Das passt auch zu Geheimhaltungsvereinbarungen Ihrer Kunden.</p>
+        </article>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="how-h">
+      <div class="wrap">
+        <p class="eyebrow">So funktioniert es</p>
+        <h2 id="how-h">Drei Schritte zum Angebot</h2>
+        <div class="cards">
+        <article class="card">
+          <span class="num-badge" aria-hidden="true">1</span>
+          <h3>DXF laden</h3>
+          <p>Eine oder mehrere Dateien hineinziehen. KerfQuote erkennt die Einheit, löst Blöcke auf und blendet Bemaßungs- und Hilfslayer aus.</p>
+        </article>
+        <article class="card">
+          <span class="num-badge" aria-hidden="true">2</span>
+          <h3>Prüfen und einstellen</h3>
+          <p>Offene Konturen und doppelte Linien werden markiert. Dann Material, Dicke, Menge und Biegungen wählen.</p>
+        </article>
+        <article class="card">
+          <span class="num-badge" aria-hidden="true">3</span>
+          <h3>Angebot ausgeben</h3>
+          <p>Staffelpreise ansehen, Kundendaten ergänzen und das Angebot drucken oder als PDF speichern.</p>
+        </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="features" aria-labelledby="features-h">
+      <div class="wrap">
+        <p class="eyebrow">Funktionen</p>
+        <h2 id="features-h">Alles, was die Zuschnittkalkulation braucht</h2>
+        <div class="cards">
+        <article class="card">
+          <h3>Schnittlänge aus der DXF berechnen</h3>
+          <p>Exakt aus Linien, Bögen, Kreisen, Polylinien, Ellipsen, Splines und Blöcken – in Millimetern oder Zoll.</p>
+        </article>
+        <article class="card">
+          <h3>Fehler in der Zeichnung finden</h3>
+          <p>Offene Konturen, doppelte Elemente und zu kleine Bohrungen fallen auf, bevor sie Geld kosten.</p>
+        </article>
+        <article class="card">
+          <h3>Staffelpreise auf einen Blick</h3>
+          <p>Die Rüstkosten verteilen sich automatisch auf die Stückzahl.</p>
+        </article>
+        <article class="card">
+          <h3>Eigene Materialtabellen</h3>
+          <p>Vorschub, Einstechzeit, Dichte und Preis je Material und Dicke – abgestimmt auf Ihre Maschine.</p>
+        </article>
+        <article class="card">
+          <h3>Angebot als PDF</h3>
+          <p>Mit Vorschaubild je Position, Mindestauftragswert und Mehrwertsteuer.</p>
+        </article>
+        <article class="card">
+          <h3>Deutsch und Englisch</h3>
+          <p>Oberfläche und Angebot in beiden Sprachen, Währung frei wählbar.</p>
+        </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="calc" aria-labelledby="calc-h">
+      <div class="wrap">
+        <p class="eyebrow">Transparenz</p>
+        <h2 id="calc-h">Laserschneiden: So werden die Kosten berechnet</h2>
+        <p class="lead">Kein Preis aus der Blackbox: Das Modell ist bewusst einfach und entspricht der üblichen Kalkulation im Lohnzuschnitt.</p>
+        <div class="formula" tabindex="0" role="group" aria-labelledby="calc-h">
+          <div><b>Material</b> = (umschließendes Rechteck + Stegzugabe) × Dicke × Dichte × Preis je kg</div>
+          <div><b>Schneiden</b> = (Schnittlänge ÷ Vorschub + Einstiche × Einstechzeit) × Maschinenstundensatz</div>
+          <div><b>Rüsten</b> = Rüstkosten je Position ÷ Menge</div>
+          <div><b>Stückpreis</b> = (Material + Schneiden + Rüsten + Biegen + Zusatz) × (1 + Zuschlag)</div>
+        </div>
+        <p class="note">Die mitgelieferten Vorschübe und Materialpreise sind Startwerte für einen 4-kW-Faserlaser. Hinterlegen Sie Ihre eigenen Werte, dann stimmen auch die Preise. Eine Schachtelung mehrerer Teile auf einer Tafel (Nesting) wird nicht berechnet.</p>
+      </div>
+    </section>
+
+    <section class="band" id="pricing" aria-labelledby="pricing-h">
+      <div class="wrap">
+        <p class="eyebrow">Preise</p>
+        <h2 id="pricing-h">Kostenlos starten, bei Bedarf erweitern</h2>
+        <p class="lead">Die Analyse Ihrer DXF-Dateien ist dauerhaft kostenlos. Pro lohnt sich, sobald Sie regelmäßig Angebote mit mehreren Positionen schreiben.</p>
+        <div class="plans">
+          <article class="plan">
+            <h3>Free</h3>
+            <p class="price">0 €</p>
+            <ul>
+            <li>DXF-Analyse ohne Begrenzung</li>
+            <li>Kalkulation mit eigenen Sätzen</li>
+            <li>Bis zu 2 Positionen je Angebot</li>
+            <li>Angebot mit KerfQuote-Hinweis</li>
+            </ul>
+            <a class="btn" href="./app/">Jetzt starten</a>
+          </article>
+          <article class="plan is-pro">
+            <h3>Pro</h3>
+            <p class="price">39 € <small>pro Monat</small></p>
+            <p class="muted">jährlich abgerechnet, 468 € pro Jahr</p>
+            <ul>
+            <li>Unbegrenzt viele Positionen</li>
+            <li>Eigenes Logo im Angebot</li>
+            <li>Angebot ohne KerfQuote-Hinweis</li>
+            <li>CSV-Export für Excel und ERP</li>
+            </ul>
+            <a class="btn btn-primary" href="./app/">In der App freischalten</a>
+          </article>
+        </div>
+        <p class="note">Alle Preise zuzüglich Mehrwertsteuer.</p>
+      </div>
+    </section>
+
+    <section id="faq" aria-labelledby="faq-h">
+      <div class="wrap">
+        <p class="eyebrow">Fragen und Antworten</p>
+        <h2 id="faq-h">Häufige Fragen</h2>
+        <div class="faq">
+          <details>
+            <summary>Welche DXF-Dateien werden unterstützt?</summary>
+            <p>ASCII-DXF ab Version R12 mit Linien, Bögen, Kreisen, Polylinien, Ellipsen, Splines und Blockreferenzen. Binäres DXF und DWG werden nicht gelesen – speichern Sie die Zeichnung im CAD als ASCII-DXF.</p>
+          </details>
+          <details>
+            <summary>Werden meine Zeichnungen hochgeladen?</summary>
+            <p>Nein. Die Datei wird ausschließlich in Ihrem Browser ausgewertet. Ihre Einstellungen bleiben ebenfalls lokal auf Ihrem Rechner gespeichert.</p>
+          </details>
+          <details>
+            <summary>Wie genau ist die Kalkulation?</summary>
+            <p>Schnittlänge, Einstiche und Fläche werden exakt aus der Geometrie berechnet. Der Preis ist so genau wie die hinterlegten Werte: Vorschübe, Stundensatz und Materialpreise sollten Sie einmal auf Ihren Betrieb abstimmen.</p>
+          </details>
+          <details>
+            <summary>Funktioniert das auch für Plasma, Wasserstrahl oder Autogen?</summary>
+            <p>Ja. Das Modell ist verfahrensunabhängig: Sie hinterlegen je Material und Dicke Vorschub und Einstechzeit Ihrer Maschine.</p>
+          </details>
+          <details>
+            <summary>Wird die Schachtelung (Nesting) berücksichtigt?</summary>
+            <p>Nein. Der Materialbedarf wird über das kleinste umschließende Rechteck des Teils plus Stegzugabe angesetzt. Das ist für Angebote üblich und liegt auf der sicheren Seite.</p>
+          </details>
+          <details>
+            <summary>Wie erhalte ich die Pro-Version?</summary>
+            <p>Nach dem Kauf bekommen Sie einen Lizenzschlüssel, den Sie in der App unter „Lizenz“ einfügen. Die Lizenz gilt für zwölf Monate.</p>
+          </details>
+          <details>
+            <summary>Brauche ich ein Benutzerkonto?</summary>
+            <p>Nein. Sie öffnen die App und legen los.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="band final" aria-labelledby="final-h">
+      <div class="wrap">
+        <h2 id="final-h">Probieren Sie es mit Ihrer nächsten Anfrage aus.</h2>
+        <p class="lead">Die Beispielteile sind mit einem Klick geladen.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary btn-lg" href="./app/">App öffnen</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-foot">
+    <div class="wrap">
+      <span>KerfQuote · Zuschnitt-Kalkulation aus DXF</span>
+      <nav aria-label="Rechtliches">
+        <a href="./impressum.html">Impressum</a>
+        <a href="./datenschutz.html">Datenschutz</a>
+        <a href="en/" lang="en" hreflang="en">English</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>
