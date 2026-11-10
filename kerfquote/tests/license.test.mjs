@@ -67,3 +67,13 @@ test('der private Schlüssel steckt nicht im öffentlichen Schlüssel', () => {
   assert.equal('d' in keys.publicJwk, false);
   assert.equal(typeof keys.privateJwk.d, 'string');
 });
+
+test('der private Schlüssel liegt standardmäßig außerhalb des Website-Ordners', async () => {
+  const { privateKeyPath } = await import('../tools/license.mjs');
+  const { fileURLToPath } = await import('node:url');
+  const siteRoot = fileURLToPath(new URL('..', import.meta.url));
+  const standard = privateKeyPath({});
+  assert.ok(!standard.startsWith(siteRoot), `${standard} liegt im Website-Ordner`);
+  assert.match(standard, /\.kerfquote[\\/]license-private-key\.json$/);
+  assert.equal(privateKeyPath({ KERFQUOTE_PRIVATE_KEY: '/sicher/schluessel.json' }), '/sicher/schluessel.json');
+});

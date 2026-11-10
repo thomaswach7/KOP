@@ -6,15 +6,24 @@
 //                               [--months 12] [--id K-0001]
 //   node tools/license.mjs verify <Lizenzschlüssel>     Lizenz prüfen
 //
-// Der private Schlüssel (license-private-key.json) darf NIE ins Repository oder auf die
-// Website. Wer ihn hat, kann beliebig viele Lizenzen ausstellen. Sicher aufbewahren!
+// Der private Schlüssel darf NIE ins Repository oder auf die Website: Wer ihn hat, kann beliebig
+// viele Lizenzen ausstellen. Er liegt deshalb außerhalb des Website-Ordners unter
+//   ~/.kerfquote/license-private-key.json
+// (anderer Ort: Umgebungsvariable KERFQUOTE_PRIVATE_KEY). Sicher aufbewahren, Backup anlegen!
 
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { bytesToBase64Url, verifyLicense, LICENSE_PREFIX } from '../src/license.js';
 
 const ALGORITHM = { name: 'ECDSA', namedCurve: 'P-256' };
-const PRIVATE_KEY_FILE = fileURLToPath(new URL('../license-private-key.json', import.meta.url));
+/** Ablageort des privaten Schlüssels – bewusst nicht im Website-Ordner, damit er nie mit hochgeladen wird. */
+export function privateKeyPath(env = process.env) {
+  return env.KERFQUOTE_PRIVATE_KEY || join(homedir(), '.kerfquote', 'license-private-key.json');
+}
+
+const PRIVATE_KEY_FILE = privateKeyPath();
 const PUBLIC_KEY_FILE = fileURLToPath(new URL('../src/license-public-key.js', import.meta.url));
 
 export async function generateKeyPair() {
@@ -58,6 +67,7 @@ async function main(args) {
       return 1;
     }
     const { privateJwk, publicJwk } = await generateKeyPair();
+    mkdirSync(dirname(PRIVATE_KEY_FILE), { recursive: true, mode: 0o700 });
     writeFileSync(PRIVATE_KEY_FILE, `${JSON.stringify(privateJwk, null, 2)}\n`, { mode: 0o600 });
     writeFileSync(PUBLIC_KEY_FILE, publicKeyModule(publicJwk));
     console.log(`Privater Schlüssel:     ${PRIVATE_KEY_FILE}  (geheim halten, Backup anlegen!)`);
@@ -72,7 +82,8 @@ async function main(args) {
       return 1;
     }
     if (!existsSync(PRIVATE_KEY_FILE)) {
-      console.error('Kein privater Schlüssel gefunden. Zuerst: node tools/license.mjs keygen');
+      console.error(`Kein privater Schlüssel unter ${PRIVATE_KEY_FILE} gefunden.\n`
+        + 'Vorhandenen Schlüssel dorthin kopieren oder (nur vor dem ersten Verkauf) neu erzeugen: node tools/license.mjs keygen');
       return 1;
     }
     const privateJwk = JSON.parse(readFileSync(PRIVATE_KEY_FILE, 'utf8'));

@@ -114,8 +114,9 @@ export function createSettingsDialog({ dialog, body, getSettings, commit, getT, 
         type: 'button', class: 'icon-btn', 'aria-label': `${t('s.removeRow')} ${ri + 1}`, title: t('s.removeRow'),
         onclick: () => { m.thicknesses.splice(ri, 1); commit(draft); render(); },
       }, '×'))));
+    // exklusives Akkordeon: es ist immer höchstens ein Material aufgeklappt (passend zu openMaterial)
     return h('details', {
-      class: 'mat', open: mi === openMaterial,
+      class: 'mat', name: 'settings-material', open: mi === openMaterial,
       ontoggle: (e) => { if (e.target.open) openMaterial = mi; else if (openMaterial === mi) openMaterial = -1; },
     },
     h('summary', { id: `s-m${mi}-summary` }, m.name || t('s.newMaterial')),

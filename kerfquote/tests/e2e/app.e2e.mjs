@@ -389,6 +389,112 @@ test('Einstellungen: Material anlegen, Dicke ergänzen, zurücksetzen mit Rückf
   await done();
 });
 
+// 1×1-Pixel-PNG als Test-Logo
+const TINY_PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
+
+test('Logo: in Free gesperrt; in Pro erscheint es im Angebot und lässt sich wieder entfernen', async () => {
+  const free = await openApp();
+  await free.page.click('#btn-settings');
+  assert.ok(await free.page.locator('#s-logo').isDisabled());
+  assert.match(norm(await free.page.locator('#dlg-settings').innerText()), /eigenes Logo im Angebot ist eine Pro-Funktion/);
+  await free.done();
+
+  const { page, done } = await openApp({ pro: true });
+  await page.waitForFunction(() => document.querySelector('#btn-license').textContent.includes('Pro'));
+  await page.click('#btn-sample');
+  await page.waitForSelector('.part-item');
+  await page.click('#btn-settings');
+  await page.fill('#s-company', 'Blechwerk Muster GmbH');
+  await page.locator('#s-company').blur();
+  assert.ok(await page.locator('#s-logo').isEnabled());
+  await page.setInputFiles('#s-logo', { name: 'logo.png', mimeType: 'image/png', buffer: TINY_PNG });
+  await page.waitForSelector('#dlg-settings img.logo-preview');
+  // zu große Datei und falsches Format werden abgelehnt, das vorhandene Logo bleibt
+  await page.setInputFiles('#s-logo', { name: 'riesig.png', mimeType: 'image/png', buffer: Buffer.alloc(300 * 1024, 1) });
+  await page.waitForFunction(() => document.querySelector('#toast').textContent.includes('zu groß'));
+  await page.setInputFiles('#s-logo', { name: 'text.png', mimeType: 'text/plain', buffer: Buffer.from('kein Bild') });
+  await page.waitForFunction(() => document.querySelector('#toast').classList.contains('is-error'));
+  assert.equal(await page.locator('#dlg-settings img.logo-preview').count(), 1);
+  await page.locator('#dlg-settings button[value="close"]').click();
+
+  await page.click('#btn-print');
+  const logo = page.locator('#print-root img.doc-logo');
+  assert.equal(await logo.count(), 1);
+  assert.match(await logo.getAttribute('src'), /^data:image\/png;base64,/);
+  assert.equal(await logo.getAttribute('alt'), 'Blechwerk Muster GmbH');
+
+  await page.click('#btn-settings');
+  await page.getByRole('button', { name: 'Logo entfernen' }).click();
+  assert.equal(await page.locator('#dlg-settings img.logo-preview').count(), 0);
+  await page.locator('#dlg-settings button[value="close"]').click();
+  await page.click('#btn-print');
+  assert.equal(await page.locator('#print-root img').count(), 0);
+  assert.equal(norm(await page.locator('#print-root .doc-company').innerText()), 'Blechwerk Muster GmbH');
+  await done();
+});
+
+test('Einstellungen: Staffelmengen, Zeile und Material löschen, Export und Import', async () => {
+  const { page, done } = await openApp();
+  await page.click('#btn-sample');
+  await page.waitForSelector('.part-item');
+  await page.click('#btn-settings');
+  await page.locator('#dlg-settings summary', { hasText: 'Kalkulation' }).click();
+  await page.fill('#s-quantities', '1, 20; 300');
+  await page.locator('#s-quantities').blur();
+  await page.fill('#s-vat', '20');
+  await page.locator('#s-vat').blur();
+
+  await page.locator('#dlg-settings summary', { hasText: 'Materialien' }).click();
+  await page.locator('details.mat summary').first().click();
+  assert.equal(await page.locator('details.mat[open] tbody tr').count(), 12);
+  await page.getByRole('button', { name: 'Zeile entfernen 1', exact: true }).click();
+  assert.equal(await page.locator('details.mat[open] tbody tr').count(), 11);
+  assert.equal(await page.locator('#s-m0-t0').inputValue(), '1.5');
+  // ungültige Eingabe: Feld wird markiert, die Zeile fällt bis zur Korrektur aus der Kalkulation
+  await page.fill('#s-m0-v0', '');
+  await page.locator('#s-m0-v0').blur();
+  assert.equal(await page.locator('#s-m0-v0').evaluate((el) => el.matches(':user-invalid')), true);
+  await page.fill('#s-m0-v0', '7000');
+  await page.locator('#s-m0-v0').blur();
+
+  await page.locator('details.mat summary').nth(2).click();
+  await page.getByRole('button', { name: 'Material löschen' }).click();
+  assert.equal(await page.locator('details.mat').count(), 2);
+
+  await page.locator('#dlg-settings summary', { hasText: 'Sicherung' }).click();
+  const [download] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: 'Einstellungen exportieren' }).click()]);
+  assert.equal(download.suggestedFilename(), 'kerfquote-einstellungen.json');
+  const exported = JSON.parse(readFileSync(await download.path(), 'utf8'));
+  assert.deepEqual(exported.quantities, [1, 20, 300]);
+  assert.equal(exported.vatPct, 20);
+  assert.equal(exported.materials.length, 2);
+  assert.deepEqual(exported.materials[0].thicknesses[0], { t: 1.5, speed: 7000, pierce: 0.3 });
+  assert.deepEqual(exported, sanitizeSettings(exported), 'Export ist bereits vollständig und gültig');
+  await page.locator('#dlg-settings button[value="close"]').click();
+
+  assert.deepEqual(await page.locator('#breaks-table tbody td:first-child').allInnerTexts(), ['1', '20', '300']);
+  assert.ok(await page.locator('#quote-totals dt', { hasText: 'MwSt. 20 %' }).isVisible());
+  assert.equal(await page.locator('#p-material option').count(), 2);
+  assert.deepEqual((await page.locator('#p-thickness option').allInnerTexts()).slice(0, 2), ['1,5', '2']);
+
+  // Import: geänderte Datei einlesen; kaputte Datei meldet einen Fehler und ändert nichts
+  await page.click('#btn-settings');
+  await page.locator('#dlg-settings summary', { hasText: 'Sicherung' }).click();
+  const importInput = page.locator('#dlg-settings input[type="file"][accept*="json"]');
+  await importInput.setInputFiles({ name: 'kaputt.json', mimeType: 'application/json', buffer: Buffer.from('{ kein json') });
+  await page.waitForFunction(() => document.querySelector('#toast').textContent.includes('konnte nicht gelesen werden'));
+  const changed = { ...exported, machineRate: 99, company: { ...exported.company, name: 'Import GmbH' }, boese: '<script>' };
+  await page.locator('#dlg-settings input[type="file"][accept*="json"]')
+    .setInputFiles({ name: 'neu.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(changed)) });
+  await page.waitForFunction(() => document.querySelector('#toast').textContent.includes('Einstellungen übernommen'));
+  await page.locator('#dlg-settings summary', { hasText: 'Firma' }).click();
+  assert.equal(await page.locator('#s-company').inputValue(), 'Import GmbH');
+  const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('kerfquote.settings.v1')));
+  assert.equal(stored.machineRate, 99);
+  assert.equal('boese' in stored, false);
+  await done();
+});
+
 test('Sprache: Umschalten auf Englisch übersetzt Oberfläche und Zahlenformat', async () => {
   const { page, done } = await openApp();
   await page.click('#btn-sample');

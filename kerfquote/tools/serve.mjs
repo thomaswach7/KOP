@@ -19,6 +19,11 @@ export function createStaticServer(root = ROOT) {
   return createServer(async (req, res) => {
     try {
       const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
+      // Versteckte Dateien (.git, .env …) und Schlüsseldateien werden grundsätzlich nicht ausgeliefert
+      if (pathname.split('/').some((part) => part.startsWith('.')) || /private-key/i.test(pathname)) {
+        res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }).end('Nicht gefunden');
+        return;
+      }
       let file = normalize(join(root, pathname));
       if (file !== root.replace(/[\\/]$/, '') && !file.startsWith(root.endsWith(sep) ? root : root + sep)) {
         res.writeHead(403).end('Forbidden');

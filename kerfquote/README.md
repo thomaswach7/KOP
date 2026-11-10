@@ -31,7 +31,7 @@ Einordnung der Chancen und Risiken:
 ```bash
 cd kerfquote
 node tools/serve.mjs          # http://localhost:8080/  (App unter /app/)
-node --test                   # 116 Logik-Tests, keine Abhängigkeiten
+node --test                   # Logik-Tests, keine Abhängigkeiten
 ```
 
 Die App nutzt ES-Module und lässt sich deshalb nicht per Doppelklick (`file://`) öffnen – immer über einen Webserver.
@@ -42,7 +42,7 @@ Diese Punkte kann nur der Betreiber erledigen. Ohne sie darf bzw. kann die Seite
 
 1. **Impressum und Datenschutz ausfüllen.** `impressum.html` und `datenschutz.html` sind Vorlagen mit rot markierten Platzhaltern. Im DACH-Raum besteht Impressumspflicht; die Texte vor dem Start rechtlich prüfen lassen. Für englischsprachige Märkte zusätzlich englische Fassungen ergänzen.
 2. **Gewerbe und Steuern klären** (Gewerbeanmeldung, Umsatzsteuer bei Verkäufen ins Ausland). Am einfachsten über einen Zahlungsanbieter, der als „Merchant of Record“ die Umsatzsteuer abführt (z. B. Lemon Squeezy oder Paddle).
-3. **Privaten Lizenzschlüssel sichern.** `license-private-key.json` liegt bewusst nicht im Repository. Wer ihn besitzt, kann Lizenzen ausstellen. Geht er verloren, mit `node tools/license.mjs keygen --force` ein neues Paar erzeugen – das macht alle bisher verkauften Lizenzen ungültig, also vor dem ersten Verkauf erledigen.
+3. **Privaten Lizenzschlüssel sichern.** Er liegt bewusst außerhalb des Website-Ordners unter `~/.kerfquote/license-private-key.json` (anderer Ort: Umgebungsvariable `KERFQUOTE_PRIVATE_KEY`), damit er nie versehentlich mit hochgeladen wird. Wer ihn besitzt, kann Lizenzen ausstellen – also nie ins Repository oder auf die Website legen und ein Backup anlegen. Auf einem neuen Rechner die gesicherte Datei an diesen Ort kopieren. Geht der Schlüssel verloren, erzeugt `node tools/license.mjs keygen --force` ein neues Paar; das macht alle bisher verkauften Lizenzen ungültig, also nur vor dem ersten Verkauf.
 4. **Zahlungslink eintragen:** `checkoutUrl` in `src/config.js` (muss mit `https://` beginnen), danach `node tools/build-landing.mjs`.
 5. **Domain eintragen:** `SITE_URL` in `tools/build-landing.mjs` setzen und neu erzeugen. Erst dann entstehen `canonical`-/`hreflang`-Angaben, Vorschaubild-Tags und `sitemap.xml`.
 6. **Namen prüfen.** Eine Websuche fand kein Produkt namens „KerfQuote“; das ersetzt keine Markenrecherche (DPMA, EUIPO, USPTO) und keine Domainprüfung.
