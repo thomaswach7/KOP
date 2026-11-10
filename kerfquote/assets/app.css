@@ -145,12 +145,13 @@ dialog {
   color: var(--ink); background: var(--surface);
   border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow);
 }
+dialog[open] { display: flex; flex-direction: column; }
 dialog:modal { overscroll-behavior: contain; }
 dialog::backdrop { background: rgb(0 0 0 / 0.45); overflow: hidden; overscroll-behavior: contain; }
 .dlg-narrow { width: min(520px, calc(100vw - 24px)); }
 .dlg-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
 .dlg-head h2 { font-size: 1.15rem; }
-.dlg-body { display: grid; gap: 14px; padding: 16px 18px; }
+.dlg-body { display: grid; gap: 14px; align-content: start; padding: 16px 18px; overflow-y: auto; overscroll-behavior: contain; }
 .dlg-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 18px; border-top: 1px solid var(--line); }
 
 details.sect { border: 1px solid var(--line); border-radius: var(--radius); }

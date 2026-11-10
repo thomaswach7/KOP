@@ -32,6 +32,7 @@ const state = {
 let t = createI18n(state.lang);
 let fmt = createFormat(state.lang, state.settings.currency);
 let toastTimer = null;
+const previewCache = new WeakMap();
 
 const isPro = () => state.license.valid;
 const selectedPart = () => state.parts.find((p) => p.id === state.selectedId) ?? null;
@@ -70,7 +71,14 @@ function addDxfText(fileName, text, errors) {
   }
 }
 
-async function addEntries(entries) {
+/** Warteschlange: mehrere Ladevorgänge laufen nacheinander, damit die Free-Grenze zuverlässig gilt. */
+let loadQueue = Promise.resolve();
+function addEntries(entries) {
+  loadQueue = loadQueue.then(() => processEntries(entries)).catch(() => toast(t('err.sample'), true));
+  return loadQueue;
+}
+
+async function processEntries(entries) {
   const errors = [];
   let added = 0;
   let firstId = null;
@@ -224,8 +232,12 @@ function renderOutputs(row) {
   const { part, price, breaks, warnings } = row;
   const a = part.analysis;
 
-  const preview = renderPreview(a);
-  clear($('#preview')).append(preview ?? h('p', { class: 'muted' }, t('warn.none')));
+  // Die Vorschau hängt nur von der Geometrie ab: je Analyse einmal bauen, bei Preisänderungen wiederverwenden
+  if (!previewCache.has(a)) previewCache.set(a, renderPreview(a));
+  const preview = previewCache.get(a);
+  const box = $('#preview');
+  if (!preview) clear(box).append(h('p', { class: 'muted' }, t('warn.none')));
+  else if (box.firstChild !== preview || box.childNodes.length !== 1) clear(box).append(preview);
 
   const metrics = [
     ['m.cutLength', fmt.length(a.cutLength)],
@@ -549,8 +561,15 @@ function bindEvents() {
 // --- Start ----------------------------------------------------------------------------------
 
 async function init() {
+  // Reihenfolge: ausdrücklicher Wunsch per Link (?lang=en) → gespeicherte Wahl → Browsersprache
+  const urlLang = new URLSearchParams(location.search).get('lang');
   const storedLang = load(KEYS.lang);
-  state.lang = LANGUAGES.includes(storedLang) ? storedLang : detectLanguage(navigator.languages ?? [navigator.language]);
+  if (LANGUAGES.includes(urlLang)) {
+    state.lang = urlLang;
+    save(KEYS.lang, urlLang);
+  } else {
+    state.lang = LANGUAGES.includes(storedLang) ? storedLang : detectLanguage(navigator.languages ?? [navigator.language]);
+  }
   $('#q-date').value = state.quote.date;
   syncQuoteNumber();
   bindEvents();
