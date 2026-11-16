@@ -403,7 +403,7 @@ class Page:
                 out.append(0.5 * (2 * p1 + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t ** 2 + (-p0 + 3 * p1 - 3 * p2 + p3) * t ** 3))
         out.append(pts[-1]); return np.array(out)
 
-    def stroke(self, pts, w=0.38, alpha=0.92, jitter=0.12):
+    def stroke(self, pts, w=0.42, alpha=0.9, jitter=0.12):
         R = self.R; pts = np.asarray(pts, float); dense = [pts[0]]
         for a, b in zip(pts[:-1], pts[1:]):
             m = max(2, int(np.linalg.norm(b - a) / 1.5))
@@ -419,10 +419,12 @@ class Page:
         x0 = max(int(Pf[:, 0].min()) - pad, 0); y0 = max(int(Pf[:, 1].min()) - pad, 0)
         x1 = min(int(Pf[:, 0].max()) + pad, self.ink.shape[1]); y1 = min(int(Pf[:, 1].max()) + pad, self.ink.shape[0])
         if x1 <= x0 or y1 <= y0: return
-        layer = np.zeros((y1 - y0, x1 - x0), np.uint8)
-        P = ((Pf - [x0, y0]) * 4).astype(np.int32)
-        cv2.polylines(layer, [P], False, 255, max(1, int(round(w * RES))), cv2.LINE_AA, shift=2)
-        a = cv2.GaussianBlur(layer.astype(np.float32) / 255 * alpha * R.uniform(.85, 1), (0, 0), .7)
+        SS = 8                                                   # Überabtastung: Strichbreite feiner als 1 px steuerbar
+        layer = np.zeros(((y1 - y0) * SS, (x1 - x0) * SS), np.uint8)
+        P = ((Pf - [x0, y0]) * SS * 4).astype(np.int32)
+        cv2.polylines(layer, [P], False, 255, max(1, int(round(w * RES * SS))), cv2.LINE_AA, shift=2)
+        layer = cv2.resize(layer, (x1 - x0, y1 - y0), interpolation=cv2.INTER_AREA).astype(np.float32)
+        a = cv2.GaussianBlur(layer / 255 * alpha * R.uniform(.85, 1), (0, 0), .7)
         reg = self.ink[y0:y1, x0:x1]; self.ink[y0:y1, x0:x1] = 1 - (1 - reg) * (1 - a)
 
     def line(self, x1, y1, x2, y2, **kw):
