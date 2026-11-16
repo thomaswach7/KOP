@@ -355,10 +355,10 @@ class Page:
                 t0, t1 = math.radians(R.uniform(35, 50)), math.radians(R.uniform(305, 320))
                 ts = np.linspace(t0, t1, 28)
                 tl = math.tan(math.radians(ang))
-                self.stroke([(cx + rx * math.cos(q), cy - h / 2 * math.sin(q) + (rx * math.cos(q)) * tl) for q in ts], w=0.3, alpha=0.85, jitter=0.05)
+                self.stroke([(cx + rx * math.cos(q), cy - h / 2 * math.sin(q) + (rx * math.cos(q)) * tl) for q in ts], w=0.17, alpha=0.9, jitter=0.05)
                 for hh in (0.62, 0.40):
                     yy = y - hh * h + R.gauss(0, .08)
-                    self.stroke([(x - 0.1 * size, yy), (cx + 0.35 * rx, yy - 0.15 + R.gauss(0, .08))], w=0.3, alpha=0.85, jitter=0.02)
+                    self.stroke([(x - 0.1 * size, yy), (cx + 0.35 * rx, yy - 0.15 + R.gauss(0, .08))], w=0.17, alpha=0.9, jitter=0.02)
             return cx + rx * 0.75
         base = ch
         if base not in self.lib: raise KeyError(f'Zeichen fehlt in der Probe: {ch!r}')
@@ -403,7 +403,7 @@ class Page:
                 out.append(0.5 * (2 * p1 + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t ** 2 + (-p0 + 3 * p1 - 3 * p2 + p3) * t ** 3))
         out.append(pts[-1]); return np.array(out)
 
-    def stroke(self, pts, w=0.42, alpha=0.9, jitter=0.12):
+    def stroke(self, pts, w=0.21, alpha=0.9, jitter=0.12):
         R = self.R; pts = np.asarray(pts, float); dense = [pts[0]]
         for a, b in zip(pts[:-1], pts[1:]):
             m = max(2, int(np.linalg.norm(b - a) / 1.5))
@@ -570,26 +570,32 @@ def measure_ink(img, x0, y0, x1, y1):
     return tuple(np.clip(ink.mean(0) / paper, .15, .9))
 
 
-def composite(img, page, inv, fwd, out_path, ink_ratio=(0.56, 0.28, 0.29), seed=0, gamma=1.6, blur=0.9, gain=1.0):
-    """gamma: Strich-Ausdünnung (höher = dünner), blur: Kamera-Unschärfe in Foto-px, gain: Deckkraft."""
+def composite(img, page, inv, fwd, out_path, ink_ratio=(0.56, 0.28, 0.29), seed=0, gamma=1.6, blur=0.9, gain=1.0,
+              aa=0.45, sharpen=None, quality=92):
+    """gamma: Strich-Ausdünnung (höher = dünner), blur: Kamera-Unschärfe in Foto-px, gain: Deckkraft,
+    aa: Vorfilter beim Verkleinern (Anteil der Abtastweite), sharpen=(Stärke, Radius px): Nachschärfen des ganzen Bildes."""
     rng = np.random.default_rng(seed); Hh, Ww = img.shape[:2]; m = MARGIN
     cor = fwd(np.array([[-m, -m], [page.W + m, -m], [page.W + m, page.H + m], [-m, page.H + m]], float))
     x0, y0 = np.maximum(np.floor(cor.min(0)).astype(int), 0)
     x1, y1 = np.minimum(np.ceil(cor.max(0)).astype(int), [Ww, Hh])
-    st = 6; gx, gy = np.meshgrid(np.arange(x0, x1 + st, st), np.arange(y0, y1 + st, st))
+    st = 6; c0 = (st - 1) / 2                     # Stützstellen in Pixelmitte -> kein Versatz durch cv2.resize
+    gx, gy = np.meshgrid(np.arange(x0, x1 + st, st) + c0, np.arange(y0, y1 + st, st) + c0)
     q = inv(np.c_[gx.ravel(), gy.ravel()].astype(float))
     w, h = x1 - x0, y1 - y0
     mx = cv2.resize(((q[:, 0] + m) * RES).reshape(gx.shape).astype(np.float32), (gx.shape[1] * st, gx.shape[0] * st))[:h, :w]
     my = cv2.resize(((q[:, 1] + m) * RES).reshape(gx.shape).astype(np.float32), (gx.shape[1] * st, gx.shape[0] * st))[:h, :w]
     # Anti-Aliasing: Canvas vor dem Abtasten passend zur Verkleinerung weichzeichnen
     ppm = st / max(float(np.median(np.abs(np.diff(q[:, 0].reshape(gx.shape), axis=1)))), 1e-6)   # Foto-px pro mm
-    sig = max(0.0, 0.45 * RES / max(ppm, 1e-6))
+    sig = max(0.0, aa * RES / max(ppm, 1e-6))
     src = cv2.GaussianBlur(page.ink, (0, 0), sig) if sig > 0.3 else page.ink
     a = cv2.remap(src, mx, my, cv2.INTER_LINEAR, borderValue=0)
     a = np.clip(gain * cv2.GaussianBlur(a, (0, 0), blur), 0, 1) ** gamma
     dens = .9 + .2 * cv2.GaussianBlur(rng.random((h, w)).astype(np.float32), (0, 0), 2)
     a = np.clip(a * dens, 0, 1)[..., None]
     out = img.copy(); out[y0:y1, x0:x1] = out[y0:y1, x0:x1] * (1 - a * (1 - np.array(ink_ratio, np.float32)))
+    if sharpen:                                   # leichte Unschärfemaske wie in der Handykamera
+        k, r = sharpen
+        out = out + k * (out - cv2.GaussianBlur(out, (0, 0), r))
     out = np.clip(out, 0, 255).astype(np.uint8)
-    cv2.imwrite(out_path, out, [cv2.IMWRITE_JPEG_QUALITY, 90])
+    if out_path: cv2.imwrite(out_path, out, [cv2.IMWRITE_JPEG_QUALITY, quality])
     return out

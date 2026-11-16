@@ -268,5 +268,6 @@ if __name__ == '__main__':
             p.preview('/tmp/claude-0/-home-user-KOP/a12a72ca-1e1f-5f0a-9d9d-c465b27ff07e/scratchpad/w/flat_%d.png' % n, 0.25)
         else:
             img = heft.load(UP + photo + '-image.jpg')
-            heft.composite(img, p, inv, fwd, 'Seite_%d.jpg' % n, ink_ratio=(0.52, 0.31, 0.32), gamma=1.2, blur=0.7, seed=n)
+            heft.composite(img, p, inv, fwd, 'Seite_%d.jpg' % n, ink_ratio=(0.52, 0.31, 0.32), gamma=1.0, blur=0.4, aa=0.3,
+                           sharpen=(0.25, 1.0), quality=92, seed=n)
         print('Seite', n, 'fertig')
