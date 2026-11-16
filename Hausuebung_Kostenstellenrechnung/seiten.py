@@ -1,0 +1,251 @@
+"""Layout der beiden Heftseiten (Ü 4.26 + Ü 4.28 | Ü 4.27 + Ü 4.29).
+Aufruf: python3 seiten.py preview|final [seite]"""
+import sys, pickle, random, math
+import numpy as np
+import heft
+
+LIB = pickle.load(open('lib.pkl', 'rb'))
+UP = '/root/.claude/uploads/a12a72ca-1e1f-5f0a-9d9d-c465b27ff07e/'
+NODES = '/tmp/claude-0/-home-user-KOP/a12a72ca-1e1f-5f0a-9d9d-c465b27ff07e/scratchpad/w/nodesc_%s.pkl'
+XL, XR = 27.0, 179.0                  # Schreibbereich: rechts vom linken Heftrand bis vor den rechten Rand
+S_TXT, S_TAB, S_HEAD = 0.82, 0.76, 0.95
+LIFT = 0.5                            # Grundlinie leicht über der Karolinie (sonst verschwinden Bodenstriche)
+
+
+class Writer:
+    def __init__(self, p, seed):
+        self.p, self.r = p, random.Random(seed)
+
+    def ang(self, k=1.0):
+        return self.r.uniform(-0.5, 0.5) * k
+
+    def t(self, x, y, s, size=S_TXT, ang=None, jit=0.8):
+        a = self.ang() if ang is None else ang
+        x = x + self.r.uniform(-jit, jit); y = y - LIFT + self.r.uniform(-0.25, 0.2)
+        x1 = self.p.text(x, y, s, size, a)
+        assert XL - 1.5 <= x and x1 <= XR + 1.5, ('außerhalb', s, round(x, 1), round(x1, 1))
+        return x, x1, a
+
+    def rt(self, xr, y, s, size=S_TAB, ang=None, jit=0.6):
+        a = self.ang(0.6) if ang is None else ang
+        xr = xr + self.r.uniform(-jit, jit); y = y - LIFT + self.r.uniform(-0.25, 0.2)
+        x0 = self.p.rtext(xr, y, s, size, a)
+        assert XL - 1.5 <= x0 and xr <= XR + 1.5, ('außerhalb', s)
+        return x0, xr, a
+
+    def ct(self, xa, xb, y, s, size=S_TAB):
+        w = self.p.width(s, size)
+        return self.t((xa + xb) / 2 - w / 2, y, s, size, jit=0.6)
+
+    def hline(self, x1, x2, y, **kw):
+        self.p.line(x1 + self.r.uniform(-.5, .5), y + self.r.uniform(-.2, .2), x2 + self.r.uniform(-.6, .6), y + self.r.uniform(-.25, .25), **kw)
+
+    def vline(self, x, y1, y2, **kw):
+        self.p.line(x + self.r.uniform(-.3, .3), y1 + self.r.uniform(-.4, .4), x + self.r.uniform(-.5, .5), y2 + self.r.uniform(-.4, .4), **kw)
+
+    def heading(self, y, s):
+        x0, x1, a = self.t(XL + 1, y, s, S_HEAD, ang=self.r.uniform(-0.3, 0.5), jit=0.4)
+        tl = math.tan(math.radians(a))
+        self.p.line(x0 - 0.5, y + 1.4, x1 + 1.0, y + 1.4 + (x1 - x0) * tl + self.r.uniform(-.3, .3))
+        return x1
+
+    def frac_line(self, y, label, num, den, res, xlab=XL + 3, size=S_TAB):
+        """label: Bruch = Ergebnis (Ergebnis doppelt unterstrichen)"""
+        a = self.ang(0.5)
+        x0, x1, _ = self.t(xlab, y, label, S_TXT, ang=a, jit=0.6)
+        xf = self.p.frac(x1 + 3, y, num, den, size, a)
+        x2, x3, _ = self.t(xf + 1.5, y, '= ' + res, S_TXT, ang=a, jit=0.3)
+        xs = x2 + self.p.width('= ', S_TXT) + 0.8
+        self.p.underline(xs, x3, y + 0.2, double=True)
+        return x1, xf, x3
+
+    def bab(self, y_head, spans, heads, rows, sum_before, label_w, size=S_TAB):
+        """Handgezeichneter BAB. spans: (xa, xb) der Zahlenspalten; rows: (Label, [Werte...])."""
+        p = self.p
+        self.t(XL + 1, y_head - 0.4, 'Kostenart', size, jit=0.4)
+        for (xa, xb), h in zip(spans, heads):
+            self.ct(xa, xb, y_head - 0.4, h, size * 0.92)
+        self.hline(XL - 0.5, XR + 0.5, y_head + 0.2)
+        y_end = y_head + 5 * len(rows) + 1.6
+        for xa in [XL + label_w] + [s[0] for s in spans[1:]]:
+            self.vline(xa, y_head - 5.6, y_end)
+        for k, (lab, vals) in enumerate(rows):
+            y = y_head + 5 * (k + 1)
+            if k == sum_before:
+                self.hline(XL - 0.5, XR + 0.5, y - 4.8)
+            ls = size * (0.92 if len(lab) > 15 else 1.0)
+            self.t(XL + 1, y - 0.4, lab, ls, jit=0.5)
+            last = k == len(rows) - 1
+            for (xa, xb), v in zip(spans, vals):
+                if not v: continue
+                x0, x1, a = self.rt(xb - 2.8, y - 0.4, v, size)
+                if last:
+                    self.p.underline(x0, x1, y - 0.2, double=True)
+        return y_end
+
+    def schema(self, y0, lines, x_pct, x_amt, pitch=5.0, lsize=0.72):
+        """Kalkulationsschema. lines: (op, Label, Prozent, Betrag, Strich_davor, Endergebnis)"""
+        ys = {}
+        for k, (op, lab, pct, amt, bar, final) in enumerate(lines):
+            y = y0 + pitch * k
+            a = self.ang(0.7)
+            if bar:
+                self.hline(x_amt - 20, x_amt + 1.5, y - 4.8)
+            if op:
+                self.t(XL + 1.2, y - 0.3, op, S_TXT, ang=a, jit=0.3)
+            self.t(XL + 6, y - 0.3, lab, lsize, ang=a, jit=0.6)
+            if pct:
+                self.rt(x_pct, y - 0.3, pct, 0.7, ang=a, jit=0.5)
+            x0, x1, _ = self.rt(x_amt, y - 0.3, amt, 0.7, ang=a, jit=0.4)
+            if final:
+                self.p.underline(x0, x1, y - 0.1, double=True)
+            ys[lab] = (y, x1)
+        return ys
+
+    def add_column(self, xr, y0, nums, res, size=0.72):
+        """Untereinander-Addition, rechtsbündig. Gibt (x0, x1, y) des Ergebnisses zurück."""
+        for k, n in enumerate(nums):
+            y = y0 + 5 * k
+            x0, x1, a = self.rt(xr, y - 0.3, n, size, jit=0.3)
+            if k > 0:
+                self.t(xr - self.p.width(max(nums, key=len), size) - 5.5, y - 0.3, '+', size, jit=0.3)
+        y = y0 + 5 * len(nums)
+        self.hline(xr - self.p.width(max(nums, key=len), size) - 6.5, xr + 1.2, y - 4.8)
+        x0, x1, a = self.rt(xr, y - 0.3, res, size, jit=0.3)
+        return x0, x1, y
+
+
+# ===================================================================== Seite 1
+def seite1(p):
+    w = Writer(p, 11)
+    w.heading(15, 'Ü 4.26 Betriebsabrechnungsbogen')
+    w.t(XL + 1, 25, 'Lohnnebenkosten:')
+    w.t(XL + 6, 30, 'Fertigung 1: 28.500 · 85 % = 24.225')
+    w.t(XL + 6, 35, 'Fertigung 2: 11.000 · 85 % = 9.350')
+    w.t(XL + 1, 40, 'Gehaltsnebenkosten:')
+    w.t(XL + 6, 45.3, 'Material: 6.500 · 45 % = 2.925', ang=0.15)
+    w.t(XL + 6, 51, 'Verwaltung: 12.000 · 45 % = 5.400', ang=-0.1)
+
+    lw = 44
+    cw = (XR - XL - lw) / 4
+    spans = [(XL + lw + i * cw, XL + lw + (i + 1) * cw) for i in range(4)]
+    rows = [('Hilfslöhne', ['', '', '11.000', '']),
+            ('Lohnnebenkosten', ['', '24.225', '9.350', '']),
+            ('Gehälter', ['6.500', '', '', '12.000']),
+            ('Gehaltsnebenkosten', ['2.925', '', '', '5.400']),
+            ('Energie', ['1.000', '3.500', '3.300', '700']),
+            ('Reinigung', ['800', '500', '900', '800']),
+            ('diverse Kosten', ['16.000', '63.000', '32.000', '9.000']),
+            ('Summe Gemeinkosten', ['27.225', '91.225', '56.550', '27.900']),
+            ('Zuschlagsbasis', ['72.000', '28.500', '1.300', '275.500']),
+            ('Zuschlagssatz', ['37,81 %', '320,09 %', '43,50 €', '10,13 %'])]
+    w.bab(60, spans, ['Material', 'Fertigung 1', 'Fertigung 2', 'Verwaltung'], rows, 7, lw, size=0.74)
+
+    w.t(XL + 1, 121, 'Zuschlagssätze:')
+    w.t(141, 120.5, 'Herstellkosten:', S_TAB * 0.95, jit=0.3)
+    hx0, hx1, hy = w.add_column(176, 127, ['72.000', '27.225', '28.500', '91.225', '56.550'], '275.500')
+    w.frac_line(131, 'Material:', '27.225 · 100', '72.000', '37,81 %')
+    w.frac_line(144, 'Fertigung 1:', '91.225 · 100', '28.500', '320,09 %')
+    w.t(XL + 3, 158, 'Maschinenstundensatz Fertigung 2:')
+    _, _, x3 = w.frac_line(169, '', '56.550', '1.300', '43,50 €', xlab=XL + 9)
+    w.t(x3 + 3, 169, 'je Maschinenstunde', jit=0.3)
+    xl, xf, xe = w.frac_line(183, 'Verwaltung:', '27.900 · 100', '275.500', '10,13 %')
+    p.arrow((hx0 + 6, hy + 1.6), (xf - 1.5, 187.4), via=[(hx1 + 1, hy + 9), (hx0 + 4, 185), (xf + 12, 190.5)])
+
+    w.hline(XL - 1, XR + 1, 195)
+    w.heading(203, 'Ü 4.28 Zuschlagskalkulation')
+    _, xe, _ = w.t(XL + 1, 212, 'Fertigungslöhne je Stück: 13,30 · 195 : 60 = 43,225')
+    lines = [('', 'Materialeinzelkosten', '', '25,00', False, False),
+             ('+', 'Materialgemeinkosten', '38 %', '9,50', False, False),
+             ('=', 'Materialkosten', '', '34,50', True, False),
+             ('', 'Fertigungslöhne', '', '43,23', False, False),
+             ('+', 'Fertigungsgemeinkosten', '320 %', '138,32', False, False),
+             ('=', 'Fertigungskosten', '', '181,55', True, False),
+             ('=', 'Herstellkosten', '', '216,05', False, False),
+             ('+', 'Verwaltungsgemeinkosten', '7 %', '15,12', False, False),
+             ('+', 'Vertriebsgemeinkosten', '5 %', '10,80', False, False),
+             ('=', 'Selbstkosten', '', '241,97', True, True)]
+    ys = w.schema(222, lines, 104, 138)
+    yf, xa = ys['Fertigungslöhne']
+    p.arrow((xe - 3, 213.6), (xa + 1.5, yf - 1.8), via=[(xe + 0.5, 219), (xa + 12, yf - 3.2)])
+    return p
+
+
+# ===================================================================== Seite 2
+def seite2(p):
+    w = Writer(p, 23)
+    w.heading(15, 'Ü 4.27 Betriebsabrechnungsbogen')
+    w.t(XL + 1, 25, 'Lohnnebenkosten Fertigung: 790.000 · 87 % = 687.300')
+    w.t(XL + 1, 30, 'Gehaltsnebenkosten:')
+    w.t(XL + 6, 35, 'Material: 95.300 · 55 % = 52.415')
+    w.t(XL + 6, 40, 'Fertigung: 157.800 · 55 % = 86.790')
+    w.t(XL + 6, 45, 'Verwaltung: 265.500 · 55 % = 146.025')
+
+    lw = 44
+    cw = (XR - XL - lw) / 3
+    spans = [(XL + lw + i * cw, XL + lw + (i + 1) * cw) for i in range(3)]
+    rows = [('Lohnnebenkosten', ['', '687.300', '']),
+            ('Gehälter', ['95.300', '157.800', '265.500']),
+            ('Gehaltsnebenkosten', ['52.415', '86.790', '146.025']),
+            ('Energiekosten', ['120.500', '190.000', '75.600']),
+            ('Raumkosten', ['76.100', '200.500', '55.400']),
+            ('Abschreibungen', ['35.000', '480.700', '115.500']),
+            ('sonstige Kosten', ['85.100', '260.000', '115.000']),
+            ('Summe Gemeinkosten', ['464.415', '2.063.090', '773.025']),
+            ('Zuschlagsbasis', ['980.000', '790.000', '4.297.505']),
+            ('Zuschlagssatz', ['47,39 %', '261,15 %', '17,99 %'])]
+    w.bab(55, spans, ['Material', 'Fertigung', 'Verwaltung'], rows, 7, lw)
+
+    w.t(XL + 1, 115, 'Zuschlagssätze:')
+    w.t(141, 114, 'Herstellkosten:', S_TAB * 0.95, jit=0.3)
+    hx0, hx1, hy = w.add_column(176, 119, ['980.000', '464.415', '790.000', '2.063.090'], '4.297.505')
+    w.frac_line(124, 'Material:', '464.415 · 100', '980.000', '47,39 %')
+    w.frac_line(137, 'Fertigung:', '2.063.090 · 100', '790.000', '261,15 %')
+    xl, xf, xe = w.frac_line(150, 'Verwaltung:', '773.025 · 100', '4.297.505', '17,99 %')
+    p.arrow((hx0 + 2, hy + 1.6), (xf - 1.5, 155.4), via=[(hx0 - 2, hy + 11), (xf + 14, 160.0)])
+
+    w.hline(XL - 1, XR + 1, 163)
+    w.heading(171, 'Ü 4.29 Zuschlagskalkulation')
+    lines = [('', 'Materialeinzelkosten', '', '31,00', False, False),
+             ('+', 'Materialgemeinkosten', '25 %', '7,75', False, False),
+             ('=', 'Materialkosten', '', '38,75', True, False),
+             ('', 'Fertigungslöhne 1', '', '23,83', False, False),
+             ('+', 'Fertigungsgemeinkosten 1', '340 %', '81,03', False, False),
+             ('', 'Fertigungslöhne 2', '', '14,25', False, False),
+             ('+', 'Fertigungsgemeinkosten 2', '424 %', '60,42', False, False),
+             ('=', 'Herstellkosten', '', '218,29', True, False),
+             ('+', 'Verwaltungsgemeinkosten', '6 %', '13,10', False, False),
+             ('+', 'Vertriebsgemeinkosten', '7 %', '15,28', False, False),
+             ('=', 'Selbstkosten', '', '246,66', True, False),
+             ('+', 'Gewinnaufschlag', '20 %', '49,33', False, False),
+             ('=', 'Nettoverkaufspreis', '', '296,00', True, False),
+             ('+', 'Umsatzsteuer', '20 %', '59,20', False, False),
+             ('=', 'Bruttoverkaufspreis', '', '355,20', True, True)]
+    ys = w.schema(181, lines, 106, 139)
+    # Nebenrechnungen rechts neben dem Schema, Ergebnis auf Höhe der Zeile, kurzer Pfeil hinein
+    for lab, nr, res in (('Fertigungslöhne 1', '13,00·110:60', '23,83'), ('Fertigungslöhne 2', '11,40·75:60', '14,25')):
+        y, xa = ys[lab]
+        w.t(145, y - 5.3, nr, 0.66, jit=0.4)
+        x0, x1, _ = w.t(150, y - 0.3, '= ' + res, 0.66, jit=0.4)
+        p.arrow((x0 - 1.0, y - 1.4), (xa + 1.3, y - 1.6), bend=0.25)
+    return p
+
+
+PAGES = {1: ('bec61ce8', seite1, 101), 2: ('bd38cdaa', seite2, 202)}
+
+if __name__ == '__main__':
+    mode = sys.argv[1] if len(sys.argv) > 1 else 'preview'
+    which = [int(a) for a in sys.argv[2:]] or [1, 2]
+    for n in which:
+        photo, fn, seed = PAGES[n]
+        nodes = pickle.load(open(NODES % photo, 'rb'))['nodes']
+        inv, fwd, Wm, Hm = heft.grid_mapping(nodes)
+        p = heft.Page(LIB['lib'], LIB['pxmm'], Wm, Hm, seed=seed)
+        fn(p)
+        pickle.dump(p.ink, open('/tmp/claude-0/-home-user-KOP/a12a72ca-1e1f-5f0a-9d9d-c465b27ff07e/scratchpad/w/ink_%d.pkl' % n, 'wb'))
+        if mode == 'preview':
+            p.preview('/tmp/claude-0/-home-user-KOP/a12a72ca-1e1f-5f0a-9d9d-c465b27ff07e/scratchpad/w/flat_%d.png' % n, 0.25)
+        else:
+            img = heft.load(UP + photo + '-image.jpg')
+            heft.composite(img, p, inv, fwd, 'Seite_%d.jpg' % n, ink_ratio=(0.52, 0.31, 0.32), gamma=1.2, blur=0.7, seed=n)
+        print('Seite', n, 'fertig')
