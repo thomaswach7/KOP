@@ -177,6 +177,7 @@ export const STRINGS = {
     'toast.limit': 'Die kostenlose Version erlaubt {max} Positionen je Angebot. Mit Pro sind es unbegrenzt viele.',
     'toast.saved': 'Einstellungen gespeichert.',
     'toast.csvPro': 'Der CSV-Export ist eine Pro-Funktion.',
+    'toast.printBlocked': 'Das Drucken wurde blockiert – vermutlich, weil die App eingebettet angezeigt wird. Öffnen Sie KerfQuote direkt im Browser.',
 
     'err.binary': '{file}: Binäres DXF wird nicht unterstützt. Bitte als ASCII-DXF speichern.',
     'err.invalid': '{file}: Das ist keine lesbare DXF-Datei.',
@@ -380,6 +381,7 @@ export const STRINGS = {
     'toast.limit': 'The free version allows {max} items per quote. Pro has no limit.',
     'toast.saved': 'Settings saved.',
     'toast.csvPro': 'CSV export is a Pro feature.',
+    'toast.printBlocked': 'Printing was blocked – probably because the app is shown embedded. Open KerfQuote directly in the browser.',
 
     'err.binary': '{file}: Binary DXF is not supported. Please save as ASCII DXF.',
     'err.invalid': '{file}: This is not a readable DXF file.',

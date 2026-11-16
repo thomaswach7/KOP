@@ -182,9 +182,9 @@
       <h2 id="dlg-settings-h" data-i18n="settings.title">Einstellungen</h2>
     </div>
     <div class="dlg-body" id="settings-body"></div>
-    <form method="dialog" class="dlg-foot">
-      <button class="btn btn-primary" value="close" data-i18n="btn.close">Schließen</button>
-    </form>
+    <div class="dlg-foot">
+      <button type="button" class="btn btn-primary" data-close-dialog data-i18n="btn.close">Schließen</button>
+    </div>
   </dialog>
 
   <dialog id="dlg-license" class="dlg-narrow" aria-labelledby="dlg-license-h">
@@ -205,9 +205,9 @@
         <button type="button" class="btn btn-danger" id="btn-remove-license" data-i18n="license.remove" hidden>Lizenz entfernen</button>
       </div>
     </div>
-    <form method="dialog" class="dlg-foot">
-      <button class="btn" value="close" data-i18n="btn.close">Schließen</button>
-    </form>
+    <div class="dlg-foot">
+      <button type="button" class="btn" data-close-dialog data-i18n="btn.close">Schließen</button>
+    </div>
   </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>

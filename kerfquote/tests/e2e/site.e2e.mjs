@@ -159,7 +159,7 @@ test('Barrierefreiheit (axe-core, WCAG 2.1 A/AA): keine Verstöße auf allen Sei
     await scan(page, `Einstellungen Materialien ${colorScheme}`);
     await page.locator('#dlg-settings summary', { hasText: 'Sicherung' }).click();
     await scan(page, `Einstellungen Sicherung ${colorScheme}`);
-    await page.locator('#dlg-settings button[value="close"]').click();
+    await page.locator('#dlg-settings [data-close-dialog]').click();
     await page.click('#btn-license');
     await page.fill('#license-key', 'falsch');
     await page.click('#btn-activate');

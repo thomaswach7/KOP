@@ -28,13 +28,19 @@ Einordnung der Chancen und Risiken:
 
 ## Schnellstart
 
+**Ohne Installation:** `standalone/kerfquote.html` per Doppelklick öffnen. Die Datei enthält die komplette App samt Beispielteilen, lädt nichts nach und läuft auch ohne Internet. Sie eignet sich zum Ausprobieren und zum Vorführen beim Kunden; Startseite und Rechtstexte sind darin nicht enthalten.
+
+**Mit Node (Entwicklung, komplette Website):**
+
 ```bash
 cd kerfquote
 node tools/serve.mjs          # http://localhost:8080/  (App unter /app/)
-node --test                   # Logik-Tests, keine Abhängigkeiten
+node --test                   # Logik-Tests
+npm install                   # nur für die Einzeldatei: lädt das Build-Werkzeug esbuild
+npm run build:standalone      # erzeugt standalone/kerfquote.html neu
 ```
 
-Die App nutzt ES-Module und lässt sich deshalb nicht per Doppelklick (`file://`) öffnen – immer über einen Webserver.
+Die Website selbst nutzt ES-Module und lässt sich deshalb nicht per Doppelklick (`file://`) öffnen – dafür gibt es die Einzeldatei. Nach jeder Änderung an `src/`, `assets/` oder `app/index.html` die Einzeldatei neu erzeugen; ein Test meldet, wenn sie veraltet ist.
 
 ## Pflichtschritte vor der Veröffentlichung
 
@@ -55,7 +61,7 @@ Der Ordner `kerfquote/` ist die fertige Website (kein Build-Schritt nötig). Emp
 - **Netlify / Cloudflare Pages:** Repository verbinden, als Basis- bzw. Ausgabeverzeichnis `kerfquote` angeben, Build-Befehl leer lassen.
 - **GitHub Pages:** eigenes Repository mit dem Inhalt von `kerfquote/` im Wurzelverzeichnis, Pages auf den Hauptzweig stellen.
 
-Alle Pfade sind relativ, die Seite funktioniert auch in einem Unterverzeichnis. Nicht ausliefern müssen Sie `tests/`, `tools/` und `package.json`; sie schaden aber nicht.
+Alle Pfade sind relativ, die Seite funktioniert auch in einem Unterverzeichnis. Nicht ausliefern müssen Sie `tests/`, `tools/`, `package.json` und `package-lock.json`; sie schaden aber nicht. Der Ordner `node_modules/` gehört nicht auf den Webserver.
 
 ## Lizenzen verkaufen
 
@@ -95,14 +101,18 @@ Bekannte Grenzen:
 - Überlappende, aber nicht deckungsgleiche Linien werden nicht als Duplikat erkannt.
 - Enthält eine Datei mehrere Teile, gilt der Preis für alle zusammen als ein Stück (mit Hinweis).
 - Das Angebot lebt im geöffneten Tab; nach dem Neuladen sind die Positionen weg. Einstellungen und Lizenz bleiben gespeichert.
+- Eingebettet in eine fremde Seite (iframe) können Drucken und Datei-Export vom umgebenden Rahmen gesperrt sein. Blockiertes Drucken meldet die App; einen gesperrten Datei-Export kann sie nicht erkennen.
 
 ## Tests
 
 ```bash
-node --test                          # Logik: Parser, Geometrie, Kalkulation, Lizenz, Formate
-node --test tests/e2e/app.e2e.mjs    # App im echten Browser (benötigt Playwright)
-node --test tests/e2e/site.e2e.mjs   # Startseiten, Links, Barrierefreiheit (axe-core optional)
+node --test                                 # Logik: Parser, Geometrie, Kalkulation, Lizenz, Formate, Einzeldatei-Build
+node --test tests/e2e/app.e2e.mjs           # App im echten Browser (benötigt Playwright)
+node --test tests/e2e/site.e2e.mjs          # Startseiten, Links, Barrierefreiheit (axe-core optional)
+node --test tests/e2e/standalone.e2e.mjs    # Einzeldatei: direkt als Datei geöffnet und in einem abgeschotteten Rahmen
 ```
+
+Die Tests zum Einzeldatei-Build brauchen esbuild (`npm install`); ohne werden sie übersprungen.
 
 Die Geometrie wird gegen eine zweite, unabhängige Implementierung geprüft: `tools/make-samples.py` erzeugt die Beispiel-Dateien mit der Python-Bibliothek ezdxf und schreibt deren Referenzwerte nach `tests/reference.json`. Zusätzlich sind die einfachen Teile analytisch nachgerechnet. Die Browser-Tests vergleichen jeden angezeigten Preis mit dem Rechenmodell.
 
@@ -111,12 +121,13 @@ Die Geometrie wird gegen eine zweite, unabhängige Implementierung geprüft: `to
 ```
 index.html, en/index.html   Startseiten (erzeugt von tools/build-landing.mjs)
 app/index.html              die Anwendung
+standalone/kerfquote.html   die Anwendung als eine Datei (erzeugt von tools/build-standalone.mjs)
 src/dxf/                    DXF lesen (parse), in Linien/Bögen umwandeln (flatten), dekodieren
 src/geom/analyze.js         Konturen verketten, Fläche, Einstiche, Abmessungen
 src/cost/                   Rechenmodell, Standardwerte, Prüfung der Einstellungen
 src/license.js              Lizenzprüfung (ECDSA P-256, Web Crypto)
 src/ui/                     Oberfläche: App, Einstellungen, Angebotsdokument, CSV
-tools/                      Lizenzwerkzeug, Entwicklungsserver, Startseiten-Generator
+tools/                      Lizenzwerkzeug, Entwicklungsserver, Generatoren für Startseiten und Einzeldatei
 samples/                    Beispiel- und Testdateien
 ```
 

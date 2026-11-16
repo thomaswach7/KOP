@@ -15,6 +15,7 @@ import { quoteCsv } from './csv.js';
 import { renderQuoteDoc } from './quote-doc.js';
 import { createSettingsDialog } from './settings-dialog.js';
 import { KEYS, load, save, remove } from '../store.js';
+import { loadSample } from './samples.js';
 
 const UNIT_CHOICES = ['mm', 'cm', 'm', 'in', 'ft'];
 
@@ -122,9 +123,7 @@ function addSamples() {
     name,
     read: async (errors) => {
       try {
-        const res = await fetch(new URL(`../../samples/${name}`, import.meta.url));
-        if (!res.ok) throw new Error(String(res.status));
-        return await res.text();
+        return await loadSample(name);
       } catch {
         if (!errors.includes(t('err.sample'))) errors.push(t('err.sample'));
         return null;
@@ -322,7 +321,8 @@ function applyLanguage() {
   document.title = t('app.title');
   for (const el of document.querySelectorAll('[data-i18n]')) el.textContent = t(el.dataset.i18n);
   $('#preview').setAttribute('aria-label', t('detail.preview'));
-  $('#brand-link').setAttribute('aria-label', `KerfQuote – ${t('nav.home')}`);
+  const brand = $('#brand-link');
+  brand.setAttribute('aria-label', brand.getAttribute('href') === '#' ? 'KerfQuote' : `KerfQuote – ${t('nav.home')}`);
   $('#lang').value = state.lang;
   renderPlan();
   renderLicense();
@@ -340,7 +340,18 @@ function printQuote() {
   const title = document.title;
   document.title = `${t('doc.title')} ${state.quote.number}`.trim();
   window.addEventListener('afterprint', () => { document.title = title; }, { once: true });
+  // Jeder Browser meldet einen geöffneten Druckdialog mit „beforeprint“. Bleibt das aus, wurde der
+  // Aufruf stillschweigend verworfen – etwa in einem eingebetteten Rahmen ohne Druckrecht.
+  let started = false;
+  const onStart = () => { started = true; };
+  window.addEventListener('beforeprint', onStart, { once: true });
   window.print();
+  setTimeout(() => {
+    window.removeEventListener('beforeprint', onStart);
+    if (started) return;
+    document.title = title;
+    toast(t('toast.printBlocked'), true);
+  }, 1000);
 }
 
 function exportCsv() {
@@ -525,6 +536,10 @@ function bindEvents() {
   });
 
   $('#btn-sample').addEventListener('click', addSamples);
+  // Schließen per Skript statt per <form method="dialog">: In eingebetteten Rahmen sind Formulare oft gesperrt
+  for (const button of document.querySelectorAll('[data-close-dialog]')) {
+    button.addEventListener('click', () => button.closest('dialog').close());
+  }
   $('#btn-settings').addEventListener('click', () => settingsDialog.open());
   $('#btn-license').addEventListener('click', openLicense);
   $('#btn-unlock').addEventListener('click', openLicense);

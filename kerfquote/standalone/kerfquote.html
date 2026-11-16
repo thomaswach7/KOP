@@ -1,0 +1,7155 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data: blob:; style-src 'sha256-/u2YPaRlEuFuTkZzvPjguywTsnUrHP8m3WHyIjp6VO4='; script-src 'sha256-JacUz1HnONNSD3v6tZJeGVgdtyil+t8W3mivoHF8zGs='; base-uri 'none'">
+  <meta name="robots" content="noindex">
+  <title>KerfQuote – Zuschnitt-Kalkulation aus DXF</title>
+  <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iNyIgZmlsbD0iI2MyNDEwYyIvPjxwYXRoIGQ9Ik04IDIzIEwxNyA5IiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PHBhdGggZD0iTTE5LjUgMjMgTDI0IDE2IiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBvcGFjaXR5PSIuNTUiLz48Y2lyY2xlIGN4PSIxNyIgY3k9IjkiIHI9IjIuNiIgZmlsbD0iI2ZmZDljMiIvPjwvc3ZnPgo=" type="image/svg+xml">
+  <style>/* KerfQuote – gemeinsame Gestaltungsgrundlage für Startseite und App.
+   Keine externen Schriften oder Dateien: schnell, datensparsam, DSGVO-freundlich. */
+
+:root {
+  color-scheme: light dark;
+  --bg: #f4f3ef;
+  --surface: #ffffff;
+  --surface-2: #faf9f6;
+  --ink: #15171c;
+  --muted: #5a6170;
+  --line: #dedbd3;
+  --accent: #c2410c;
+  --accent-ink: #ffffff;
+  --accent-soft: #fdeee6;
+  --ok: #15803d;
+  --warn: #b45309;
+  --danger: #b91c1c;
+  --info: #1d4ed8;
+  --c-outer: #15171c;
+  --c-inner: #1d4ed8;
+  --c-open: #dc2626;
+  --c-fill: #e3e6ec;
+  --radius: 10px;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.06), 0 8px 24px rgb(0 0 0 / 0.06);
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+  accent-color: var(--accent);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #101216;
+    --surface: #181b21;
+    --surface-2: #1e222a;
+    --ink: #eceef2;
+    --muted: #a3aab8;
+    --line: #2d323c;
+    --accent: #ff8a4c;
+    --accent-ink: #1c0f07;
+    --accent-soft: #33200f;
+    --ok: #4ade80;
+    --warn: #fbbf24;
+    --danger: #f87171;
+    --info: #7aa7ff;
+    --c-outer: #eceef2;
+    --c-inner: #7aa7ff;
+    --c-open: #ff6b6b;
+    --c-fill: #2a2f39;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.35);
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* hidden muss auch gegen display-Angaben von Klassen gewinnen */
+[hidden] { display: none !important; }
+
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--bg);
+}
+
+h1, h2, h3 { line-height: 1.2; margin: 0; text-wrap: balance; overflow-wrap: break-word; }
+p { margin: 0; }
+a { color: var(--accent); }
+img, svg { max-width: 100%; }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+
+.muted { color: var(--muted); }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* --- Marke ------------------------------------------------------------------ */
+
+.brand {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-weight: 700; font-size: 1.15rem; letter-spacing: -0.01em;
+  color: var(--ink); text-decoration: none;
+}
+.brand svg { width: 30px; height: 30px; flex: none; }
+
+/* --- Schaltflächen ---------------------------------------------------------- */
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 40px; padding: 8px 14px;
+  font: inherit; font-weight: 600; text-decoration: none; cursor: pointer;
+  color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 8px;
+}
+.btn:hover { border-color: var(--muted); }
+.btn-primary { color: var(--accent-ink); background: var(--accent); border-color: var(--accent); }
+.btn-primary:hover { filter: brightness(1.08); border-color: var(--accent); }
+.btn-ghost { background: transparent; }
+.btn-danger { color: var(--danger); }
+.btn-lg { min-height: 48px; padding: 12px 22px; font-size: 1.05rem; }
+.btn[aria-disabled="true"] { opacity: 0.6; }
+
+.link {
+  padding: 0; font: inherit; font-weight: 600; cursor: pointer;
+  color: var(--accent); background: none; border: 0; text-decoration: underline;
+}
+
+.tag {
+  display: inline-block; padding: 1px 7px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em;
+  color: var(--accent-ink); background: var(--accent); border-radius: 999px;
+}
+/* KerfQuote – Oberfläche der Kalkulations-App */
+
+.topbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--line);
+}
+.topbar-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.topbar-actions select { width: auto; }
+.btn-plan[data-plan="pro"] { color: var(--accent-ink); background: var(--accent); border-color: var(--accent); }
+
+.layout {
+  display: grid; gap: 16px; align-items: start;
+  grid-template-columns: minmax(250px, 300px) minmax(0, 1fr) minmax(300px, 370px);
+  max-width: 1640px; margin-inline: auto; padding: 16px;
+}
+@media (max-width: 1150px) {
+  .layout { grid-template-columns: minmax(240px, 300px) minmax(0, 1fr); }
+  .quote { grid-column: 1 / -1; }
+}
+@media (max-width: 760px) {
+  .layout { grid-template-columns: minmax(0, 1fr); padding: 10px; }
+}
+
+.panel {
+  display: grid; gap: 14px; padding: 16px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+}
+.panel h2 { font-size: 1.1rem; }
+.panel h3 { font-size: 0.82rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.stack { display: grid; gap: 10px; }
+.hint { font-size: 0.82rem; color: var(--muted); }
+
+/* --- Formularfelder --------------------------------------------------------- */
+
+.field { display: grid; gap: 4px; min-width: 0; align-content: start; }
+.field > label, .field > .label { font-size: 0.82rem; font-weight: 600; color: var(--muted); }
+input[type="text"], input[type="number"], input[type="date"], select, textarea {
+  width: 100%; min-height: 40px; padding: 8px 10px;
+  font: inherit; color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 8px;
+}
+textarea { min-height: 76px; resize: vertical; }
+input[type="number"] { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+:is(input, select, textarea):user-invalid { border-color: var(--danger); background: color-mix(in srgb, var(--danger) 8%, var(--surface)); }
+.field-error { display: block; font-size: 0.82rem; font-weight: 600; color: var(--danger); }
+.field-error::before { content: "⚠ "; }
+.form-grid { display: grid; gap: 10px; align-items: start; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+
+/* --- Teileliste ------------------------------------------------------------- */
+
+.dropzone {
+  display: grid; justify-items: center; gap: 4px; padding: 20px 12px; text-align: center; cursor: pointer;
+  background: var(--surface-2); border: 2px dashed var(--line); border-radius: var(--radius);
+}
+.dropzone:hover, .dropzone.is-over { border-color: var(--accent); background: var(--accent-soft); }
+.dropzone:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
+.dropzone svg { width: 34px; height: 34px; color: var(--accent); }
+.dropzone-title { font-weight: 600; }
+.dropzone-hint { font-size: 0.8rem; color: var(--muted); }
+
+.part-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.part-item { display: flex; align-items: stretch; gap: 4px; }
+.part-select {
+  flex: 1; min-width: 0; display: grid; gap: 2px; padding: 9px 11px; text-align: left; cursor: pointer;
+  font: inherit; color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 8px;
+}
+.part-select[aria-current="true"] { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); background: var(--accent-soft); }
+.part-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.part-meta { font-size: 0.8rem; color: var(--muted); }
+.part-remove {
+  flex: none; width: 40px; cursor: pointer; font-size: 1.2rem; line-height: 1;
+  color: var(--muted); background: transparent; border: 1px solid transparent; border-radius: 8px;
+}
+.part-remove:hover { color: var(--danger); border-color: var(--line); }
+.privacy { display: flex; gap: 8px; font-size: 0.8rem; color: var(--muted); }
+.privacy::before { content: "🔒"; }
+
+/* --- Detailbereich ---------------------------------------------------------- */
+
+.empty-state { display: grid; justify-items: center; gap: 10px; padding: 48px 16px; text-align: center; }
+.empty-state h2 { font-size: 1.5rem; }
+.empty-state p { max-width: 46ch; color: var(--muted); }
+.empty-state svg { width: 120px; height: 120px; color: var(--accent); }
+
+.preview-box { margin: 0; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-2); overflow: hidden; }
+.preview { display: grid; place-items: center; padding: 10px; height: clamp(220px, 38vh, 420px); }
+.preview svg { width: 100%; height: 100%; }
+.pv-fill { fill: var(--c-fill); stroke: none; }
+.pv-outer, .pv-inner, .pv-open { fill: none; stroke-width: 1.6; vector-effect: non-scaling-stroke; stroke-linejoin: round; stroke-linecap: round; }
+.pv-outer { stroke: var(--c-outer); }
+.pv-inner { stroke: var(--c-inner); }
+.pv-open { stroke: var(--c-open); stroke-width: 2.4; stroke-dasharray: 7 4; }
+.pv-gap { fill: var(--c-open); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; padding: 8px 12px; font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--line); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 18px; height: 0; border-top: 3px solid; }
+.legend .l-outer { border-color: var(--c-outer); }
+.legend .l-inner { border-color: var(--c-inner); }
+.legend .l-open { border-color: var(--c-open); border-top-style: dashed; }
+
+.metrics { display: grid; gap: 8px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); margin: 0; }
+.metric { padding: 9px 11px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; }
+.metric dt { font-size: 0.75rem; font-weight: 600; color: var(--muted); }
+.metric dd { margin: 0; font-variant-numeric: tabular-nums; font-size: 1.02rem; font-weight: 700; overflow-wrap: anywhere; }
+
+.warnings { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.warnings li { display: flex; gap: 8px; padding: 8px 10px; font-size: 0.9rem; border: 1px solid var(--line); border-left-width: 4px; border-radius: 8px; background: var(--surface-2); }
+.warnings li::before { flex: none; font-weight: 700; }
+.warnings .w-warn { border-left-color: var(--warn); }
+.warnings .w-warn::before { content: "⚠"; color: var(--warn); }
+.warnings .w-info { border-left-color: var(--info); }
+.warnings .w-info::before { content: "ℹ"; color: var(--info); }
+.warnings .w-ok { border-left-color: var(--ok); }
+.warnings .w-ok::before { content: "✓"; color: var(--ok); }
+
+.layers { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.layers label { display: flex; align-items: center; gap: 8px; padding: 6px 4px; cursor: pointer; }
+.layers input { width: 18px; height: 18px; flex: none; }
+.layer-name { font-weight: 600; overflow-wrap: anywhere; }
+.layer-info { margin-left: auto; font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+
+.two-col { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+
+table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+th, td { padding: 6px 4px; text-align: left; border-bottom: 1px solid var(--line); }
+th { font-size: 0.75rem; font-weight: 700; color: var(--muted); }
+td.r, th.r { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr.sum td { font-weight: 700; border-bottom: 0; }
+tr.is-current td { background: var(--accent-soft); font-weight: 700; }
+.notice { padding: 10px 12px; border: 1px solid var(--warn); border-radius: 8px; background: var(--surface-2); }
+
+/* --- Angebot ---------------------------------------------------------------- */
+
+.totals { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; margin: 0; }
+.totals dt { color: var(--muted); }
+.totals dd { margin: 0; text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.totals .grand { padding-top: 6px; font-weight: 700; font-size: 1.15rem; color: var(--ink); border-top: 2px solid var(--ink); }
+.actions { display: grid; gap: 8px; }
+.free-note { padding: 10px 12px; font-size: 0.85rem; color: var(--muted); background: var(--surface-2); border: 1px dashed var(--line); border-radius: 8px; }
+.quote-table td:nth-child(2) { overflow-wrap: anywhere; }
+
+/* --- Dialoge ---------------------------------------------------------------- */
+
+dialog {
+  width: min(760px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); padding: 0;
+  color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow);
+}
+dialog[open] { display: flex; flex-direction: column; }
+dialog:modal { overscroll-behavior: contain; }
+dialog::backdrop { background: rgb(0 0 0 / 0.45); overflow: hidden; overscroll-behavior: contain; }
+.dlg-narrow { width: min(520px, calc(100vw - 24px)); }
+.dlg-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.dlg-head h2 { font-size: 1.15rem; }
+.dlg-body { display: grid; gap: 14px; align-content: start; padding: 16px 18px; overflow-y: auto; overscroll-behavior: contain; }
+.dlg-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 18px; border-top: 1px solid var(--line); }
+
+details.sect { border: 1px solid var(--line); border-radius: var(--radius); }
+details.sect > summary { padding: 11px 14px; font-weight: 700; cursor: pointer; }
+details.sect[open] > summary { border-bottom: 1px solid var(--line); }
+.sect-body { display: grid; gap: 12px; padding: 14px; }
+.mat { border: 1px solid var(--line); border-radius: 8px; }
+.mat > summary { padding: 9px 12px; font-weight: 600; cursor: pointer; }
+.mat-body { display: grid; gap: 10px; padding: 12px; border-top: 1px solid var(--line); }
+.mat-table input { min-height: 36px; padding: 6px 8px; }
+.mat-table td, .mat-table th { border-bottom: 0; padding: 3px 4px; }
+.row-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.icon-btn { width: 36px; min-height: 36px; cursor: pointer; font-size: 1.1rem; color: var(--muted); background: transparent; border: 1px solid var(--line); border-radius: 8px; }
+.icon-btn:hover { color: var(--danger); }
+.logo-preview { max-height: 60px; max-width: 220px; }
+.status { padding: 10px 12px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--line); }
+.status.is-pro { border-color: var(--ok); }
+.error-msg { color: var(--danger); font-weight: 600; }
+.key-input { font-family: var(--mono); font-size: 0.85rem; min-height: 110px; overflow-wrap: anywhere; }
+
+/* --- Meldungen -------------------------------------------------------------- */
+
+.toast {
+  position: fixed; left: 50%; bottom: 20px; z-index: 10; translate: -50% 0;
+  max-width: min(560px, calc(100vw - 24px)); padding: 11px 16px;
+  color: var(--surface); background: var(--ink); border-radius: 10px; box-shadow: var(--shadow);
+}
+.toast:empty { display: none; }
+.toast.is-error { background: var(--danger); color: #fff; }
+
+/* --- Angebotsdokument (nur im Druck sichtbar) ------------------------------- */
+
+#print-root { display: none; }
+
+@media print {
+  @page { size: A4; margin: 16mm 15mm; }
+  :root {
+    color-scheme: light;
+    --ink: #111; --muted: #555; --line: #bbb; --surface: #fff; --bg: #fff;
+    --c-outer: #111; --c-inner: #111; --c-open: #111; --c-fill: #e6e6e6;
+  }
+  body { background: #fff; }
+  body > :not(#print-root) { display: none !important; }
+  #print-root { display: block; }
+}
+
+.doc { color: #111; font-size: 10.5pt; line-height: 1.4; }
+.doc-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; padding-bottom: 10px; border-bottom: 2px solid #111; }
+.doc-logo { max-height: 22mm; max-width: 70mm; }
+.doc-company { font-size: 15pt; font-weight: 700; }
+.doc-address { white-space: pre-line; text-align: right; font-size: 9pt; }
+.doc-meta { display: flex; justify-content: space-between; gap: 24px; margin: 9mm 0 7mm; }
+.doc-customer { white-space: pre-line; min-height: 22mm; }
+.doc-facts { display: grid; grid-template-columns: auto auto; gap: 2px 14px; margin: 0; align-content: start; }
+.doc-facts dt { color: #555; }
+.doc-facts dd { margin: 0; text-align: right; }
+.doc h1 { font-size: 16pt; margin: 0 0 3mm; }
+.doc-table { margin-top: 5mm; font-size: 10pt; }
+.doc-table th { border-bottom: 1.5px solid #111; color: #111; font-size: 8.5pt; }
+.doc-table td { vertical-align: top; border-bottom: 1px solid #bbb; padding: 6px 4px; }
+.doc-table tr { break-inside: avoid; }
+.doc-thumb { width: 18mm; height: 14mm; }
+.doc-thumb svg { width: 100%; height: 100%; }
+.doc-spec { font-size: 8.5pt; color: #555; }
+.doc-totals { width: 72mm; margin: 5mm 0 0 auto; font-size: 10pt; }
+.doc-totals td { border-bottom: 0; padding: 2px 4px; }
+.doc-totals tr.grand td { font-weight: 700; font-size: 12pt; border-top: 2px solid #111; padding-top: 5px; }
+.doc-footer { margin-top: 10mm; padding-top: 4mm; border-top: 1px solid #bbb; white-space: pre-line; font-size: 9pt; }
+.doc-watermark { margin-top: 5mm; font-size: 8.5pt; color: #555; text-align: center; }</style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" id="brand-link">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#c2410c"/><path d="M8 23 L17 9" stroke="#fff" stroke-width="3" stroke-linecap="round"/><path d="M19.5 23 L24 16" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".55"/><circle cx="17" cy="9" r="2.6" fill="#ffd9c2"/></svg>
+      <span>KerfQuote</span>
+    </a>
+    <div class="topbar-actions">
+      <label class="sr-only" for="lang" data-i18n="nav.language">Sprache</label>
+      <select id="lang">
+        <option value="de">Deutsch</option>
+        <option value="en">English</option>
+      </select>
+      <button type="button" class="btn" id="btn-settings" data-i18n="nav.settings">Einstellungen</button>
+      <button type="button" class="btn btn-plan" id="btn-license">Free</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <h1 class="sr-only" data-i18n="app.title">KerfQuote – Zuschnitt-Kalkulation aus DXF</h1>
+
+    <section class="panel parts" aria-labelledby="parts-h">
+      <h2 id="parts-h" data-i18n="parts.title">Teile</h2>
+      <label class="dropzone" id="dropzone">
+        <input type="file" id="file-input" class="sr-only" accept=".dxf" multiple>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+        <span class="dropzone-title" data-i18n="parts.drop">DXF-Dateien hierher ziehen oder klicken</span>
+        <span class="dropzone-hint" data-i18n="parts.dropHint">Mehrere Dateien möglich · ASCII-DXF</span>
+      </label>
+      <button type="button" class="btn btn-ghost" id="btn-sample" data-i18n="parts.sample">Beispielteile laden</button>
+      <ul class="part-list" id="part-list"></ul>
+      <p class="muted" id="parts-empty" data-i18n="parts.empty">Noch keine Teile. Laden Sie eine DXF-Datei oder die Beispielteile.</p>
+      <p class="privacy" data-i18n="parts.privacy">Ihre Zeichnungen bleiben auf Ihrem Rechner – es wird nichts hochgeladen.</p>
+    </section>
+
+    <section class="panel detail" aria-labelledby="detail-h">
+      <div class="empty-state" id="detail-empty">
+        <svg viewBox="0 0 120 120" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round" aria-hidden="true"><path d="M20 30h62l18 18v42H20z"/><circle cx="42" cy="68" r="9"/><circle cx="76" cy="68" r="9"/><path d="M36 44h30" stroke-dasharray="5 5"/></svg>
+        <h2 id="detail-h" data-i18n="detail.emptyTitle">In 30 Sekunden vom DXF zum Angebot</h2>
+        <p data-i18n="detail.emptyText">Laden Sie links eine Zeichnung. KerfQuote ermittelt Schnittlänge, Einstiche, Fläche und Gewicht und rechnet mit Ihren Maschinensätzen den Preis.</p>
+      </div>
+
+      <div class="stack" id="detail" hidden>
+        <div class="field">
+          <label for="part-name" data-i18n="detail.name">Bezeichnung</label>
+          <input type="text" id="part-name" maxlength="120" autocomplete="off">
+        </div>
+
+        <figure class="preview-box">
+          <div class="preview" id="preview" role="img" aria-label="Vorschau des Teils"></div>
+          <figcaption class="legend">
+            <span><i class="l-outer"></i><span data-i18n="legend.outer">Außenkontur</span></span>
+            <span><i class="l-inner"></i><span data-i18n="legend.inner">Innenkontur</span></span>
+            <span><i class="l-open"></i><span data-i18n="legend.open">Offene Kontur</span></span>
+          </figcaption>
+        </figure>
+
+        <dl class="metrics" id="metrics"></dl>
+
+        <section class="stack" aria-labelledby="warn-h">
+          <h3 id="warn-h" data-i18n="warn.title">Hinweise</h3>
+          <ul class="warnings" id="warnings"></ul>
+        </section>
+
+        <section class="stack" aria-labelledby="params-h">
+          <h3 id="params-h" data-i18n="p.title">Kalkulation</h3>
+          <div class="form-grid">
+            <div class="field">
+              <label for="p-material" data-i18n="p.material">Material</label>
+              <select id="p-material"></select>
+            </div>
+            <div class="field">
+              <label for="p-thickness" data-i18n="p.thickness">Dicke (mm)</label>
+              <select id="p-thickness"></select>
+            </div>
+            <div class="field">
+              <label for="p-qty" data-i18n="p.qty">Menge</label>
+              <input type="number" id="p-qty" min="1" max="1000000" step="1" required inputmode="numeric">
+            </div>
+            <div class="field">
+              <label for="p-bends" data-i18n="p.bends">Biegungen</label>
+              <input type="number" id="p-bends" min="0" max="999" step="1" required inputmode="numeric">
+            </div>
+            <div class="field">
+              <label for="p-extra" data-i18n="p.extra">Zusatzkosten je Stück</label>
+              <input type="number" id="p-extra" min="0" max="1000000" step="any" required inputmode="decimal">
+            </div>
+            <div class="field">
+              <label for="p-units" data-i18n="p.units">Zeichnungseinheit</label>
+              <select id="p-units"></select>
+            </div>
+            <div class="field">
+              <label for="p-tol" data-i18n="p.tol">Lückentoleranz (mm)</label>
+              <input type="number" id="p-tol" min="0.001" max="10" step="any" required inputmode="decimal" aria-describedby="p-tol-hint">
+              <span class="hint" id="p-tol-hint" data-i18n="p.tolHint">Lücken bis zu diesem Wert gelten als geschlossen.</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="stack" aria-labelledby="layers-h">
+          <h3 id="layers-h" data-i18n="layers.title">Layer</h3>
+          <p class="hint" data-i18n="layers.hint">Nur angehakte Layer werden geschnitten.</p>
+          <ul class="layers" id="layers"></ul>
+        </section>
+
+        <div class="two-col">
+          <section class="stack" aria-labelledby="cost-h">
+            <h3 id="cost-h" data-i18n="cost.title">Kosten je Stück</h3>
+            <table id="cost-table"><tbody></tbody></table>
+            <p class="notice" id="cost-none" hidden data-i18n="cost.noPrice">Für dieses Material ist die gewählte Dicke nicht hinterlegt.</p>
+          </section>
+          <section class="stack" aria-labelledby="breaks-h">
+            <h3 id="breaks-h" data-i18n="breaks.title">Staffelpreise</h3>
+            <table id="breaks-table">
+              <thead><tr>
+                <th scope="col" data-i18n="breaks.qty">Menge</th>
+                <th scope="col" class="r" data-i18n="breaks.unit">Stückpreis</th>
+                <th scope="col" class="r" data-i18n="breaks.total">Gesamt</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel quote" aria-labelledby="quote-h">
+      <h2 id="quote-h" data-i18n="quote.title">Angebot</h2>
+      <div class="field">
+        <label for="q-customer" data-i18n="quote.customer">Kunde (Name und Anschrift)</label>
+        <textarea id="q-customer" maxlength="600" autocomplete="off"></textarea>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label for="q-number" data-i18n="quote.number">Angebotsnummer</label>
+          <input type="text" id="q-number" maxlength="40" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="q-date" data-i18n="quote.date">Datum</label>
+          <input type="date" id="q-date" required>
+        </div>
+      </div>
+      <table class="quote-table" id="quote-table" hidden>
+        <thead><tr>
+          <th scope="col" data-i18n="quote.pos">Pos.</th>
+          <th scope="col" data-i18n="quote.desc">Bezeichnung</th>
+          <th scope="col" class="r" data-i18n="quote.qty">Menge</th>
+          <th scope="col" class="r" data-i18n="quote.unit">Einzelpreis</th>
+          <th scope="col" class="r" data-i18n="quote.total">Gesamt</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="muted" id="quote-empty" data-i18n="quote.empty">Noch keine Positionen.</p>
+      <dl class="totals" id="quote-totals"></dl>
+      <div class="actions">
+        <button type="button" class="btn btn-primary" id="btn-print" data-i18n="quote.print">Angebot drucken / PDF</button>
+        <button type="button" class="btn" id="btn-csv"><span data-i18n="quote.csv">CSV exportieren</span> <span class="tag" id="csv-tag">Pro</span></button>
+        <button type="button" class="btn btn-ghost" id="btn-clear" data-i18n="quote.clear">Angebot leeren</button>
+      </div>
+      <p class="free-note" id="free-note">
+        <span id="free-note-text"></span>
+        <button type="button" class="link" id="btn-unlock" data-i18n="quote.unlock">Pro freischalten</button>
+      </p>
+    </section>
+  </main>
+
+  <dialog id="dlg-settings" aria-labelledby="dlg-settings-h">
+    <div class="dlg-head">
+      <h2 id="dlg-settings-h" data-i18n="settings.title">Einstellungen</h2>
+    </div>
+    <div class="dlg-body" id="settings-body"></div>
+    <div class="dlg-foot">
+      <button type="button" class="btn btn-primary" data-close-dialog data-i18n="btn.close">Schließen</button>
+    </div>
+  </dialog>
+
+  <dialog id="dlg-license" class="dlg-narrow" aria-labelledby="dlg-license-h">
+    <div class="dlg-head">
+      <h2 id="dlg-license-h" data-i18n="license.title">KerfQuote Pro</h2>
+    </div>
+    <div class="dlg-body">
+      <p class="status" id="license-status"></p>
+      <p data-i18n="license.benefits">Pro: unbegrenzt viele Positionen je Angebot, eigenes Logo, Angebot ohne KerfQuote-Hinweis, CSV-Export.</p>
+      <p id="license-buy"></p>
+      <div class="field">
+        <label for="license-key" data-i18n="license.key">Lizenzschlüssel</label>
+        <textarea id="license-key" class="key-input" spellcheck="false" autocomplete="off" autocapitalize="off" aria-describedby="license-error"></textarea>
+        <p class="error-msg" id="license-error" role="alert"></p>
+      </div>
+      <div class="row-actions">
+        <button type="button" class="btn btn-primary" id="btn-activate" data-i18n="license.activate">Aktivieren</button>
+        <button type="button" class="btn btn-danger" id="btn-remove-license" data-i18n="license.remove" hidden>Lizenz entfernen</button>
+      </div>
+    </div>
+    <div class="dlg-foot">
+      <button type="button" class="btn" data-close-dialog data-i18n="btn.close">Schließen</button>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div id="print-root"></div>
+<script>(()=>{var K={checkoutUrl:"",maxFileMb:25,samples:["flansch.dxf","halteblech.dxf"]};var yn={kty:"EC",crv:"P-256",x:"z2T3KL4AWau5X748T5DfNIE8CoiJuiT3GxxqAVzNZjo",y:"ejqTRMyl8kyX4Geefr4-RPDf85p8927PC_FEb2ToLXo"};var In={de:{"app.title":"KerfQuote – Zuschnitt-Kalkulation aus DXF","nav.settings":"Einstellungen","nav.language":"Sprache","nav.home":"Zur Startseite","plan.free":"Free","plan.pro":"Pro","plan.badge":"Lizenz: {plan}","parts.title":"Teile","parts.drop":"DXF-Dateien hierher ziehen oder klicken","parts.dropHint":"Mehrere Dateien möglich · ASCII-DXF","parts.sample":"Beispielteile laden","parts.empty":"Noch keine Teile. Laden Sie eine DXF-Datei oder die Beispielteile.","parts.privacy":"Ihre Zeichnungen bleiben auf Ihrem Rechner – es wird nichts hochgeladen.","parts.remove":"{name} entfernen","parts.each":"je Stück","detail.emptyTitle":"In 30 Sekunden vom DXF zum Angebot","detail.emptyText":"Laden Sie links eine Zeichnung. KerfQuote ermittelt Schnittlänge, Einstiche, Fläche und Gewicht und rechnet mit Ihren Maschinensätzen den Preis.","detail.name":"Bezeichnung","detail.preview":"Vorschau des Teils","legend.outer":"Außenkontur","legend.inner":"Innenkontur","legend.open":"Offene Kontur","m.cutLength":"Schnittlänge","m.pierces":"Einstiche","m.contours":"Konturen","m.contoursValue":"{closed} geschlossen, {open} offen","m.size":"Abmessungen","m.area":"Nettofläche","m.weight":"Gewicht","m.cutTime":"Schneidzeit","p.title":"Kalkulation","p.material":"Material","p.thickness":"Dicke (mm)","p.qty":"Menge","p.bends":"Biegungen","p.extra":"Zusatzkosten je Stück","p.units":"Zeichnungseinheit","p.unitsAuto":"Automatisch ({unit})","p.tol":"Lückentoleranz (mm)","p.tolHint":"Lücken bis zu diesem Wert gelten als geschlossen.","layers.title":"Layer","layers.hint":"Nur angehakte Layer werden geschnitten.","layers.count":"{count} Elemente · {length}","cost.title":"Kosten je Stück","cost.material":"Material ({weight})","cost.cutting":"Schneiden ({time})","cost.setup":"Rüsten (anteilig)","cost.bending":"Biegen","cost.extra":"Zusatzkosten","cost.markup":"Zuschlag ({pct} %)","cost.unit":"Stückpreis","cost.total":"Gesamt ({qty} Stk.)","cost.noPrice":"Für dieses Material ist die gewählte Dicke nicht hinterlegt.","breaks.title":"Staffelpreise","breaks.qty":"Menge","breaks.unit":"Stückpreis","breaks.total":"Gesamt","warn.title":"Hinweise","warn.open":"{n} offene Kontur(en), rot markiert. Zeichnung schließen oder Lückentoleranz erhöhen. Fläche und Gewicht können unvollständig sein.","warn.duplicates":"{n} doppelte Elemente entfernt – sie wären sonst doppelt geschnitten und berechnet worden.","warn.zero":"{n} Elemente mit Länge 0 entfernt.","warn.multi":"{n} getrennte Außenkonturen: Die Datei enthält mehrere Teile. Der Preis gilt für alle zusammen als ein Stück.","warn.small":"Kleinste Innenkontur ({size} mm) ist kleiner als die Blechdicke ({t} mm). Bitte Fertigbarkeit prüfen.","warn.fit":"{n} Spline(s) sind nur über Stützpunkte definiert; ihre Länge ist angenähert.","warn.blocks":"{n} Blockreferenz(en) ohne Blockdefinition übersprungen.","warn.unitAssumed":"Die Datei nennt keine Einheit. Angenommen: {unit}. Bitte Abmessungen prüfen.","warn.ignored":"Nicht geschnitten: {list}","warn.paper":"{n} Elemente aus dem Papierbereich ignoriert.","warn.none":"Keine Schnittgeometrie gefunden. Prüfen Sie die Layer-Auswahl.","warn.ok":"Keine Auffälligkeiten: alle Konturen sind geschlossen.","quote.title":"Angebot","quote.customer":"Kunde (Name und Anschrift)","quote.number":"Angebotsnummer","quote.date":"Datum","quote.pos":"Pos.","quote.desc":"Bezeichnung","quote.qty":"Menge","quote.unit":"Einzelpreis","quote.total":"Gesamt","quote.net":"Netto","quote.surcharge":"Mindermengenzuschlag","quote.vat":"MwSt. {pct} %","quote.gross":"Gesamtbetrag","quote.print":"Angebot drucken / PDF","quote.csv":"CSV exportieren","quote.clear":"Angebot leeren","quote.clearConfirm":"Alle Positionen aus dem Angebot entfernen?","quote.empty":"Noch keine Positionen.","quote.freeNote":"Free: bis zu {max} Positionen, Angebot mit KerfQuote-Hinweis.","quote.unlock":"Pro freischalten","doc.title":"Angebot","doc.number":"Angebot Nr.","doc.date":"Datum","doc.validUntil":"Gültig bis","doc.intro":"Vielen Dank für Ihre Anfrage. Wir bieten Ihnen freibleibend an:","doc.spec":"{material}, {t} mm · {w} × {h} mm · {weight}","doc.watermark":"Erstellt mit der kostenlosen Version von KerfQuote","settings.title":"Einstellungen","settings.company":"Firma","settings.calc":"Kalkulation","settings.materials":"Materialien","settings.backup":"Sicherung","s.companyName":"Firmenname","s.address":"Anschrift","s.logo":"Logo (PNG, JPG oder SVG, max. 250 kB)","s.logoRemove":"Logo entfernen","s.logoPro":"Ein eigenes Logo im Angebot ist eine Pro-Funktion.","s.logoTooBig":"Das Logo ist zu groß (max. 250 kB) oder kein unterstütztes Bildformat.","s.footer":"Fußtext im Angebot (z. B. Zahlungs- und Lieferbedingungen)","s.quotePrefix":"Präfix der Angebotsnummer","s.validity":"Gültigkeit (Tage)","s.currency":"Währung","s.vat":"MwSt. (%)","s.machineRate":"Maschinenstundensatz","s.setup":"Rüstkosten je Position","s.markup":"Zuschlag für Gemeinkosten und Gewinn (%)","s.gap":"Stegzugabe um das Teil (mm)","s.bend":"Preis je Biegung","s.minOrder":"Mindestauftragswert (netto)","s.quantities":"Staffelmengen (durch Komma getrennt)","s.defaultUnit":"Einheit, wenn die DXF keine nennt","s.matHint":"Vorschub und Einstechzeit sind Startwerte für einen 4-kW-Faserlaser, die Preise sind Beispiele. Bitte auf Ihre Maschine und Ihren Einkauf abstimmen.","s.matName":"Name","s.density":"Dichte (kg/dm³)","s.pricePerKg":"Preis je kg","s.t":"Dicke (mm)","s.speed":"Vorschub (mm/min)","s.pierce":"Einstechzeit (s)","s.addRow":"Dicke hinzufügen","s.removeRow":"Zeile entfernen","s.addMaterial":"Material hinzufügen","s.removeMaterial":"Material löschen","s.newMaterial":"Neues Material","s.export":"Einstellungen exportieren","s.import":"Einstellungen importieren","s.reset":"Auf Standardwerte zurücksetzen","s.resetConfirm":"Alle Einstellungen auf die Standardwerte zurücksetzen?","s.importError":"Die Datei konnte nicht gelesen werden.","s.imported":"Einstellungen übernommen. Bitte prüfen und speichern.","btn.save":"Speichern","btn.cancel":"Abbrechen","btn.close":"Schließen","license.title":"KerfQuote Pro","license.statusFree":"Sie nutzen die kostenlose Version.","license.statusPro":"Pro ist aktiv – lizenziert für {name}, gültig bis {date}.","license.benefits":"Pro: unbegrenzt viele Positionen je Angebot, eigenes Logo, Angebot ohne KerfQuote-Hinweis, CSV-Export.","license.key":"Lizenzschlüssel","license.activate":"Aktivieren","license.remove":"Lizenz entfernen","license.buy":"Pro-Lizenz kaufen","license.noCheckout":"Der Online-Kauf wird gerade eingerichtet.","license.errFormat":"Das ist kein gültiger Lizenzschlüssel. Bitte vollständig einfügen.","license.errSignature":"Der Lizenzschlüssel ist ungültig.","license.errExpired":"Diese Lizenz ist am {date} abgelaufen.","license.errUnconfigured":"Die Lizenzprüfung ist noch nicht eingerichtet.","license.activated":"Pro ist freigeschaltet. Vielen Dank!","license.removed":"Die Lizenz wurde entfernt.","toast.added":"{n} Teil(e) hinzugefügt.","toast.limit":"Die kostenlose Version erlaubt {max} Positionen je Angebot. Mit Pro sind es unbegrenzt viele.","toast.saved":"Einstellungen gespeichert.","toast.csvPro":"Der CSV-Export ist eine Pro-Funktion.","toast.printBlocked":"Das Drucken wurde blockiert – vermutlich, weil die App eingebettet angezeigt wird. Öffnen Sie KerfQuote direkt im Browser.","err.binary":"{file}: Binäres DXF wird nicht unterstützt. Bitte als ASCII-DXF speichern.","err.invalid":"{file}: Das ist keine lesbare DXF-Datei.","err.empty":"{file}: Die Datei ist leer.","err.tooBig":"{file}: Die Datei ist größer als {mb} MB.","err.noGeometry":"{file}: Die Datei enthält keine Linien, Bögen oder Polylinien.","err.sample":"Die Beispielteile konnten nicht geladen werden.","csv.pos":"Pos","csv.name":"Bezeichnung","csv.material":"Material","csv.thickness":"Dicke (mm)","csv.qty":"Menge","csv.cutLength":"Schnittlänge (mm)","csv.pierces":"Einstiche","csv.weight":"Gewicht (kg)","csv.unitPrice":"Einzelpreis","csv.total":"Gesamt","unit.mm":"mm","unit.cm":"cm","unit.m":"m","unit.in":"Zoll","unit.ft":"Fuß","unit.pcs":"Stk."},en:{"app.title":"KerfQuote – cut-part quoting from DXF","nav.settings":"Settings","nav.language":"Language","nav.home":"Home","plan.free":"Free","plan.pro":"Pro","plan.badge":"License: {plan}","parts.title":"Parts","parts.drop":"Drop DXF files here or click to browse","parts.dropHint":"Multiple files supported · ASCII DXF","parts.sample":"Load sample parts","parts.empty":"No parts yet. Add a DXF file or load the sample parts.","parts.privacy":"Your drawings never leave your computer – nothing is uploaded.","parts.remove":"Remove {name}","parts.each":"each","detail.emptyTitle":"From DXF to quote in 30 seconds","detail.emptyText":"Add a drawing on the left. KerfQuote measures cut length, pierces, area and weight and prices the part with your own machine rates.","detail.name":"Part name","detail.preview":"Part preview","legend.outer":"Outer contour","legend.inner":"Inner contour","legend.open":"Open contour","m.cutLength":"Cut length","m.pierces":"Pierces","m.contours":"Contours","m.contoursValue":"{closed} closed, {open} open","m.size":"Dimensions","m.area":"Net area","m.weight":"Weight","m.cutTime":"Cut time","p.title":"Pricing inputs","p.material":"Material","p.thickness":"Thickness (mm)","p.qty":"Quantity","p.bends":"Bends","p.extra":"Extra cost per part","p.units":"Drawing units","p.unitsAuto":"Automatic ({unit})","p.tol":"Gap tolerance (mm)","p.tolHint":"Gaps up to this size are treated as closed.","layers.title":"Layers","layers.hint":"Only checked layers are cut.","layers.count":"{count} entities · {length}","cost.title":"Cost per part","cost.material":"Material ({weight})","cost.cutting":"Cutting ({time})","cost.setup":"Setup (share)","cost.bending":"Bending","cost.extra":"Extras","cost.markup":"Markup ({pct}%)","cost.unit":"Unit price","cost.total":"Total ({qty} pcs)","cost.noPrice":"The selected thickness is not defined for this material.","breaks.title":"Quantity breaks","breaks.qty":"Qty","breaks.unit":"Unit price","breaks.total":"Total","warn.title":"Notes","warn.open":"{n} open contour(s), shown in red. Close them in CAD or raise the gap tolerance. Area and weight may be incomplete.","warn.duplicates":"{n} duplicate entities removed – they would have been cut and charged twice.","warn.zero":"{n} zero-length entities removed.","warn.multi":"{n} separate outer contours: the file contains several parts. The price covers all of them together as one piece.","warn.small":"Smallest inner contour ({size} mm) is smaller than the sheet thickness ({t} mm). Please check manufacturability.","warn.fit":"{n} spline(s) are defined by fit points only; their length is approximated.","warn.blocks":"{n} block reference(s) without a block definition were skipped.","warn.unitAssumed":"The file does not state its units. Assumed: {unit}. Please check the dimensions.","warn.ignored":"Not cut: {list}","warn.paper":"{n} paper-space entities ignored.","warn.none":"No cut geometry found. Check the layer selection.","warn.ok":"No issues: all contours are closed.","quote.title":"Quote","quote.customer":"Customer (name and address)","quote.number":"Quote number","quote.date":"Date","quote.pos":"Item","quote.desc":"Description","quote.qty":"Qty","quote.unit":"Unit price","quote.total":"Total","quote.net":"Net","quote.surcharge":"Minimum order surcharge","quote.vat":"VAT {pct}%","quote.gross":"Total due","quote.print":"Print quote / PDF","quote.csv":"Export CSV","quote.clear":"Clear quote","quote.clearConfirm":"Remove all items from the quote?","quote.empty":"No items yet.","quote.freeNote":"Free: up to {max} items, quote carries a KerfQuote note.","quote.unlock":"Unlock Pro","doc.title":"Quotation","doc.number":"Quote no.","doc.date":"Date","doc.validUntil":"Valid until","doc.intro":"Thank you for your enquiry. We are pleased to quote as follows:","doc.spec":"{material}, {t} mm · {w} × {h} mm · {weight}","doc.watermark":"Created with the free version of KerfQuote","settings.title":"Settings","settings.company":"Company","settings.calc":"Costing","settings.materials":"Materials","settings.backup":"Backup","s.companyName":"Company name","s.address":"Address","s.logo":"Logo (PNG, JPG or SVG, max 250 kB)","s.logoRemove":"Remove logo","s.logoPro":"Your own logo on quotes is a Pro feature.","s.logoTooBig":"The logo is too large (max 250 kB) or not a supported image format.","s.footer":"Quote footer (e.g. payment and delivery terms)","s.quotePrefix":"Quote number prefix","s.validity":"Validity (days)","s.currency":"Currency","s.vat":"VAT (%)","s.machineRate":"Machine hourly rate","s.setup":"Setup cost per item","s.markup":"Markup for overhead and profit (%)","s.gap":"Material allowance around the part (mm)","s.bend":"Price per bend","s.minOrder":"Minimum order value (net)","s.quantities":"Quantity breaks (comma-separated)","s.defaultUnit":"Units when the DXF states none","s.matHint":"Feed rates and pierce times are starting values for a 4 kW fiber laser, prices are examples. Calibrate them to your machine and your purchasing.","s.matName":"Name","s.density":"Density (kg/dm³)","s.pricePerKg":"Price per kg","s.t":"Thickness (mm)","s.speed":"Feed rate (mm/min)","s.pierce":"Pierce time (s)","s.addRow":"Add thickness","s.removeRow":"Remove row","s.addMaterial":"Add material","s.removeMaterial":"Delete material","s.newMaterial":"New material","s.export":"Export settings","s.import":"Import settings","s.reset":"Reset to defaults","s.resetConfirm":"Reset all settings to their defaults?","s.importError":"The file could not be read.","s.imported":"Settings loaded. Please review and save.","btn.save":"Save","btn.cancel":"Cancel","btn.close":"Close","license.title":"KerfQuote Pro","license.statusFree":"You are using the free version.","license.statusPro":"Pro is active – licensed to {name}, valid until {date}.","license.benefits":"Pro: unlimited items per quote, your own logo, quotes without the KerfQuote note, CSV export.","license.key":"License key","license.activate":"Activate","license.remove":"Remove license","license.buy":"Buy a Pro license","license.noCheckout":"Online checkout is being set up.","license.errFormat":"That is not a valid license key. Please paste it completely.","license.errSignature":"The license key is invalid.","license.errExpired":"This license expired on {date}.","license.errUnconfigured":"License verification is not set up yet.","license.activated":"Pro is unlocked. Thank you!","license.removed":"The license was removed.","toast.added":"{n} part(s) added.","toast.limit":"The free version allows {max} items per quote. Pro has no limit.","toast.saved":"Settings saved.","toast.csvPro":"CSV export is a Pro feature.","toast.printBlocked":"Printing was blocked – probably because the app is shown embedded. Open KerfQuote directly in the browser.","err.binary":"{file}: Binary DXF is not supported. Please save as ASCII DXF.","err.invalid":"{file}: This is not a readable DXF file.","err.empty":"{file}: The file is empty.","err.tooBig":"{file}: The file is larger than {mb} MB.","err.noGeometry":"{file}: The file contains no lines, arcs or polylines.","err.sample":"The sample parts could not be loaded.","csv.pos":"Item","csv.name":"Description","csv.material":"Material","csv.thickness":"Thickness (mm)","csv.qty":"Qty","csv.cutLength":"Cut length (mm)","csv.pierces":"Pierces","csv.weight":"Weight (kg)","csv.unitPrice":"Unit price","csv.total":"Total","unit.mm":"mm","unit.cm":"cm","unit.m":"m","unit.in":"inch","unit.ft":"feet","unit.pcs":"pcs"}},Q=["de","en"];function $n(n){let t=In[n]??In.en;return(e,s)=>{let i=t[e]??In.en[e]??e;return s?i.replace(/\{(\w+)\}/g,(r,o)=>o in s?String(s[o]):r):i}}function Xn(n){for(let t of n??[]){let e=String(t).toLowerCase().slice(0,2);if(Q.includes(e))return e}return"en"}var Cn=n=>n.map(([t,e,s])=>({t,speed:e,pierce:s})),Pe=[{id:"s235",name:"S235 (Baustahl)",density:7.85,pricePerKg:1.2,thicknesses:Cn([[1,9e3,.2],[1.5,7500,.3],[2,6500,.3],[3,4200,.5],[4,3500,.7],[5,3200,.8],[6,2800,1],[8,2300,1.5],[10,1800,2],[12,1500,2.5],[15,1100,3.5],[20,700,5]])},{id:"1.4301",name:"1.4301 (Edelstahl)",density:7.9,pricePerKg:4,thicknesses:Cn([[1,2e4,.1],[1.5,14e3,.2],[2,1e4,.2],[3,6e3,.4],[4,4e3,.6],[5,2800,.8],[6,2200,1],[8,1300,1.5],[10,800,2.5],[12,500,3.5]])},{id:"almg3",name:"AlMg3 (Aluminium)",density:2.66,pricePerKg:5,thicknesses:Cn([[1,2e4,.1],[1.5,15e3,.2],[2,11e3,.2],[3,7e3,.4],[4,4500,.6],[5,3200,.8],[6,2500,1],[8,1500,1.5],[10,900,2.5]])}],Rn=["EUR","USD","CHF","GBP"],Oe={currency:"EUR",vatPct:19,machineRate:120,setupCost:25,markupPct:25,partGap:10,pricePerBend:1.5,minOrder:50,validityDays:30,defaultUnit:"mm",quotePrefix:"A-",quantities:[1,5,10,25,50,100],company:{name:"",address:"",logo:"",footer:""},materials:Pe},Ne=/^data:image\/(png|jpeg|webp|gif|svg\+xml);base64,[A-Za-z0-9+/=]+$/,ve=4e5,_=(n,t,e)=>typeof n=="number"&&Number.isFinite(n)&&n>=t&&n<=e,X=(n,t,e,s)=>_(n,t,e)?n:s,un=(n,t,e="")=>typeof n=="string"?n.slice(0,t):e;function Hn(n){if(!n||typeof n!="object"||typeof n.id!="string"||!n.id.trim()||typeof n.name!="string"||!n.name.trim()||!_(n.density,.01,25)||!_(n.pricePerKg,0,1e5)||!Array.isArray(n.thicknesses))return null;let t=new Set,e=[];for(let s of n.thicknesses)!s||!_(s.t,.01,500)||!_(s.speed,1,1e6)||!_(s.pierce,0,600)||t.has(s.t)||(t.add(s.t),e.push({t:s.t,speed:s.speed,pierce:s.pierce}));return e.length===0?null:(e.sort((s,i)=>s.t-i.t),{id:n.id.trim().slice(0,40),name:n.name.trim().slice(0,60),density:n.density,pricePerKg:n.pricePerKg,thicknesses:e})}function z(n){let t=n&&typeof n=="object"?n:{},e=Oe,s=t.company&&typeof t.company=="object"?t.company:{},i=typeof s.logo=="string"&&s.logo.length<=ve&&Ne.test(s.logo)?s.logo:"",r=new Set,o=(Array.isArray(t.materials)?t.materials:[]).map(Hn).filter(c=>c&&!r.has(c.id)&&r.add(c.id));o.length===0&&(o=e.materials.map(Hn));let a=[...new Set((Array.isArray(t.quantities)?t.quantities:[]).filter(c=>Number.isInteger(c)&&c>=1&&c<=1e6))].sort((c,d)=>c-d).slice(0,8);return a.length===0&&(a=e.quantities.slice()),{currency:Rn.includes(t.currency)?t.currency:e.currency,vatPct:X(t.vatPct,0,100,e.vatPct),machineRate:X(t.machineRate,0,1e5,e.machineRate),setupCost:X(t.setupCost,0,1e5,e.setupCost),markupPct:X(t.markupPct,0,1e3,e.markupPct),partGap:X(t.partGap,0,1e3,e.partGap),pricePerBend:X(t.pricePerBend,0,1e4,e.pricePerBend),minOrder:X(t.minOrder,0,1e6,e.minOrder),validityDays:Number.isInteger(t.validityDays)&&t.validityDays>=1&&t.validityDays<=365?t.validityDays:e.validityDays,defaultUnit:t.defaultUnit==="in"?"in":"mm",quotePrefix:un(t.quotePrefix,20,e.quotePrefix),quantities:a,company:{name:un(s.name,120),address:un(s.address,600),logo:i,footer:un(s.footer,600)},materials:o}}function J(n,t){if(!Number.isFinite(n)||Math.abs(n)<1e-9)return 0;let e=+`${Math.round(+`${n}e${t}`)}e-${t}`;if(Number.isFinite(e))return e;let s=10**t;return Math.round(n*s)/s}var H=n=>J(n,2);function xe(n,t){return n?.thicknesses?.find(e=>Math.abs(e.t-t)<1e-9)??null}function Mn(n,t,e,s){let i=xe(e,t.thickness);if(!i)return null;let r=Math.max(1,Math.floor(Number(t.qty)||0)),o=Math.max(0,Math.floor(Number(t.bends)||0)),a=Math.max(0,Number(t.extra)||0),c=i.t*e.density/1e6,d=n.rect?(n.rect.w+s.partGap)*(n.rect.h+s.partGap):0,u=d*c,m=n.netArea*c,D=u*e.pricePerKg,S=n.cutLength/i.speed*60+n.pierces*i.pierce,f=S/3600*s.machineRate,I=s.setupCost/r,g=o*s.pricePerBend,R=D+f+I+g+a,P=H(R*(1+s.markupPct/100));return{qty:r,weightKg:m,chargedAreaMm2:d,chargedWeightKg:u,materialCost:D,cutTimeSec:S,cutCost:f,setupPerPart:I,bendCost:g,extraCost:a,costPerPart:R,markup:P-R,unitPrice:P,total:H(P*r)}}function Kn(n,t,e,s,i){let r=[];for(let o of i){let a=Mn(n,{...t,qty:o},e,s);a&&r.push({qty:o,unitPrice:a.unitPrice,total:a.total})}return r}function _n(n,t){let e=H(n.reduce((o,a)=>o+a,0)),s=e>0&&e<t.minOrder?H(t.minOrder-e):0,i=H(e+s),r=H(i*t.vatPct/100);return{net:e,surcharge:s,subtotal:i,vat:r,gross:H(i+r)}}function zn(n,t){let e=[];return n.openCount>0&&e.push("openContours"),n.minInnerSize!==null&&n.minInnerSize!==void 0&&n.minInnerSize<t&&e.push("smallFeature"),e}var dn={maxParts:2},ke={name:"ECDSA",namedCurve:"P-256"},we={name:"ECDSA",hash:"SHA-256"},Vn=/^[A-Za-z0-9_-]+$/;function Wn(n){let t=n.replace(/-/g,"+").replace(/_/g,"/"),e=atob(t+"=".repeat((4-t.length%4)%4)),s=new Uint8Array(e.length);for(let i=0;i<e.length;i++)s[i]=e.charCodeAt(i);return s}async function Pn(n,t,e=new Date){if(typeof n!="string")return{valid:!1,reason:"format"};let s=n.replace(/\s+/g,"").split(".");if(s.length!==3||s[0]!=="KQ1"||!Vn.test(s[1])||!Vn.test(s[2]))return{valid:!1,reason:"format"};if(!t)return{valid:!1,reason:"unconfigured"};let i=!1;try{let a=await crypto.subtle.importKey("jwk",t,ke,!1,["verify"]),c=new TextEncoder().encode(`${s[0]}.${s[1]}`);i=await crypto.subtle.verify(we,a,Wn(s[2]),c)}catch{i=!1}if(!i)return{valid:!1,reason:"signature"};let r;try{r=JSON.parse(new TextDecoder().decode(Wn(s[1])))}catch{return{valid:!1,reason:"format"}}let o=typeof r?.exp=="string"&&/^\d{4}-\d{2}-\d{2}$/.test(r.exp)?Date.parse(`${r.exp}T23:59:59.999Z`):NaN;return r?.plan!=="pro"||Number.isNaN(o)?{valid:!1,reason:"format"}:e.getTime()>o?{valid:!1,reason:"expired",payload:r}:{valid:!0,payload:r}}var G=class extends Error{constructor(t,e){super(e),this.name="DxfError",this.code=t}},w=n=>{let t=Number.parseFloat(n);return Number.isFinite(t)?t:0},F=n=>Math.trunc(w(n));function Be(n){let t=n.replace(/^\uFEFF/,"").replace(/\s+$/,"").split(/\r\n|\r|\n/),e=[],s=[];for(let i=0;i+1<t.length;i+=2){let r=t[i].trim(),o=Number(r);if(r===""||!Number.isInteger(o))throw new G("invalid",`Zeile ${i+1}: Gruppencode erwartet, gefunden "${r.slice(0,20)}"`);e.push(o),s.push(t[i+1].trim())}return{codes:e,values:s}}function Ue(n,t,e,s,i){let r={type:n,layer:"0",paperSpace:!1,extZ:1};for(let d=s;d<i;d++){let u=t[d];u===8?r.layer=e[d]:u===67?r.paperSpace=F(e[d])===1:u===230&&(r.extZ=w(e[d])<0?-1:1)}let o=(d,u=0)=>{for(let m=s;m<i;m++)if(t[m]===d)return w(e[m]);return u},a=d=>{let u=[];for(let m=s;m<i;m++)t[m]===d&&u.push(w(e[m]));return u},c=(d,u)=>{let m=[];for(let D=s;D<i;D++)t[D]===d?m.push({x:w(e[D]),y:0}):t[D]===u&&m.length&&(m[m.length-1].y=w(e[D]));return m};switch(n){case"LINE":r.x1=o(10),r.y1=o(20),r.x2=o(11),r.y2=o(21);break;case"CIRCLE":r.cx=o(10),r.cy=o(20),r.r=o(40);break;case"ARC":r.cx=o(10),r.cy=o(20),r.r=o(40),r.a0=o(50),r.a1=o(51);break;case"LWPOLYLINE":{r.closed=(F(o(70))&1)===1,r.vertices=[];for(let d=s;d<i;d++){let u=t[d],m=r.vertices[r.vertices.length-1];u===10?r.vertices.push({x:w(e[d]),y:0,bulge:0}):u===20&&m?m.y=w(e[d]):u===42&&m&&(m.bulge=w(e[d]))}break}case"POLYLINE":{let d=F(o(70));r.closed=(d&1)===1,r.mesh=(d&80)!==0,r.vertices=[];break}case"VERTEX":r.x=o(10),r.y=o(20),r.bulge=o(42),r.flags=F(o(70));break;case"ELLIPSE":r.cx=o(10),r.cy=o(20),r.mx=o(11),r.my=o(21),r.ratio=o(40,1),r.t0=o(41,0),r.t1=o(42,2*Math.PI);break;case"SPLINE":r.closed=(F(o(70))&1)===1,r.degree=F(o(71,3)),r.knots=a(40),r.ctrl=c(10,20),r.weights=a(41),r.fit=c(11,21);break;case"INSERT":{for(let d=s;d<i;d++)if(t[d]===2){r.name=e[d];break}r.name??="",r.x=o(10),r.y=o(20),r.sx=o(41,1),r.sy=o(42,1),r.rot=o(50),r.cols=Math.max(1,F(o(70,1))),r.rows=Math.max(1,F(o(71,1))),r.dx=o(44),r.dy=o(45);break}default:break}return r}function jn(n,t,e,s){let i=[],r=null,o=n.length;for(;e<o;){if(n[e]!==0){e++;continue}let a=t[e].toUpperCase();if(a===s||a==="ENDSEC"||a==="EOF")break;let c=e+1;for(;c<o&&n[c]!==0;)c++;let d=Ue(a,n,t,e+1,c);e=c,a==="POLYLINE"?(r=d,i.push(d)):a==="VERTEX"?r&&(d.flags&16)===0&&r.vertices.push({x:d.x,y:d.y,bulge:d.bulge}):a==="SEQEND"?r=null:(r=null,i.push(d))}return{entities:i,next:e}}function Zn(n){if(typeof n!="string"||n.trim()==="")throw new G("empty","Die Datei ist leer.");if(n.startsWith("AutoCAD Binary DXF"))throw new G("binary","Binäres DXF wird nicht unterstützt. Bitte als ASCII-DXF speichern.");let{codes:t,values:e}=Be(n),s={insunits:null,measurement:null,acadver:null},i=new Map,r=[],o=!1,a=t.length,c=0;for(;c<a;){if(t[c]!==0||e[c].toUpperCase()!=="SECTION"){c++;continue}let d=c+1<a&&t[c+1]===2?e[c+1].toUpperCase():"";if(c+=2,d==="HEADER")for(;c<a&&!(t[c]===0&&e[c].toUpperCase()==="ENDSEC");c++){if(t[c]!==9||c+1>=a)continue;let u=e[c].toUpperCase();u==="$INSUNITS"?s.insunits=F(e[c+1]):u==="$MEASUREMENT"?s.measurement=F(e[c+1]):u==="$ACADVER"&&(s.acadver=e[c+1])}else if(d==="BLOCKS")for(;c<a&&!(t[c]===0&&e[c].toUpperCase()==="ENDSEC");){if(t[c]===0&&e[c].toUpperCase()==="BLOCK"){let u=c+1;for(;u<a&&t[u]!==0;)u++;let m="",D={x:0,y:0};for(let f=c+1;f<u;f++)t[f]===2?m=e[f]:t[f]===10?D.x=w(e[f]):t[f]===20&&(D.y=w(e[f]));let S=jn(t,e,u,"ENDBLK");i.set(m,{base:D,entities:S.entities}),c=S.next}c<a&&!(t[c]===0&&e[c].toUpperCase()==="ENDSEC")&&c++}else if(d==="ENTITIES"){o=!0;let u=jn(t,e,c,"ENDSEC");r=r.concat(u.entities),c=u.next}}if(!o)throw new G("invalid","Keine ENTITIES-Sektion gefunden – ist das eine DXF-Datei?");return{header:s,blocks:i,entities:r}}function Qn(n){try{return new TextDecoder("utf-8",{fatal:!0}).decode(n)}catch{return new TextDecoder("windows-1252").decode(n)}}var tn=2*Math.PI,pn=Math.PI/180,Fe=16,ne=1e-5,On=48,nn={mm:1,cm:10,m:1e3,in:25.4,ft:304.8},Ye={1:"in",2:"ft",4:"mm",5:"cm",6:"m"};function qe(n,t="auto",e="mm"){if(t!=="auto"&&nn[t])return{name:t,scale:nn[t],source:"manual"};let s=Ye[n?.insunits];if(s)return{name:s,scale:nn[s],source:"header"};let i=nn[e]?e:"mm";return{name:i,scale:nn[i],source:"assumed"}}var rn=(n,t,e,s,i)=>({k:"L",x0:n,y0:t,x1:e,y1:s,layer:i});function Dn(n,t,e,s,i,r){let o=s+i;return{k:"A",cx:n,cy:t,r:e,a0:s,sw:i,layer:r,x0:n+e*Math.cos(s),y0:t+e*Math.sin(s),x1:n+e*Math.cos(o),y1:t+e*Math.sin(o)}}function An(n){return n.k==="L"?Math.hypot(n.x1-n.x0,n.y1-n.y0):n.r*Math.abs(n.sw)}function Nn(n,t){let e=Math.min(Math.max(t/n.r,1e-9),.5),s=2*Math.acos(1-e),i=Math.min(4096,Math.max(2,Math.ceil(Math.abs(n.sw)/s))),r=[];for(let o=0;o<=i;o++){let a=n.a0+n.sw*o/i;r.push([n.cx+n.r*Math.cos(a),n.cy+n.r*Math.sin(a)])}return r}var Ge=[1,0,0,1,0,0],Xe=[-1,0,0,1,0,0],sn=(n,t)=>[n[0]*t[0]+n[2]*t[1],n[1]*t[0]+n[3]*t[1],n[0]*t[2]+n[2]*t[3],n[1]*t[2]+n[3]*t[3],n[0]*t[4]+n[2]*t[5]+n[4],n[1]*t[4]+n[3]*t[5]+n[5]],en=(n,t,e)=>[n[0]*t+n[2]*e+n[4],n[1]*t+n[3]*e+n[5]];function He(n,t,e,s){let i=Math.cos(n.rot*pn),r=Math.sin(n.rot*pn),o=[i,r,-r,i,n.x,n.y],a=[1,0,0,1,e*n.dx,s*n.dy],c=[n.sx,0,0,n.sy,0,0],d=[1,0,0,1,-t.x,-t.y];return sn(sn(sn(o,a),c),d)}function Ke(n,t,e){if(t.k==="L"){let[d,u]=en(e,t.x0,t.y0),[m,D]=en(e,t.x1,t.y1);n.push(rn(d,u,m,D,t.layer));return}let s=e[0]*e[0]+e[1]*e[1],i=e[2]*e[2]+e[3]*e[3],r=e[0]*e[2]+e[1]*e[3],o=Math.max(s,i);if(Math.abs(s-i)<=1e-9*o&&Math.abs(r)<=1e-9*o){let[d,u]=en(e,t.cx,t.cy),[m,D]=en(e,t.x0,t.y0),S=e[0]*e[3]-e[1]*e[2];n.push(Dn(d,u,t.r*Math.sqrt(s),Math.atan2(D-u,m-d),S<0?-t.sw:t.sw,t.layer));return}let c=Nn(t,t.r*ne).map(([d,u])=>en(e,d,u));for(let d=1;d<c.length;d++)n.push(rn(c[d-1][0],c[d-1][1],c[d][0],c[d][1],t.layer))}function Jn(n,t,e){let s=[],i=n.length,r=t?i:i-1;for(let o=0;o<r;o++){let a=n[o],c=n[(o+1)%i],d=c.x-a.x,u=c.y-a.y;if(d===0&&u===0)continue;let m=a.bulge||0;if(Math.abs(m)<1e-12){s.push(rn(a.x,a.y,c.x,c.y,e));continue}let D=(1-m*m)/(4*m),S=(a.x+c.x)/2-u*D,f=(a.y+c.y)/2+d*D,I=Math.hypot(a.x-S,a.y-f),g=Dn(S,f,I,Math.atan2(a.y-f,a.x-S),4*Math.atan(m),e);g.x0=a.x,g.y0=a.y,g.x1=c.x,g.y1=c.y,s.push(g)}return s}function mn(n,t){let e=[];for(let s=1;s<n.length;s++){let[i,r]=n[s-1],[o,a]=n[s];(i!==o||r!==a)&&e.push(rn(i,r,o,a,t))}return e}function _e(n,t){if(Math.hypot(n.mx,n.my)===0)return[];let s=-n.my*n.ratio*n.extZ,i=n.mx*n.ratio*n.extZ,r=n.t1-n.t0;for(;r<=1e-12;)r+=tn;r>tn&&(r=tn);let o=2*Math.acos(1-ne),a=Math.min(4096,Math.max(16,Math.ceil(r/o))),c=[];for(let d=0;d<=a;d++){let u=n.t0+r*d/a;c.push([n.cx+Math.cos(u)*n.mx+Math.sin(u)*s,n.cy+Math.cos(u)*n.my+Math.sin(u)*i])}return r===tn&&(c[a]=c[0].slice()),mn(c,t)}function ze(n,t,e,s,i){let r=[];for(let o=0;o<=i;o++)r.push(s[o+n-i].slice());for(let o=1;o<=i;o++)for(let a=i;a>=o;a--){let c=a+n-i,d=e[c+i-o+1]-e[c],u=d===0?0:(t-e[c])/d;for(let m=0;m<3;m++)r[a][m]=(1-u)*r[a-1][m]+u*r[a][m]}return r[i]}function Ve(n,t,e){let s=n.ctrl.length,i=n.degree;if(s>=2&&i>=1&&s>i&&n.knots.length===s+i+1){let r=n.weights.length===s,o=n.ctrl.map((c,d)=>{let u=r?n.weights[d]:1;return[c.x*u,c.y*u,u]}),a=[];for(let c=i;c<s;c++){let d=n.knots[c],u=n.knots[c+1];if(!(u>d))continue;let m=a.length?1:0;for(let D=m;D<=On;D++){let S=D===On?u:d+(u-d)*D/On,f=ze(c,S,n.knots,o,i);a.push([f[0]/f[2],f[1]/f[2]])}}if(a.length>=2)return mn(a,t)}if(n.fit.length>=2){e.fitSplines++;let r=n.fit.map(o=>[o.x,o.y]);return n.closed&&r.push(r[0].slice()),mn(r,t)}return s>=2?(e.fitSplines++,mn(n.ctrl.map(r=>[r.x,r.y]),t)):[]}function ee(n,t={}){let e=qe(n.header,t.units??"auto",t.defaultUnit??"mm"),s=[],i={},r={fitSplines:0,missingBlocks:0,paperSpace:0},o=(c,d,u,m)=>{if(c.paperSpace){r.paperSpace++;return}let D=c.layer==="0"&&u!==null?u:c.layer,S=c.extZ<0?sn(d,Xe):d,f=null,I=d;switch(c.type){case"LINE":f=[rn(c.x1,c.y1,c.x2,c.y2,D)];break;case"CIRCLE":c.r>0&&(f=[Dn(c.cx,c.cy,c.r,0,tn,D)]),I=S;break;case"ARC":{if(c.r>0){let g=(c.a1-c.a0)%360;g<=0&&(g+=360),f=[Dn(c.cx,c.cy,c.r,c.a0*pn,g*pn,D)]}I=S;break}case"LWPOLYLINE":f=Jn(c.vertices,c.closed,D),I=S;break;case"POLYLINE":c.mesh||(f=Jn(c.vertices,c.closed,D)),I=S;break;case"ELLIPSE":f=_e(c,D);break;case"SPLINE":f=Ve(c,D,r);break;case"INSERT":{let g=n.blocks.get(c.name)??n.blocks.get(String(c.name).toUpperCase());if(!g){r.missingBlocks++;return}if(m>=Fe)return;for(let R=0;R<c.rows;R++)for(let P=0;P<c.cols;P++){let T=sn(S,He(c,g.base,P,R));for(let M of g.entities)o(M,T,D,m+1)}return}default:i[c.type]=(i[c.type]??0)+1;return}if(f)for(let g of f)Ke(s,g,I)},a=[e.scale,0,0,e.scale,0,0];for(let c of n.entities)o(c,e.scale===1?Ge:a,null,0);return{prims:s,ignored:i,unit:e,notes:r}}var We=2*Math.PI,En=Math.PI/2,je=.01,Ze=1e-4,Qe=1e-9,Y=n=>Math.round(n/Ze);function te(n){return n.k==="L"?{...n,x0:n.x1,y0:n.y1,x1:n.x0,y1:n.y0}:{...n,a0:n.a0+n.sw,sw:-n.sw,x0:n.x1,y0:n.y1,x1:n.x0,y1:n.y0}}var se=n=>n.k==="A"&&Math.abs(n.sw)>=We-1e-9;function Je(n){if(se(n))return`C|${Y(n.cx)},${Y(n.cy)},${Y(n.r)}`;let t=`${Y(n.x0)},${Y(n.y0)}`,e=`${Y(n.x1)},${Y(n.y1)}`;if(t>e&&([t,e]=[e,t]),n.k==="L")return`L|${t}|${e}`;let s=n.a0+n.sw/2;return`A|${t}|${e}|${Y(n.cx+n.r*Math.cos(s))},${Y(n.cy+n.r*Math.sin(s))}`}function an(n,t,e){t<n[0]&&(n[0]=t),e<n[1]&&(n[1]=e),t>n[2]&&(n[2]=t),e>n[3]&&(n[3]=e)}function nt(n,t){if(an(t,n.x0,n.y0),an(t,n.x1,n.y1),n.k!=="A")return;let e=n.sw>=0?n.a0:n.a0+n.sw,s=e+Math.abs(n.sw);for(let i=Math.ceil(e/En-1e-12);i*En<=s+1e-12;i++)an(t,n.cx+n.r*Math.cos(i*En),n.cy+n.r*Math.sin(i*En))}function et(n,t,e){let s=!1;for(let i=0,r=e.length-1;i<e.length;r=i++){let o=e[i][0],a=e[i][1],c=e[r][0],d=e[r][1];a>t!=d>t&&n<(c-o)*(t-a)/(d-a)+o&&(s=!s)}return s}function tt(n){if(n.length===0)return null;let t=n.slice().sort((a,c)=>a[0]-c[0]||a[1]-c[1]),e=(a,c,d)=>(c[0]-a[0])*(d[1]-a[1])-(c[1]-a[1])*(d[0]-a[0]),s=[];for(let a of t){for(;s.length>=2&&e(s[s.length-2],s[s.length-1],a)<=0;)s.pop();s.push(a)}let i=[];for(let a=t.length-1;a>=0;a--){let c=t[a];for(;i.length>=2&&e(i[i.length-2],i[i.length-1],c)<=0;)i.pop();i.push(c)}let r=s.slice(0,-1).concat(i.slice(0,-1));if(r.length<3){let a=t[0],c=t[t.length-1];return{w:Math.hypot(c[0]-a[0],c[1]-a[1]),h:0,angle:Math.atan2(c[1]-a[1],c[0]-a[0])}}let o=null;for(let a=0;a<r.length;a++){let c=r[a],d=r[(a+1)%r.length],u=Math.hypot(d[0]-c[0],d[1]-c[1]);if(u===0)continue;let m=(d[0]-c[0])/u,D=(d[1]-c[1])/u,S=1/0,f=-1/0,I=0;for(let R of r){let P=(R[0]-c[0])*m+(R[1]-c[1])*D,T=-(R[0]-c[0])*D+(R[1]-c[1])*m;P<S&&(S=P),P>f&&(f=P),T>I&&(I=T)}let g=(f-S)*I;(!o||g<o.area)&&(o={area:g,a:f-S,b:I,angle:Math.atan2(D,m)})}return{w:Math.max(o.a,o.b),h:Math.min(o.a,o.b),angle:o.angle}}function re(n){let t=new Map;for(let e of n){let s=t.get(e.layer)??{name:e.layer,count:0,length:0};s.count++,s.length+=An(e),t.set(e.layer,s)}return[...t.values()].sort((e,s)=>e.name.localeCompare(s.name))}var st=new RegExp(["bema(ss|ß)ung","^dim","defpoints","text","hilfs","mittellini","^cent(er|re)","schriftfeld","rahmen","tit(le|el)","gravur","engrav","bieg","^bend","annot","schraff","hatch"].join("|"),"i");function ae(n){return n.filter(t=>st.test(t))}function rt(n,t){let e=Math.max(t,1e-6),s=t*t,i=new Map,r=(m,D)=>`${m}:${D}`,o=(m,D,S)=>{let f=r(Math.floor(m/e),Math.floor(D/e)),I=i.get(f);I?I.push(S):i.set(f,[S])};n.forEach((m,D)=>{o(m.x0,m.y0,2*D),o(m.x1,m.y1,2*D+1)});let a=new Uint8Array(n.length),c=(m,D)=>{let S=Math.floor(m/e),f=Math.floor(D/e),I=-1,g=s;for(let R=-1;R<=1;R++)for(let P=-1;P<=1;P++){let T=i.get(r(S+R,f+P));if(T)for(let M of T){let C=n[M>>1];if(a[M>>1])continue;let p=M&1?C.x1:C.x0,h=M&1?C.y1:C.y0,L=(p-m)*(p-m)+(h-D)*(h-D);L<=g&&(g=L,I=M)}}return I},d=(m,D)=>(m.x1-D.x0)**2+(m.y1-D.y0)**2<=s,u=[];for(let m=0;m<n.length;m++){if(a[m])continue;if(a[m]=1,se(n[m])){u.push({prims:[n[m]],closed:!0});continue}let D=[n[m]],S=[],f=!1;for(;;){let I=D[D.length-1];if(D.length>=2&&d(I,D[0])){f=!0;break}let g=c(I.x1,I.y1);if(g<0)break;a[g>>1]=1,D.push(g&1?te(n[g>>1]):n[g>>1])}for(;!f;){let I=S.length?S[S.length-1]:D[0],g=c(I.x0,I.y0);if(g<0)break;a[g>>1]=1,S.push(g&1?n[g>>1]:te(n[g>>1])),d(D[D.length-1],S[S.length-1])&&(f=!0)}u.push({prims:S.reverse().concat(D),closed:f})}return u}function ie(n,t={}){let e=t.tol>0?t.tol:.05,s=new Set(t.ignoreLayers??[]),i={duplicates:0,zeroLength:0},r=new Set,o=[];for(let T of n){if(s.has(T.layer))continue;if(An(T)<=Qe){i.zeroLength++;continue}let M=Je(T);if(r.has(M)){i.duplicates++;continue}r.add(M),o.push(T)}let a=rt(o,e).map(T=>{let M=T.prims.length,C=[1/0,1/0,-1/0,-1/0],p=[],h=0,L=0;if(T.prims.forEach((y,v)=>{if(h+=An(y),nt(y,C),y.k==="A"){let x=Nn(y,je);for(let Ln=0;Ln<x.length-1;Ln++)p.push(x[Ln]);L+=y.r*y.r*(y.sw-Math.sin(y.sw))}else p.push([y.x0,y.y0]);let O=T.prims[(v+1)%M];L+=y.x0*y.y1-y.x1*y.y0+(y.x1*O.y0-O.x0*y.y1)}),!T.closed){let y=T.prims[M-1];p.push([y.x1,y.y1])}return{closed:T.closed,prims:T.prims,length:h,area:T.closed?Math.abs(L)/2:0,bbox:C,size:Math.min(C[2]-C[0],C[3]-C[1]),points:p,depth:0,role:T.closed?"outer":"open"}}),c=a.filter(T=>T.closed).sort((T,M)=>M.area-T.area),d=1e-9;c.forEach((T,M)=>{let[C,p]=T.points[0];for(let h=0;h<M;h++){let L=c[h];T.bbox[0]<L.bbox[0]-d||T.bbox[1]<L.bbox[1]-d||T.bbox[2]>L.bbox[2]+d||T.bbox[3]>L.bbox[3]+d||et(C,p,L.points)&&T.depth++}T.role=T.depth%2===0?"outer":"inner"});let u=0,m=0,D=0,S=0,f=null,I=[],g=[1/0,1/0,-1/0,-1/0],R=[];for(let T of a){if(u+=T.length,an(g,T.bbox[0],T.bbox[1]),an(g,T.bbox[2],T.bbox[3]),T.role==="outer")m+=T.area,D++;else if(T.role==="inner")m-=T.area,(f===null||T.size<f)&&(f=T.size);else{S++;let M=T.prims[0],C=T.prims[T.prims.length-1];I.push([M.x0,M.y0],[C.x1,C.y1])}if(T.depth===0)for(let M of T.points)R.push(M)}let P=a.length>0;return{contours:a,cutLength:u,pierces:a.length,closedCount:c.length,openCount:S,outerCount:D,netArea:Math.max(0,m),bbox:P?{minX:g[0],minY:g[1],maxX:g[2],maxY:g[3],w:g[2]-g[0],h:g[3]-g[1]}:null,rect:P?tt(R):null,minInnerSize:f,openEnds:I,removed:i,tol:e}}var at=1;function it(n){return(String(n).trim().split(/[\\/]/).pop().replace(/\.dxf$/i,"").trim()||"Teil").slice(0,120)}var ot=(n,t)=>n.thicknesses.reduce((e,s)=>Math.abs(s.t-t)<Math.abs(e.t-t)?s:e).t;function on(n,t){let e=t.materials.find(s=>s.id===n.materialId);return e||(e=t.materials[0],n.materialId=e.id),e.thicknesses.some(s=>s.t===n.thickness)||(n.thickness=ot(e,n.thickness??3)),e}function V(n,t,e=!1){if(n.flat=ee(n.dxf,{units:n.units,defaultUnit:t.defaultUnit}),n.layers=re(n.flat.prims),e){let s=ae(n.layers.map(i=>i.name));n.ignoreLayers=s.length<n.layers.length?s:[]}n.analysis=ie(n.flat.prims,{tol:n.tol,ignoreLayers:n.ignoreLayers})}function oe(n,t,e,s={}){let i={id:at++,name:it(n),dxf:Zn(t),units:"auto",tol:.05,ignoreLayers:[],materialId:s.materialId,thickness:s.thickness??3,qty:1,bends:0,extra:0};return on(i,e),V(i,e,!0),i}function ce(n,t){let e=on(n,t),s=n.analysis,i=Mn(s,n,e,t),r=Kn(s,n,e,t,t.quantities),o=[],a=(u,m,D)=>o.push({level:u,key:m,vars:D}),c=zn(s,n.thickness);s.pierces===0&&a("warn","warn.none"),c.includes("openContours")&&a("warn","warn.open",{n:s.openCount}),c.includes("smallFeature")&&a("warn","warn.small",{size:J(s.minInnerSize,2),t:n.thickness}),n.flat.notes.missingBlocks>0&&a("warn","warn.blocks",{n:n.flat.notes.missingBlocks}),o.length===0&&a("ok","warn.ok"),s.outerCount>1&&a("info","warn.multi",{n:s.outerCount}),s.removed.duplicates>0&&a("info","warn.duplicates",{n:s.removed.duplicates}),s.removed.zeroLength>0&&a("info","warn.zero",{n:s.removed.zeroLength}),n.flat.notes.fitSplines>0&&a("info","warn.fit",{n:n.flat.notes.fitSplines}),n.flat.unit.source==="assumed"&&a("info","warn.unitAssumed",{unit:n.flat.unit.name});let d=Object.entries(n.flat.ignored).map(([u,m])=>`${m}× ${u}`);return d.length&&a("info","warn.ignored",{list:d.join(", ")}),n.flat.notes.paperSpace>0&&a("info","warn.paper",{n:n.flat.notes.paperSpace}),{material:e,price:i,breaks:r,warnings:o}}var B=n=>{let t=n.toFixed(3).replace(/\.?0+$/,"");return t==="-0"?"0":t};function ct(n){let t=n.prims[0],e=`M${B(t.x0)} ${B(-t.y0)}`;for(let s of n.prims){if(s.k==="L"){e+=`L${B(s.x1)} ${B(-s.y1)}`;continue}let i=B(s.r),r=s.sw>0?0:1;if(Math.abs(s.sw)>=2*Math.PI-1e-9){let o=2*s.cx-s.x0,a=2*s.cy-s.y0;e+=`A${i} ${i} 0 0 ${r} ${B(o)} ${B(-a)}A${i} ${i} 0 0 ${r} ${B(s.x1)} ${B(-s.y1)}`}else{let o=Math.abs(s.sw)>Math.PI?1:0;e+=`A${i} ${i} 0 ${o} ${r} ${B(s.x1)} ${B(-s.y1)}`}}return n.closed?`${e}Z`:e}function le(n){if(!n.bbox)return null;let t="",e="",s="";for(let u of n.contours){let m=ct(u);u.role==="outer"?t+=m:u.role==="inner"?e+=m:s+=m}let{minX:i,maxY:r,w:o,h:a}=n.bbox,c=Math.max(o,a)||1,d=c*.05;return{viewBox:[i-d,-r-d,o+2*d,a+2*d],outer:t,inner:e,open:s,fill:t+e,gaps:n.openEnds.map(([u,m])=>[u,-m]),markerRadius:c*.012}}var E=(n,t=document)=>t.querySelector(n),lt=new Set(["value","checked","selected","disabled","hidden","open","textContent","htmlFor","required"]);function l(n,t,...e){let s=document.createElement(n);for(let[i,r]of Object.entries(t??{}))r==null||r===!1||(i==="class"?s.className=r:i==="dataset"?Object.assign(s.dataset,r):i.startsWith("on")&&typeof r=="function"?s.addEventListener(i.slice(2),r):lt.has(i)?s[i]=r:s.setAttribute(i,r===!0?"":String(r)));for(let i of e.flat(1/0))i==null||i===!1||s.append(i instanceof Node?i:String(i));return s}function N(n){return n.replaceChildren(),n}var ut="http://www.w3.org/2000/svg";function W(n,t){let e=document.createElementNS(ut,n);for(let[s,i]of Object.entries(t))e.setAttribute(s,String(i));return e}function fn(n){let t=le(n);if(!t)return null;let e=W("svg",{viewBox:t.viewBox.join(" "),preserveAspectRatio:"xMidYMid meet","aria-hidden":"true"});t.fill&&e.append(W("path",{class:"pv-fill",d:t.fill,"fill-rule":"evenodd"})),t.outer&&e.append(W("path",{class:"pv-outer",d:t.outer})),t.inner&&e.append(W("path",{class:"pv-inner",d:t.inner})),t.open&&e.append(W("path",{class:"pv-open",d:t.open}));for(let[s,i]of t.gaps)e.append(W("circle",{class:"pv-gap",cx:s,cy:i,r:t.markerRadius}));return e}function Sn(n,t,e){let s=URL.createObjectURL(new Blob([t],{type:e})),i=l("a",{href:s,download:n});document.body.append(i),i.click(),i.remove(),setTimeout(()=>URL.revokeObjectURL(s),1e3)}function bn(n,t,e){let s=null,i="",r=()=>{clearTimeout(s),s=null,n.textContent=i,n.removeAttribute("data-armed")};n.addEventListener("click",()=>{if(s!==null){r(),e();return}i=n.textContent,n.textContent=t(),n.setAttribute("data-armed",""),s=setTimeout(r,5e3)})}function ue(n=document){let t=(e,s)=>{if(!(e instanceof HTMLInputElement||e instanceof HTMLTextAreaElement||e instanceof HTMLSelectElement)||!e.willValidate||!e.id)return;let i=e.closest(".field, td");if(!i)return;let r=`${e.id}-error`,o=i.querySelector(".field-error"),a=(e.getAttribute("aria-describedby")??"").split(/\s+/).filter(c=>c&&c!==r);e.validity.valid?(o?.remove(),e.removeAttribute("aria-invalid")):(s||o)&&(o||(o=l("span",{class:"field-error",id:r}),i.append(o)),o.textContent=e.validationMessage,e.setAttribute("aria-invalid","true"),a.push(r)),a.length?e.setAttribute("aria-describedby",a.join(" ")):e.removeAttribute("aria-describedby")};n.addEventListener("input",e=>t(e.target,!1)),n.addEventListener("change",e=>t(e.target,!0)),n.addEventListener("focusout",e=>t(e.target,!0))}var Tn=n=>String(n).padStart(2,"0");function de(n=new Date){return`${n.getFullYear()}-${Tn(n.getMonth()+1)}-${Tn(n.getDate())}`}function me(n,t){let e=new Date(`${n}T00:00:00Z`);return e.setUTCDate(e.getUTCDate()+t),e.toISOString().slice(0,10)}var pe=(n,t)=>`${n}${t.replace(/-/g,"")}-01`;function hn(n,t){let e=n==="de"?"de-DE":"en-US",s=(o,a)=>new Intl.NumberFormat(e,{minimumFractionDigits:o,maximumFractionDigits:a}),i=new Intl.NumberFormat(e,{style:"currency",currency:t}),r=new Intl.DateTimeFormat(e,{dateStyle:"medium",timeZone:"UTC"});return{locale:e,money:o=>i.format(o),num:(o,a=2,c=0)=>s(c,a).format(o),length:o=>o>=1e3?`${s(2,2).format(o/1e3)} m`:`${s(0,1).format(o)} mm`,area:o=>o>=1e6?`${s(3,3).format(o/1e6)} m²`:`${s(1,1).format(o/100)} cm²`,weight:o=>o<10?`${s(3,3).format(o)} kg`:`${s(1,1).format(o)} kg`,dims:(o,a)=>`${s(0,1).format(o)} × ${s(0,1).format(a)} mm`,time:o=>{let a=Math.round(o);if(a<3570)return`${Math.floor(a/60)}:${Tn(a%60)} min`;let c=Math.round(a/60);return`${Math.floor(c/60)} h ${Tn(c%60)} min`},date:o=>{let a=new Date(`${o}T00:00:00Z`);return Number.isNaN(a.getTime())?"":r.format(a)}}}var dt="\uFEFF";function vn(n,t){let e=String(n??"");return/^[=+\-@\t\r]/.test(e)&&(e=`'${e}`),(e.includes(t)||e.includes('"')||e.includes(`
+`)||e.includes("\r"))&&(e=`"${e.replace(/"/g,'""')}"`),e}function De(n,{lang:t,header:e}){let s=t==="de",i=s?";":",",r=(a,c,d=!1)=>{let u=J(a,c),m=d?u.toFixed(c):String(u);return s?m.replace(".",","):m},o=[e.map(a=>vn(a,i)).join(i)];return n.forEach((a,c)=>{o.push([c+1,vn(a.name,i),vn(a.material,i),r(a.thickness,3),a.qty,r(a.cutLength,1),a.pierces,r(a.weightKg,3),r(a.unitPrice,2,!0),r(a.total,2,!0)].join(i))}),`${dt}${o.join(`\r
+`)}\r
+`}function Ae(n,{settings:t,quote:e,rows:s,totals:i,t:r,fmt:o,isPro:a}){let{company:c}=t,d=a&&c.logo?l("img",{class:"doc-logo",src:c.logo,alt:c.name}):null,u=s.map(({part:D,material:S,price:f},I)=>{let g=fn(D.analysis),R=D.analysis.rect,P=r("doc.spec",{material:S.name,t:o.num(D.thickness,2),w:R?o.num(R.w,1):"–",h:R?o.num(R.h,1):"–",weight:f?o.weight(f.weightKg):"–"});return l("tr",null,l("td",null,String(I+1)),l("td",null,l("div",{class:"doc-thumb"},g)),l("td",null,l("div",null,l("strong",null,D.name)),l("div",{class:"doc-spec"},P)),l("td",{class:"r"},f?`${o.num(f.qty,0)} ${r("unit.pcs")}`:"–"),l("td",{class:"r"},f?o.money(f.unitPrice):"–"),l("td",{class:"r"},f?o.money(f.total):"–"))}),m=[l("tr",null,l("td",null,r("quote.net")),l("td",{class:"r"},o.money(i.net)))];i.surcharge>0&&m.push(l("tr",null,l("td",null,r("quote.surcharge")),l("td",{class:"r"},o.money(i.surcharge)))),m.push(l("tr",null,l("td",null,r("quote.vat",{pct:o.num(t.vatPct,2)})),l("td",{class:"r"},o.money(i.vat))),l("tr",{class:"grand"},l("td",null,r("quote.gross")),l("td",{class:"r"},o.money(i.gross)))),N(n).append(l("article",{class:"doc"},l("header",{class:"doc-head"},l("div",null,d??l("div",{class:"doc-company"},c.name)),l("div",{class:"doc-address"},d&&c.name?`${c.name}
+${c.address}`:c.address)),l("section",{class:"doc-meta"},l("div",{class:"doc-customer"},e.customer),l("dl",{class:"doc-facts"},l("dt",null,r("doc.number")),l("dd",null,e.number),l("dt",null,r("doc.date")),l("dd",null,o.date(e.date)),l("dt",null,r("doc.validUntil")),l("dd",null,o.date(me(e.date,t.validityDays))))),l("h1",null,`${r("doc.title")} ${e.number}`),l("p",null,r("doc.intro")),l("table",{class:"doc-table"},l("thead",null,l("tr",null,l("th",{scope:"col"},r("quote.pos")),l("th",{scope:"col"}),l("th",{scope:"col"},r("quote.desc")),l("th",{scope:"col",class:"r"},r("quote.qty")),l("th",{scope:"col",class:"r"},r("quote.unit")),l("th",{scope:"col",class:"r"},r("quote.total")))),l("tbody",null,u)),l("table",{class:"doc-totals"},l("tbody",null,m)),c.footer?l("footer",{class:"doc-footer"},c.footer):null,a?null:l("p",{class:"doc-watermark"},r("doc.watermark"))))}var mt=250*1024;function pt(n,t,e){let s=t.split("."),i=n;for(let r=0;r<s.length-1;r++)i=i[s[r]];i[s[s.length-1]]=e}function Ee({dialog:n,body:t,getSettings:e,commit:s,getT:i,isPro:r,toast:o}){let a=null,c=0,d=-1,u=(p,h,L)=>l("div",{class:"field"},l("label",{htmlFor:h.id},p),h,L?l("span",{class:"hint"},L):null),m=(p,h,L,y)=>l("input",{type:"text",id:p,maxlength:y,autocomplete:"off",value:L??"",dataset:{path:h,type:"text"}}),D=(p,h,L,y)=>l("textarea",{id:p,maxlength:y,autocomplete:"off",value:L??"",dataset:{path:h,type:"text"}}),S=(p,h,L,y,v,O={})=>l("input",{type:"number",id:p,min:y,max:v,step:O.step??"any",inputmode:O.step===1?"numeric":"decimal","aria-label":O.label,value:Number.isFinite(L)?String(L):"",required:!0,dataset:{path:h,type:"num"}}),f=(p,h,L,y)=>l("select",{id:p,dataset:{path:h,type:"text"}},y.map(([v,O])=>l("option",{value:v,selected:v===L},O))),I=(p,h,...L)=>l("details",{class:"sect",name:"settings",open:p===c,ontoggle:y=>{y.target.open?c=p:c===p&&(c=-1)}},l("summary",null,h),l("div",{class:"sect-body"},L));function g(p){let h=a.company,L=l("input",{type:"file",id:"s-logo",accept:"image/png,image/jpeg,image/webp,image/svg+xml",disabled:!r(),onchange:y=>{let v=y.target.files[0];if(!v)return;if(v.size>mt){o(p("s.logoTooBig"),!0),y.target.value="";return}let O=new FileReader;O.onload=()=>{let x=a.company.logo;a.company.logo=String(O.result),s(a),e().company.logo!==a.company.logo&&(a.company.logo=x,s(a),o(p("s.logoTooBig"),!0)),C()},O.readAsDataURL(v)}});return I(0,p("settings.company"),u(p("s.companyName"),m("s-company","company.name",h.name,120)),u(p("s.address"),D("s-address","company.address",h.address,600)),u(p("s.logo"),L,r()?null:p("s.logoPro")),h.logo?l("div",{class:"row-actions"},l("img",{class:"logo-preview",src:h.logo,alt:""}),l("button",{type:"button",class:"btn",onclick:()=>{a.company.logo="",s(a),C()}},p("s.logoRemove"))):null,u(p("s.footer"),D("s-footer","company.footer",h.footer,600)),l("div",{class:"form-grid"},u(p("s.quotePrefix"),m("s-prefix","quotePrefix",a.quotePrefix,20)),u(p("s.validity"),S("s-validity","validityDays",a.validityDays,1,365,{step:1}))))}function R(p){return I(1,p("settings.calc"),l("div",{class:"form-grid"},u(p("s.currency"),f("s-currency","currency",a.currency,Rn.map(h=>[h,h]))),u(p("s.vat"),S("s-vat","vatPct",a.vatPct,0,100)),u(p("s.machineRate"),S("s-rate","machineRate",a.machineRate,0,1e5)),u(p("s.setup"),S("s-setup","setupCost",a.setupCost,0,1e5)),u(p("s.markup"),S("s-markup","markupPct",a.markupPct,0,1e3)),u(p("s.gap"),S("s-gap","partGap",a.partGap,0,1e3)),u(p("s.bend"),S("s-bend","pricePerBend",a.pricePerBend,0,1e4)),u(p("s.minOrder"),S("s-minorder","minOrder",a.minOrder,0,1e6)),u(p("s.quantities"),l("input",{type:"text",id:"s-quantities",autocomplete:"off",inputmode:"numeric",pattern:"[0-9]+([,; ]+[0-9]+)*",required:!0,value:a.quantities.join(", "),dataset:{path:"quantities",type:"list"}})),u(p("s.defaultUnit"),f("s-defunit","defaultUnit",a.defaultUnit,[["mm",p("unit.mm")],["in",p("unit.in")]]))))}function P(p,h,L){let y=`materials.${L}`,v=h.thicknesses.map((O,x)=>l("tr",null,l("td",null,S(`s-m${L}-t${x}`,`${y}.thicknesses.${x}.t`,O.t,.01,500,{label:`${p("s.t")} ${x+1}`})),l("td",null,S(`s-m${L}-v${x}`,`${y}.thicknesses.${x}.speed`,O.speed,1,1e6,{label:`${p("s.speed")} ${x+1}`})),l("td",null,S(`s-m${L}-p${x}`,`${y}.thicknesses.${x}.pierce`,O.pierce,0,600,{label:`${p("s.pierce")} ${x+1}`})),l("td",null,l("button",{type:"button",class:"icon-btn","aria-label":`${p("s.removeRow")} ${x+1}`,title:p("s.removeRow"),onclick:()=>{h.thicknesses.splice(x,1),s(a),C()}},"×"))));return l("details",{class:"mat",name:"settings-material",open:L===d,ontoggle:O=>{O.target.open?d=L:d===L&&(d=-1)}},l("summary",{id:`s-m${L}-summary`},h.name||p("s.newMaterial")),l("div",{class:"mat-body"},l("div",{class:"form-grid"},u(p("s.matName"),m(`s-m${L}-name`,`${y}.name`,h.name,60)),u(p("s.density"),S(`s-m${L}-density`,`${y}.density`,h.density,.01,25)),u(p("s.pricePerKg"),S(`s-m${L}-price`,`${y}.pricePerKg`,h.pricePerKg,0,1e5))),l("table",{class:"mat-table"},l("thead",null,l("tr",null,l("th",{scope:"col"},p("s.t")),l("th",{scope:"col"},p("s.speed")),l("th",{scope:"col"},p("s.pierce")),l("th",{scope:"col"},l("span",{class:"sr-only"},p("s.removeRow"))))),l("tbody",null,v)),l("div",{class:"row-actions"},l("button",{type:"button",class:"btn",onclick:()=>{h.thicknesses.push({t:NaN,speed:NaN,pierce:NaN}),C(),t.querySelector(`#s-m${L}-t${h.thicknesses.length-1}`)?.focus()}},p("s.addRow")),a.materials.length>1?l("button",{type:"button",class:"btn btn-danger",onclick:()=>{a.materials.splice(L,1),d=-1,s(a),C()}},p("s.removeMaterial")):null)))}function T(p){return I(2,p("settings.materials"),l("p",{class:"hint"},p("s.matHint")),a.materials.map((h,L)=>P(p,h,L)),l("div",{class:"row-actions"},l("button",{type:"button",class:"btn",onclick:()=>{a.materials.push({id:`m${Date.now().toString(36)}`,name:p("s.newMaterial"),density:7.85,pricePerKg:1,thicknesses:[{t:1,speed:5e3,pierce:.3}]}),d=a.materials.length-1,s(a),C()}},p("s.addMaterial"))))}function M(p){let h=l("input",{type:"file",class:"sr-only",accept:"application/json,.json","aria-label":p("s.import"),tabindex:"-1",onchange:async y=>{let v=y.target.files[0];if(y.target.value="",!!v)try{let O=JSON.parse(await v.text());if(!O||typeof O!="object")throw new Error("kein Objekt");a=structuredClone(z(O)),s(a),C(),o(p("s.imported"))}catch{o(p("s.importError"),!0)}}}),L=l("button",{type:"button",class:"btn btn-danger"},p("s.reset"));return bn(L,()=>p("s.resetConfirm"),()=>{a=structuredClone(z()),s(a),C()}),I(3,p("settings.backup"),l("div",{class:"row-actions"},l("button",{type:"button",class:"btn",onclick:()=>Sn("kerfquote-einstellungen.json",JSON.stringify(e(),null,2),"application/json")},p("s.export")),l("button",{type:"button",class:"btn",onclick:()=>h.click()},p("s.import")),h,L))}function C(){let p=i();N(t).append(g(p),R(p),T(p),M(p))}return t.addEventListener("change",p=>{let h=p.target,L=h.dataset?.path;if(!L||!a)return;let y=h.value;h.dataset.type==="num"?y=h.value===""?NaN:Number(h.value):h.dataset.type==="list"&&(y=h.value.split(/[\s,;]+/).filter(Boolean).map(Number)),pt(a,L,y),s(a);let v=/^materials\.(\d+)\.name$/.exec(L);v&&(t.querySelector(`#s-m${v[1]}-summary`).textContent=y||i()("s.newMaterial"))}),{open(){a=structuredClone(e()),C(),n.showModal()},refresh(){n.open&&C()}}}var gn=new Map,U={settings:"kerfquote.settings.v1",license:"kerfquote.license",lang:"kerfquote.lang",last:"kerfquote.last"};function cn(n){try{let t=localStorage.getItem(n);return t===null?gn.get(n)??null:JSON.parse(t)}catch{return gn.get(n)??null}}function j(n,t){gn.set(n,t);try{localStorage.setItem(n,JSON.stringify(t))}catch{}}function fe(n){gn.delete(n);try{localStorage.removeItem(n)}catch{}}var Se={"flansch.dxf":`  0
+SECTION
+  2
+HEADER
+  9
+$ACADVER
+  1
+AC1024
+  9
+$ACADMAINTVER
+ 70
+6
+  9
+$DWGCODEPAGE
+  3
+ANSI_1252
+  9
+$LASTSAVEDBY
+  1
+ezdxf
+  9
+$INSBASE
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$EXTMIN
+ 10
+1e+20
+ 20
+1e+20
+ 30
+1e+20
+  9
+$EXTMAX
+ 10
+-1e+20
+ 20
+-1e+20
+ 30
+-1e+20
+  9
+$LIMMIN
+ 10
+0.0
+ 20
+0.0
+  9
+$LIMMAX
+ 10
+420.0
+ 20
+297.0
+  9
+$ORTHOMODE
+ 70
+0
+  9
+$REGENMODE
+ 70
+1
+  9
+$FILLMODE
+ 70
+1
+  9
+$QTEXTMODE
+ 70
+0
+  9
+$MIRRTEXT
+ 70
+1
+  9
+$LTSCALE
+ 40
+1.0
+  9
+$ATTMODE
+ 70
+1
+  9
+$TEXTSIZE
+ 40
+2.5
+  9
+$TRACEWID
+ 40
+1.0
+  9
+$TEXTSTYLE
+  7
+Standard
+  9
+$CLAYER
+  8
+0
+  9
+$CELTYPE
+  6
+ByLayer
+  9
+$CECOLOR
+ 62
+256
+  9
+$CELTSCALE
+ 40
+1.0
+  9
+$DISPSILH
+ 70
+0
+  9
+$DIMSCALE
+ 40
+1.0
+  9
+$DIMASZ
+ 40
+2.5
+  9
+$DIMEXO
+ 40
+0.625
+  9
+$DIMDLI
+ 40
+3.75
+  9
+$DIMRND
+ 40
+0.0
+  9
+$DIMDLE
+ 40
+0.0
+  9
+$DIMEXE
+ 40
+1.25
+  9
+$DIMTP
+ 40
+0.0
+  9
+$DIMTM
+ 40
+0.0
+  9
+$DIMTXT
+ 40
+2.5
+  9
+$DIMCEN
+ 40
+2.5
+  9
+$DIMTSZ
+ 40
+0.0
+  9
+$DIMTOL
+ 70
+0
+  9
+$DIMLIM
+ 70
+0
+  9
+$DIMTIH
+ 70
+0
+  9
+$DIMTOH
+ 70
+0
+  9
+$DIMSE1
+ 70
+0
+  9
+$DIMSE2
+ 70
+0
+  9
+$DIMTAD
+ 70
+1
+  9
+$DIMZIN
+ 70
+8
+  9
+$DIMBLK
+  1
+
+  9
+$DIMASO
+ 70
+1
+  9
+$DIMSHO
+ 70
+1
+  9
+$DIMPOST
+  1
+
+  9
+$DIMAPOST
+  1
+
+  9
+$DIMALT
+ 70
+0
+  9
+$DIMALTD
+ 70
+3
+  9
+$DIMALTF
+ 40
+0.03937007874
+  9
+$DIMLFAC
+ 40
+1.0
+  9
+$DIMTOFL
+ 70
+1
+  9
+$DIMTVP
+ 40
+0.0
+  9
+$DIMTIX
+ 70
+0
+  9
+$DIMSOXD
+ 70
+0
+  9
+$DIMSAH
+ 70
+0
+  9
+$DIMBLK1
+  1
+
+  9
+$DIMBLK2
+  1
+
+  9
+$DIMSTYLE
+  2
+ISO-25
+  9
+$DIMCLRD
+ 70
+0
+  9
+$DIMCLRE
+ 70
+0
+  9
+$DIMCLRT
+ 70
+0
+  9
+$DIMTFAC
+ 40
+1.0
+  9
+$DIMGAP
+ 40
+0.625
+  9
+$DIMJUST
+ 70
+0
+  9
+$DIMSD1
+ 70
+0
+  9
+$DIMSD2
+ 70
+0
+  9
+$DIMTOLJ
+ 70
+0
+  9
+$DIMTZIN
+ 70
+8
+  9
+$DIMALTZ
+ 70
+0
+  9
+$DIMALTTZ
+ 70
+0
+  9
+$DIMUPT
+ 70
+0
+  9
+$DIMDEC
+ 70
+2
+  9
+$DIMTDEC
+ 70
+2
+  9
+$DIMALTU
+ 70
+2
+  9
+$DIMALTTD
+ 70
+3
+  9
+$DIMTXSTY
+  7
+Standard
+  9
+$DIMAUNIT
+ 70
+0
+  9
+$DIMADEC
+ 70
+0
+  9
+$DIMALTRND
+ 40
+0.0
+  9
+$DIMAZIN
+ 70
+0
+  9
+$DIMDSEP
+ 70
+44
+  9
+$DIMATFIT
+ 70
+3
+  9
+$DIMFRAC
+ 70
+0
+  9
+$DIMLDRBLK
+  1
+
+  9
+$DIMLUNIT
+ 70
+2
+  9
+$DIMLWD
+ 70
+-2
+  9
+$DIMLWE
+ 70
+-2
+  9
+$DIMTMOVE
+ 70
+0
+  9
+$DIMFXL
+ 40
+1.0
+  9
+$DIMFXLON
+ 70
+0
+  9
+$DIMJOGANG
+ 40
+0.785398163397
+  9
+$DIMTFILL
+ 70
+0
+  9
+$DIMTFILLCLR
+ 70
+0
+  9
+$DIMARCSYM
+ 70
+0
+  9
+$DIMLTYPE
+  6
+
+  9
+$DIMLTEX1
+  6
+
+  9
+$DIMLTEX2
+  6
+
+  9
+$DIMTXTDIRECTION
+ 70
+0
+  9
+$LUNITS
+ 70
+2
+  9
+$LUPREC
+ 70
+4
+  9
+$SKETCHINC
+ 40
+1.0
+  9
+$FILLETRAD
+ 40
+10.0
+  9
+$AUNITS
+ 70
+0
+  9
+$AUPREC
+ 70
+2
+  9
+$MENU
+  1
+.
+  9
+$ELEVATION
+ 40
+0.0
+  9
+$PELEVATION
+ 40
+0.0
+  9
+$THICKNESS
+ 40
+0.0
+  9
+$LIMCHECK
+ 70
+0
+  9
+$CHAMFERA
+ 40
+0.0
+  9
+$CHAMFERB
+ 40
+0.0
+  9
+$CHAMFERC
+ 40
+0.0
+  9
+$CHAMFERD
+ 40
+0.0
+  9
+$SKPOLY
+ 70
+0
+  9
+$TDCREATE
+ 40
+2461355.831203704
+  9
+$TDUCREATE
+ 40
+2458532.153996898
+  9
+$TDUPDATE
+ 40
+2461355.831203704
+  9
+$TDUUPDATE
+ 40
+2458532.1544311
+  9
+$TDINDWG
+ 40
+0.0
+  9
+$TDUSRTIMER
+ 40
+0.0
+  9
+$USRTIMER
+ 70
+1
+  9
+$ANGBASE
+ 50
+0.0
+  9
+$ANGDIR
+ 70
+0
+  9
+$PDMODE
+ 70
+0
+  9
+$PDSIZE
+ 40
+0.0
+  9
+$PLINEWID
+ 40
+0.0
+  9
+$SPLFRAME
+ 70
+0
+  9
+$SPLINETYPE
+ 70
+6
+  9
+$SPLINESEGS
+ 70
+8
+  9
+$HANDSEED
+  5
+3A
+  9
+$SURFTAB1
+ 70
+6
+  9
+$SURFTAB2
+ 70
+6
+  9
+$SURFTYPE
+ 70
+6
+  9
+$SURFU
+ 70
+6
+  9
+$SURFV
+ 70
+6
+  9
+$UCSBASE
+  2
+
+  9
+$UCSNAME
+  2
+
+  9
+$UCSORG
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSXDIR
+ 10
+1.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSYDIR
+ 10
+0.0
+ 20
+1.0
+ 30
+0.0
+  9
+$UCSORTHOREF
+  2
+
+  9
+$UCSORTHOVIEW
+ 70
+0
+  9
+$UCSORGTOP
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSORGBOTTOM
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSORGLEFT
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSORGRIGHT
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSORGFRONT
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSORGBACK
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSBASE
+  2
+
+  9
+$PUCSNAME
+  2
+
+  9
+$PUCSORG
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSXDIR
+ 10
+1.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSYDIR
+ 10
+0.0
+ 20
+1.0
+ 30
+0.0
+  9
+$PUCSORTHOREF
+  2
+
+  9
+$PUCSORTHOVIEW
+ 70
+0
+  9
+$PUCSORGTOP
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSORGBOTTOM
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSORGLEFT
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSORGRIGHT
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSORGFRONT
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSORGBACK
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$USERI1
+ 70
+0
+  9
+$USERI2
+ 70
+0
+  9
+$USERI3
+ 70
+0
+  9
+$USERI4
+ 70
+0
+  9
+$USERI5
+ 70
+0
+  9
+$USERR1
+ 40
+0.0
+  9
+$USERR2
+ 40
+0.0
+  9
+$USERR3
+ 40
+0.0
+  9
+$USERR4
+ 40
+0.0
+  9
+$USERR5
+ 40
+0.0
+  9
+$WORLDVIEW
+ 70
+1
+  9
+$SHADEDGE
+ 70
+3
+  9
+$SHADEDIF
+ 70
+70
+  9
+$TILEMODE
+ 70
+1
+  9
+$MAXACTVP
+ 70
+64
+  9
+$PINSBASE
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PLIMCHECK
+ 70
+0
+  9
+$PEXTMIN
+ 10
+1e+20
+ 20
+1e+20
+ 30
+1e+20
+  9
+$PEXTMAX
+ 10
+-1e+20
+ 20
+-1e+20
+ 30
+-1e+20
+  9
+$PLIMMIN
+ 10
+0.0
+ 20
+0.0
+  9
+$PLIMMAX
+ 10
+420.0
+ 20
+297.0
+  9
+$UNITMODE
+ 70
+0
+  9
+$VISRETAIN
+ 70
+1
+  9
+$PLINEGEN
+ 70
+0
+  9
+$PSLTSCALE
+ 70
+1
+  9
+$TREEDEPTH
+ 70
+3020
+  9
+$CMLSTYLE
+  2
+Standard
+  9
+$CMLJUST
+ 70
+0
+  9
+$CMLSCALE
+ 40
+20.0
+  9
+$PROXYGRAPHICS
+ 70
+1
+  9
+$MEASUREMENT
+ 70
+1
+  9
+$CELWEIGHT
+370
+-1
+  9
+$ENDCAPS
+280
+0
+  9
+$JOINSTYLE
+280
+0
+  9
+$LWDISPLAY
+290
+0
+  9
+$INSUNITS
+ 70
+4
+  9
+$HYPERLINKBASE
+  1
+
+  9
+$STYLESHEET
+  1
+
+  9
+$XEDIT
+290
+1
+  9
+$CEPSNTYPE
+380
+0
+  9
+$PSTYLEMODE
+290
+1
+  9
+$FINGERPRINTGUID
+  2
+{5E076C14-D5C9-4372-A14E-D5D7EA8DBCC1}
+  9
+$VERSIONGUID
+  2
+{BCA5A3BF-FE83-498D-AD9D-2F707F709BAF}
+  9
+$EXTNAMES
+290
+1
+  9
+$PSVPSCALE
+ 40
+0.0
+  9
+$OLESTARTUP
+290
+0
+  9
+$SORTENTS
+280
+127
+  9
+$INDEXCTL
+280
+0
+  9
+$HIDETEXT
+280
+1
+  9
+$XCLIPFRAME
+280
+1
+  9
+$HALOGAP
+280
+0
+  9
+$OBSCOLOR
+ 70
+257
+  9
+$OBSLTYPE
+280
+0
+  9
+$INTERSECTIONDISPLAY
+280
+0
+  9
+$INTERSECTIONCOLOR
+ 70
+257
+  9
+$DIMASSOC
+280
+2
+  9
+$PROJECTNAME
+  1
+
+  9
+$CAMERADISPLAY
+290
+0
+  9
+$LENSLENGTH
+ 40
+50.0
+  9
+$CAMERAHEIGHT
+ 40
+0.0
+  9
+$STEPSPERSEC
+ 40
+24.0
+  9
+$STEPSIZE
+ 40
+100.0
+  9
+$3DDWFPREC
+ 40
+2.0
+  9
+$PSOLWIDTH
+ 40
+0.005
+  9
+$PSOLHEIGHT
+ 40
+0.08
+  9
+$LOFTANG1
+ 40
+1.570796326795
+  9
+$LOFTANG2
+ 40
+1.570796326795
+  9
+$LOFTMAG1
+ 40
+0.0
+  9
+$LOFTMAG2
+ 40
+0.0
+  9
+$LOFTPARAM
+ 70
+7
+  9
+$LOFTNORMALS
+280
+1
+  9
+$LATITUDE
+ 40
+37.795
+  9
+$LONGITUDE
+ 40
+-122.394
+  9
+$NORTHDIRECTION
+ 40
+0.0
+  9
+$TIMEZONE
+ 70
+-8000
+  9
+$LIGHTGLYPHDISPLAY
+280
+1
+  9
+$TILEMODELIGHTSYNCH
+280
+1
+  9
+$CMATERIAL
+347
+20
+  9
+$SOLIDHIST
+280
+0
+  9
+$SHOWHIST
+280
+1
+  9
+$DWFFRAME
+280
+2
+  9
+$DGNFRAME
+280
+2
+  9
+$REALWORLDSCALE
+290
+1
+  9
+$INTERFERECOLOR
+ 62
+256
+  9
+$CSHADOW
+280
+0
+  9
+$SHADOWPLANELOCATION
+ 40
+0.0
+  0
+ENDSEC
+  0
+SECTION
+  2
+CLASSES
+  0
+CLASS
+  1
+ACDBDICTIONARYWDFLT
+  2
+AcDbDictionaryWithDefault
+  3
+ObjectDBX Classes
+ 90
+0
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+SUN
+  2
+AcDbSun
+  3
+SCENEOE
+ 90
+1153
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+VISUALSTYLE
+  2
+AcDbVisualStyle
+  3
+ObjectDBX Classes
+ 90
+4095
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+MATERIAL
+  2
+AcDbMaterial
+  3
+ObjectDBX Classes
+ 90
+1153
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+SCALE
+  2
+AcDbScale
+  3
+ObjectDBX Classes
+ 90
+1153
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+TABLESTYLE
+  2
+AcDbTableStyle
+  3
+ObjectDBX Classes
+ 90
+4095
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+MLEADERSTYLE
+  2
+AcDbMLeaderStyle
+  3
+ACDB_MLEADERSTYLE_CLASS
+ 90
+4095
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+DICTIONARYVAR
+  2
+AcDbDictionaryVar
+  3
+ObjectDBX Classes
+ 90
+0
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+CELLSTYLEMAP
+  2
+AcDbCellStyleMap
+  3
+ObjectDBX Classes
+ 90
+1152
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+MENTALRAYRENDERSETTINGS
+  2
+AcDbMentalRayRenderSettings
+  3
+SCENEOE
+ 90
+1024
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+ACDBDETAILVIEWSTYLE
+  2
+AcDbDetailViewStyle
+  3
+ObjectDBX Classes
+ 90
+1025
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+ACDBSECTIONVIEWSTYLE
+  2
+AcDbSectionViewStyle
+  3
+ObjectDBX Classes
+ 90
+1025
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+RASTERVARIABLES
+  2
+AcDbRasterVariables
+  3
+ISM
+ 90
+0
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+LAYOUT
+  2
+AcDbLayout
+  3
+ObjectDBX Classes
+ 90
+0
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+ACDBPLACEHOLDER
+  2
+AcDbPlaceHolder
+  3
+ObjectDBX Classes
+ 90
+0
+ 91
+0
+280
+0
+281
+0
+  0
+ENDSEC
+  0
+SECTION
+  2
+TABLES
+  0
+TABLE
+  2
+VPORT
+  5
+8
+330
+0
+100
+AcDbSymbolTable
+ 70
+1
+  0
+VPORT
+  5
+23
+330
+8
+100
+AcDbSymbolTableRecord
+100
+AcDbViewportTableRecord
+  2
+*Active
+ 70
+0
+ 10
+0.0
+ 20
+0.0
+ 11
+1.0
+ 21
+1.0
+ 12
+0.0
+ 22
+0.0
+ 13
+0.0
+ 23
+0.0
+ 14
+0.5
+ 24
+0.5
+ 15
+0.5
+ 25
+0.5
+ 16
+0.0
+ 26
+0.0
+ 36
+1.0
+ 17
+0.0
+ 27
+0.0
+ 37
+0.0
+ 40
+1000.0
+ 41
+1.34
+ 42
+50.0
+ 43
+0.0
+ 44
+0.0
+ 50
+0.0
+ 51
+0.0
+ 71
+0
+ 72
+1000
+ 73
+1
+ 74
+3
+ 75
+0
+ 76
+0
+ 77
+0
+ 78
+0
+281
+0
+ 65
+0
+146
+0.0
+  0
+ENDTAB
+  0
+TABLE
+  2
+LTYPE
+  5
+2
+330
+0
+100
+AcDbSymbolTable
+ 70
+3
+  0
+LTYPE
+  5
+24
+330
+2
+100
+AcDbSymbolTableRecord
+100
+AcDbLinetypeTableRecord
+  2
+ByBlock
+ 70
+0
+  3
+
+ 72
+65
+ 73
+0
+ 40
+0.0
+  0
+LTYPE
+  5
+25
+330
+2
+100
+AcDbSymbolTableRecord
+100
+AcDbLinetypeTableRecord
+  2
+ByLayer
+ 70
+0
+  3
+
+ 72
+65
+ 73
+0
+ 40
+0.0
+  0
+LTYPE
+  5
+26
+330
+2
+100
+AcDbSymbolTableRecord
+100
+AcDbLinetypeTableRecord
+  2
+Continuous
+ 70
+0
+  3
+
+ 72
+65
+ 73
+0
+ 40
+0.0
+  0
+ENDTAB
+  0
+TABLE
+  2
+LAYER
+  5
+1
+330
+0
+100
+AcDbSymbolTable
+ 70
+2
+  0
+LAYER
+  5
+27
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+0
+ 70
+0
+ 62
+7
+  6
+Continuous
+370
+-3
+390
+13
+347
+21
+  0
+LAYER
+  5
+28
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+Defpoints
+ 70
+0
+ 62
+7
+  6
+Continuous
+290
+0
+370
+-3
+390
+13
+347
+21
+  0
+ENDTAB
+  0
+TABLE
+  2
+STYLE
+  5
+5
+330
+0
+100
+AcDbSymbolTable
+ 70
+1
+  0
+STYLE
+  5
+29
+330
+5
+100
+AcDbSymbolTableRecord
+100
+AcDbTextStyleTableRecord
+  2
+Standard
+ 70
+0
+ 40
+0.0
+ 41
+1.0
+ 50
+0.0
+ 71
+0
+ 42
+2.5
+  3
+txt
+  4
+
+  0
+ENDTAB
+  0
+TABLE
+  2
+VIEW
+  5
+7
+330
+0
+100
+AcDbSymbolTable
+ 70
+0
+  0
+ENDTAB
+  0
+TABLE
+  2
+UCS
+  5
+6
+330
+0
+100
+AcDbSymbolTable
+ 70
+0
+  0
+ENDTAB
+  0
+TABLE
+  2
+APPID
+  5
+3
+330
+0
+100
+AcDbSymbolTable
+ 70
+3
+  0
+APPID
+  5
+2A
+330
+3
+100
+AcDbSymbolTableRecord
+100
+AcDbRegAppTableRecord
+  2
+ACAD
+ 70
+0
+  0
+APPID
+  5
+37
+330
+3
+100
+AcDbSymbolTableRecord
+100
+AcDbRegAppTableRecord
+  2
+HATCHBACKGROUNDCOLOR
+ 70
+0
+  0
+APPID
+  5
+38
+330
+3
+100
+AcDbSymbolTableRecord
+100
+AcDbRegAppTableRecord
+  2
+EZDXF
+ 70
+0
+  0
+ENDTAB
+  0
+TABLE
+  2
+DIMSTYLE
+  5
+4
+330
+0
+100
+AcDbSymbolTable
+ 70
+1
+100
+AcDbDimStyleTable
+  0
+DIMSTYLE
+105
+2B
+330
+4
+100
+AcDbSymbolTableRecord
+100
+AcDbDimStyleTableRecord
+  2
+Standard
+ 70
+0
+ 40
+1.0
+ 41
+2.5
+ 42
+0.625
+ 43
+3.75
+ 44
+1.25
+ 45
+0.0
+ 46
+0.0
+ 47
+0.0
+ 48
+0.0
+ 49
+2.5
+140
+2.5
+141
+2.5
+142
+0.0
+143
+0.03937007874
+144
+1.0
+145
+0.0
+146
+1.0
+147
+0.625
+148
+0.0
+ 69
+0
+ 70
+0
+ 71
+0
+ 72
+0
+ 73
+0
+ 74
+0
+ 75
+0
+ 76
+0
+ 77
+1
+ 78
+8
+ 79
+3
+170
+0
+171
+3
+172
+1
+173
+0
+174
+0
+175
+0
+176
+0
+177
+0
+178
+0
+179
+2
+271
+2
+272
+2
+273
+2
+274
+3
+275
+0
+276
+0
+277
+2
+278
+44
+279
+0
+280
+0
+281
+0
+282
+0
+283
+0
+284
+8
+285
+0
+286
+0
+288
+0
+289
+3
+290
+0
+371
+-2
+372
+-2
+  0
+ENDTAB
+  0
+TABLE
+  2
+BLOCK_RECORD
+  5
+9
+330
+0
+100
+AcDbSymbolTable
+ 70
+2
+  0
+BLOCK_RECORD
+  5
+17
+330
+9
+100
+AcDbSymbolTableRecord
+100
+AcDbBlockTableRecord
+  2
+*Model_Space
+340
+1A
+ 70
+0
+280
+1
+281
+0
+  0
+BLOCK_RECORD
+  5
+1B
+330
+9
+100
+AcDbSymbolTableRecord
+100
+AcDbBlockTableRecord
+  2
+*Paper_Space
+340
+1E
+ 70
+0
+280
+1
+281
+0
+  0
+ENDTAB
+  0
+ENDSEC
+  0
+SECTION
+  2
+BLOCKS
+  0
+BLOCK
+  5
+18
+330
+17
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockBegin
+  2
+*Model_Space
+ 70
+0
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  3
+*Model_Space
+  1
+
+  0
+ENDBLK
+  5
+19
+330
+17
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockEnd
+  0
+BLOCK
+  5
+1C
+330
+1B
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockBegin
+  2
+*Paper_Space
+ 70
+0
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  3
+*Paper_Space
+  1
+
+  0
+ENDBLK
+  5
+1D
+330
+1B
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockEnd
+  0
+ENDSEC
+  0
+SECTION
+  2
+ENTITIES
+  0
+CIRCLE
+  5
+2F
+330
+17
+100
+AcDbEntity
+  8
+0
+100
+AcDbCircle
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+ 40
+60.0
+  0
+CIRCLE
+  5
+30
+330
+17
+100
+AcDbEntity
+  8
+0
+100
+AcDbCircle
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+ 40
+20.0
+  0
+CIRCLE
+  5
+31
+330
+17
+100
+AcDbEntity
+  8
+0
+100
+AcDbCircle
+ 10
+45.0
+ 20
+0.0
+ 30
+0.0
+ 40
+4.5
+  0
+CIRCLE
+  5
+32
+330
+17
+100
+AcDbEntity
+  8
+0
+100
+AcDbCircle
+ 10
+22.500000000000004
+ 20
+38.97114317029974
+ 30
+0.0
+ 40
+4.5
+  0
+CIRCLE
+  5
+33
+330
+17
+100
+AcDbEntity
+  8
+0
+100
+AcDbCircle
+ 10
+-22.49999999999999
+ 20
+38.97114317029974
+ 30
+0.0
+ 40
+4.5
+  0
+CIRCLE
+  5
+34
+330
+17
+100
+AcDbEntity
+  8
+0
+100
+AcDbCircle
+ 10
+-45.0
+ 20
+5.5109105961630896e-15
+ 30
+0.0
+ 40
+4.5
+  0
+CIRCLE
+  5
+35
+330
+17
+100
+AcDbEntity
+  8
+0
+100
+AcDbCircle
+ 10
+-22.50000000000002
+ 20
+-38.971143170299726
+ 30
+0.0
+ 40
+4.5
+  0
+CIRCLE
+  5
+36
+330
+17
+100
+AcDbEntity
+  8
+0
+100
+AcDbCircle
+ 10
+22.500000000000004
+ 20
+-38.97114317029974
+ 30
+0.0
+ 40
+4.5
+  0
+ENDSEC
+  0
+SECTION
+  2
+OBJECTS
+  0
+DICTIONARY
+  5
+A
+330
+0
+100
+AcDbDictionary
+281
+1
+  3
+ACAD_COLOR
+350
+B
+  3
+ACAD_GROUP
+350
+C
+  3
+ACAD_LAYOUT
+350
+D
+  3
+ACAD_MATERIAL
+350
+E
+  3
+ACAD_MLEADERSTYLE
+350
+F
+  3
+ACAD_MLINESTYLE
+350
+10
+  3
+ACAD_PLOTSETTINGS
+350
+11
+  3
+ACAD_PLOTSTYLENAME
+350
+12
+  3
+ACAD_SCALELIST
+350
+14
+  3
+ACAD_TABLESTYLE
+350
+15
+  3
+ACAD_VISUALSTYLE
+350
+16
+  3
+EZDXF_META
+350
+2D
+  0
+DICTIONARY
+  5
+B
+330
+A
+100
+AcDbDictionary
+281
+1
+  0
+DICTIONARY
+  5
+C
+330
+A
+100
+AcDbDictionary
+281
+1
+  0
+DICTIONARY
+  5
+D
+330
+A
+100
+AcDbDictionary
+281
+1
+  3
+Model
+350
+1A
+  3
+Layout1
+350
+1E
+  0
+DICTIONARY
+  5
+E
+330
+A
+100
+AcDbDictionary
+281
+1
+  3
+ByBlock
+350
+1F
+  3
+ByLayer
+350
+20
+  3
+Global
+350
+21
+  0
+DICTIONARY
+  5
+F
+330
+A
+100
+AcDbDictionary
+281
+1
+  3
+Standard
+350
+2C
+  0
+DICTIONARY
+  5
+10
+330
+A
+100
+AcDbDictionary
+281
+1
+  3
+Standard
+350
+22
+  0
+DICTIONARY
+  5
+11
+330
+A
+100
+AcDbDictionary
+281
+1
+  0
+ACDBDICTIONARYWDFLT
+  5
+12
+330
+A
+100
+AcDbDictionary
+281
+1
+  3
+Normal
+350
+13
+100
+AcDbDictionaryWithDefault
+340
+13
+  0
+ACDBPLACEHOLDER
+  5
+13
+330
+12
+  0
+DICTIONARY
+  5
+14
+330
+A
+100
+AcDbDictionary
+281
+1
+  0
+DICTIONARY
+  5
+15
+330
+A
+100
+AcDbDictionary
+281
+1
+  0
+DICTIONARY
+  5
+16
+330
+A
+100
+AcDbDictionary
+281
+1
+  0
+LAYOUT
+  5
+1A
+330
+D
+100
+AcDbPlotSettings
+  1
+
+  4
+A3
+  6
+
+ 40
+7.5
+ 41
+20.0
+ 42
+7.5
+ 43
+20.0
+ 44
+420.0
+ 45
+297.0
+ 46
+0.0
+ 47
+0.0
+ 48
+0.0
+ 49
+0.0
+140
+0.0
+141
+0.0
+142
+1.0
+143
+1.0
+ 70
+1024
+ 72
+1
+ 73
+0
+ 74
+5
+  7
+
+ 75
+16
+ 76
+0
+ 77
+2
+ 78
+300
+147
+1.0
+148
+0.0
+149
+0.0
+100
+AcDbLayout
+  1
+Model
+ 70
+1
+ 71
+0
+ 10
+0.0
+ 20
+0.0
+ 11
+420.0
+ 21
+297.0
+ 12
+0.0
+ 22
+0.0
+ 32
+0.0
+ 14
+1e+20
+ 24
+1e+20
+ 34
+1e+20
+ 15
+-1e+20
+ 25
+-1e+20
+ 35
+-1e+20
+146
+0.0
+ 13
+0.0
+ 23
+0.0
+ 33
+0.0
+ 16
+1.0
+ 26
+0.0
+ 36
+0.0
+ 17
+0.0
+ 27
+1.0
+ 37
+0.0
+ 76
+1
+330
+17
+  0
+LAYOUT
+  5
+1E
+330
+D
+100
+AcDbPlotSettings
+  1
+
+  4
+A3
+  6
+
+ 40
+7.5
+ 41
+20.0
+ 42
+7.5
+ 43
+20.0
+ 44
+420.0
+ 45
+297.0
+ 46
+0.0
+ 47
+0.0
+ 48
+0.0
+ 49
+0.0
+140
+0.0
+141
+0.0
+142
+1.0
+143
+1.0
+ 70
+0
+ 72
+1
+ 73
+0
+ 74
+5
+  7
+
+ 75
+16
+ 76
+0
+ 77
+2
+ 78
+300
+147
+1.0
+148
+0.0
+149
+0.0
+100
+AcDbLayout
+  1
+Layout1
+ 70
+1
+ 71
+1
+ 10
+0.0
+ 20
+0.0
+ 11
+420.0
+ 21
+297.0
+ 12
+0.0
+ 22
+0.0
+ 32
+0.0
+ 14
+1e+20
+ 24
+1e+20
+ 34
+1e+20
+ 15
+-1e+20
+ 25
+-1e+20
+ 35
+-1e+20
+146
+0.0
+ 13
+0.0
+ 23
+0.0
+ 33
+0.0
+ 16
+1.0
+ 26
+0.0
+ 36
+0.0
+ 17
+0.0
+ 27
+1.0
+ 37
+0.0
+ 76
+1
+330
+1B
+  0
+MATERIAL
+  5
+1F
+102
+{ACAD_REACTORS
+330
+E
+102
+}
+330
+E
+100
+AcDbMaterial
+  1
+ByBlock
+  2
+
+ 70
+0
+ 40
+1.0
+ 71
+1
+ 41
+1.0
+ 91
+-1023410177
+ 42
+1.0
+ 72
+1
+  3
+
+ 73
+1
+ 74
+1
+ 75
+1
+ 44
+0.5
+ 73
+0
+ 45
+1.0
+ 46
+1.0
+ 77
+1
+  4
+
+ 78
+1
+ 79
+1
+170
+1
+ 48
+1.0
+171
+1
+  6
+
+172
+1
+173
+1
+174
+1
+140
+1.0
+141
+1.0
+175
+1
+  7
+
+176
+1
+177
+1
+178
+1
+143
+1.0
+179
+1
+  8
+
+270
+1
+271
+1
+272
+1
+145
+1.0
+146
+1.0
+273
+1
+  9
+
+274
+1
+275
+1
+276
+1
+ 42
+1.0
+ 72
+1
+  3
+
+ 73
+1
+ 74
+1
+ 75
+1
+ 94
+63
+  0
+MATERIAL
+  5
+20
+102
+{ACAD_REACTORS
+330
+E
+102
+}
+330
+E
+100
+AcDbMaterial
+  1
+ByLayer
+  2
+
+ 70
+0
+ 40
+1.0
+ 71
+1
+ 41
+1.0
+ 91
+-1023410177
+ 42
+1.0
+ 72
+1
+  3
+
+ 73
+1
+ 74
+1
+ 75
+1
+ 44
+0.5
+ 73
+0
+ 45
+1.0
+ 46
+1.0
+ 77
+1
+  4
+
+ 78
+1
+ 79
+1
+170
+1
+ 48
+1.0
+171
+1
+  6
+
+172
+1
+173
+1
+174
+1
+140
+1.0
+141
+1.0
+175
+1
+  7
+
+176
+1
+177
+1
+178
+1
+143
+1.0
+179
+1
+  8
+
+270
+1
+271
+1
+272
+1
+145
+1.0
+146
+1.0
+273
+1
+  9
+
+274
+1
+275
+1
+276
+1
+ 42
+1.0
+ 72
+1
+  3
+
+ 73
+1
+ 74
+1
+ 75
+1
+ 94
+63
+  0
+MATERIAL
+  5
+21
+102
+{ACAD_REACTORS
+330
+E
+102
+}
+330
+E
+100
+AcDbMaterial
+  1
+Global
+  2
+
+ 70
+0
+ 40
+1.0
+ 71
+1
+ 41
+1.0
+ 91
+-1023410177
+ 42
+1.0
+ 72
+1
+  3
+
+ 73
+1
+ 74
+1
+ 75
+1
+ 44
+0.5
+ 73
+0
+ 45
+1.0
+ 46
+1.0
+ 77
+1
+  4
+
+ 78
+1
+ 79
+1
+170
+1
+ 48
+1.0
+171
+1
+  6
+
+172
+1
+173
+1
+174
+1
+140
+1.0
+141
+1.0
+175
+1
+  7
+
+176
+1
+177
+1
+178
+1
+143
+1.0
+179
+1
+  8
+
+270
+1
+271
+1
+272
+1
+145
+1.0
+146
+1.0
+273
+1
+  9
+
+274
+1
+275
+1
+276
+1
+ 42
+1.0
+ 72
+1
+  3
+
+ 73
+1
+ 74
+1
+ 75
+1
+ 94
+63
+  0
+MLINESTYLE
+  5
+22
+102
+{ACAD_REACTORS
+330
+10
+102
+}
+330
+10
+100
+AcDbMlineStyle
+  2
+Standard
+ 70
+0
+  3
+
+ 62
+256
+ 51
+90.0
+ 52
+90.0
+ 71
+2
+ 49
+0.5
+ 62
+256
+  6
+BYLAYER
+ 49
+-0.5
+ 62
+256
+  6
+BYLAYER
+  0
+MLEADERSTYLE
+  5
+2C
+102
+{ACAD_REACTORS
+330
+F
+102
+}
+330
+F
+100
+AcDbMLeaderStyle
+179
+2
+170
+2
+171
+1
+172
+0
+ 90
+2
+ 40
+0.0
+ 41
+0.0
+173
+1
+ 91
+-1056964608
+ 92
+-2
+290
+1
+ 42
+2.0
+291
+1
+ 43
+8.0
+  3
+Standard
+ 44
+4.0
+300
+
+342
+29
+174
+1
+175
+1
+176
+0
+178
+1
+ 93
+-1056964608
+ 45
+4.0
+292
+0
+297
+0
+ 46
+4.0
+ 94
+-1056964608
+ 47
+1.0
+ 49
+1.0
+140
+1.0
+294
+1
+141
+0.0
+177
+0
+142
+1.0
+295
+0
+296
+0
+143
+3.75
+271
+0
+272
+9
+273
+9
+  0
+DICTIONARY
+  5
+2D
+330
+A
+100
+AcDbDictionary
+280
+1
+281
+1
+  3
+CREATED_BY_EZDXF
+350
+2E
+  3
+WRITTEN_BY_EZDXF
+350
+39
+  0
+DICTIONARYVAR
+  5
+2E
+330
+2D
+100
+DictionaryVariables
+280
+0
+  1
+1.4.5 @ 2026-11-10T19:56:56.951755+00:00
+  0
+DICTIONARYVAR
+  5
+39
+330
+2D
+100
+DictionaryVariables
+280
+0
+  1
+1.4.5 @ 2026-11-10T19:56:56.952718+00:00
+  0
+ENDSEC
+  0
+EOF
+`,"halteblech.dxf":`  0
+SECTION
+  2
+HEADER
+  9
+$ACADVER
+  1
+AC1024
+  9
+$ACADMAINTVER
+ 70
+6
+  9
+$DWGCODEPAGE
+  3
+ANSI_1252
+  9
+$LASTSAVEDBY
+  1
+ezdxf
+  9
+$INSBASE
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$EXTMIN
+ 10
+1e+20
+ 20
+1e+20
+ 30
+1e+20
+  9
+$EXTMAX
+ 10
+-1e+20
+ 20
+-1e+20
+ 30
+-1e+20
+  9
+$LIMMIN
+ 10
+0.0
+ 20
+0.0
+  9
+$LIMMAX
+ 10
+420.0
+ 20
+297.0
+  9
+$ORTHOMODE
+ 70
+0
+  9
+$REGENMODE
+ 70
+1
+  9
+$FILLMODE
+ 70
+1
+  9
+$QTEXTMODE
+ 70
+0
+  9
+$MIRRTEXT
+ 70
+1
+  9
+$LTSCALE
+ 40
+1.0
+  9
+$ATTMODE
+ 70
+1
+  9
+$TEXTSIZE
+ 40
+2.5
+  9
+$TRACEWID
+ 40
+1.0
+  9
+$TEXTSTYLE
+  7
+Standard
+  9
+$CLAYER
+  8
+0
+  9
+$CELTYPE
+  6
+ByLayer
+  9
+$CECOLOR
+ 62
+256
+  9
+$CELTSCALE
+ 40
+1.0
+  9
+$DISPSILH
+ 70
+0
+  9
+$DIMSCALE
+ 40
+1.0
+  9
+$DIMASZ
+ 40
+2.5
+  9
+$DIMEXO
+ 40
+0.625
+  9
+$DIMDLI
+ 40
+3.75
+  9
+$DIMRND
+ 40
+0.0
+  9
+$DIMDLE
+ 40
+0.0
+  9
+$DIMEXE
+ 40
+1.25
+  9
+$DIMTP
+ 40
+0.0
+  9
+$DIMTM
+ 40
+0.0
+  9
+$DIMTXT
+ 40
+2.5
+  9
+$DIMCEN
+ 40
+2.5
+  9
+$DIMTSZ
+ 40
+0.0
+  9
+$DIMTOL
+ 70
+0
+  9
+$DIMLIM
+ 70
+0
+  9
+$DIMTIH
+ 70
+0
+  9
+$DIMTOH
+ 70
+0
+  9
+$DIMSE1
+ 70
+0
+  9
+$DIMSE2
+ 70
+0
+  9
+$DIMTAD
+ 70
+1
+  9
+$DIMZIN
+ 70
+8
+  9
+$DIMBLK
+  1
+
+  9
+$DIMASO
+ 70
+1
+  9
+$DIMSHO
+ 70
+1
+  9
+$DIMPOST
+  1
+
+  9
+$DIMAPOST
+  1
+
+  9
+$DIMALT
+ 70
+0
+  9
+$DIMALTD
+ 70
+3
+  9
+$DIMALTF
+ 40
+0.03937007874
+  9
+$DIMLFAC
+ 40
+1.0
+  9
+$DIMTOFL
+ 70
+1
+  9
+$DIMTVP
+ 40
+0.0
+  9
+$DIMTIX
+ 70
+0
+  9
+$DIMSOXD
+ 70
+0
+  9
+$DIMSAH
+ 70
+0
+  9
+$DIMBLK1
+  1
+
+  9
+$DIMBLK2
+  1
+
+  9
+$DIMSTYLE
+  2
+ISO-25
+  9
+$DIMCLRD
+ 70
+0
+  9
+$DIMCLRE
+ 70
+0
+  9
+$DIMCLRT
+ 70
+0
+  9
+$DIMTFAC
+ 40
+1.0
+  9
+$DIMGAP
+ 40
+0.625
+  9
+$DIMJUST
+ 70
+0
+  9
+$DIMSD1
+ 70
+0
+  9
+$DIMSD2
+ 70
+0
+  9
+$DIMTOLJ
+ 70
+0
+  9
+$DIMTZIN
+ 70
+8
+  9
+$DIMALTZ
+ 70
+0
+  9
+$DIMALTTZ
+ 70
+0
+  9
+$DIMUPT
+ 70
+0
+  9
+$DIMDEC
+ 70
+2
+  9
+$DIMTDEC
+ 70
+2
+  9
+$DIMALTU
+ 70
+2
+  9
+$DIMALTTD
+ 70
+3
+  9
+$DIMTXSTY
+  7
+Standard
+  9
+$DIMAUNIT
+ 70
+0
+  9
+$DIMADEC
+ 70
+0
+  9
+$DIMALTRND
+ 40
+0.0
+  9
+$DIMAZIN
+ 70
+0
+  9
+$DIMDSEP
+ 70
+44
+  9
+$DIMATFIT
+ 70
+3
+  9
+$DIMFRAC
+ 70
+0
+  9
+$DIMLDRBLK
+  1
+
+  9
+$DIMLUNIT
+ 70
+2
+  9
+$DIMLWD
+ 70
+-2
+  9
+$DIMLWE
+ 70
+-2
+  9
+$DIMTMOVE
+ 70
+0
+  9
+$DIMFXL
+ 40
+1.0
+  9
+$DIMFXLON
+ 70
+0
+  9
+$DIMJOGANG
+ 40
+0.785398163397
+  9
+$DIMTFILL
+ 70
+0
+  9
+$DIMTFILLCLR
+ 70
+0
+  9
+$DIMARCSYM
+ 70
+0
+  9
+$DIMLTYPE
+  6
+
+  9
+$DIMLTEX1
+  6
+
+  9
+$DIMLTEX2
+  6
+
+  9
+$DIMTXTDIRECTION
+ 70
+0
+  9
+$LUNITS
+ 70
+2
+  9
+$LUPREC
+ 70
+4
+  9
+$SKETCHINC
+ 40
+1.0
+  9
+$FILLETRAD
+ 40
+10.0
+  9
+$AUNITS
+ 70
+0
+  9
+$AUPREC
+ 70
+2
+  9
+$MENU
+  1
+.
+  9
+$ELEVATION
+ 40
+0.0
+  9
+$PELEVATION
+ 40
+0.0
+  9
+$THICKNESS
+ 40
+0.0
+  9
+$LIMCHECK
+ 70
+0
+  9
+$CHAMFERA
+ 40
+0.0
+  9
+$CHAMFERB
+ 40
+0.0
+  9
+$CHAMFERC
+ 40
+0.0
+  9
+$CHAMFERD
+ 40
+0.0
+  9
+$SKPOLY
+ 70
+0
+  9
+$TDCREATE
+ 40
+2461355.831203704
+  9
+$TDUCREATE
+ 40
+2458532.153996898
+  9
+$TDUPDATE
+ 40
+2461355.831203704
+  9
+$TDUUPDATE
+ 40
+2458532.1544311
+  9
+$TDINDWG
+ 40
+0.0
+  9
+$TDUSRTIMER
+ 40
+0.0
+  9
+$USRTIMER
+ 70
+1
+  9
+$ANGBASE
+ 50
+0.0
+  9
+$ANGDIR
+ 70
+0
+  9
+$PDMODE
+ 70
+0
+  9
+$PDSIZE
+ 40
+0.0
+  9
+$PLINEWID
+ 40
+0.0
+  9
+$SPLFRAME
+ 70
+0
+  9
+$SPLINETYPE
+ 70
+6
+  9
+$SPLINESEGS
+ 70
+8
+  9
+$HANDSEED
+  5
+3E
+  9
+$SURFTAB1
+ 70
+6
+  9
+$SURFTAB2
+ 70
+6
+  9
+$SURFTYPE
+ 70
+6
+  9
+$SURFU
+ 70
+6
+  9
+$SURFV
+ 70
+6
+  9
+$UCSBASE
+  2
+
+  9
+$UCSNAME
+  2
+
+  9
+$UCSORG
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSXDIR
+ 10
+1.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSYDIR
+ 10
+0.0
+ 20
+1.0
+ 30
+0.0
+  9
+$UCSORTHOREF
+  2
+
+  9
+$UCSORTHOVIEW
+ 70
+0
+  9
+$UCSORGTOP
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSORGBOTTOM
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSORGLEFT
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSORGRIGHT
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSORGFRONT
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$UCSORGBACK
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSBASE
+  2
+
+  9
+$PUCSNAME
+  2
+
+  9
+$PUCSORG
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSXDIR
+ 10
+1.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSYDIR
+ 10
+0.0
+ 20
+1.0
+ 30
+0.0
+  9
+$PUCSORTHOREF
+  2
+
+  9
+$PUCSORTHOVIEW
+ 70
+0
+  9
+$PUCSORGTOP
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSORGBOTTOM
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSORGLEFT
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSORGRIGHT
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSORGFRONT
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PUCSORGBACK
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$USERI1
+ 70
+0
+  9
+$USERI2
+ 70
+0
+  9
+$USERI3
+ 70
+0
+  9
+$USERI4
+ 70
+0
+  9
+$USERI5
+ 70
+0
+  9
+$USERR1
+ 40
+0.0
+  9
+$USERR2
+ 40
+0.0
+  9
+$USERR3
+ 40
+0.0
+  9
+$USERR4
+ 40
+0.0
+  9
+$USERR5
+ 40
+0.0
+  9
+$WORLDVIEW
+ 70
+1
+  9
+$SHADEDGE
+ 70
+3
+  9
+$SHADEDIF
+ 70
+70
+  9
+$TILEMODE
+ 70
+1
+  9
+$MAXACTVP
+ 70
+64
+  9
+$PINSBASE
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  9
+$PLIMCHECK
+ 70
+0
+  9
+$PEXTMIN
+ 10
+1e+20
+ 20
+1e+20
+ 30
+1e+20
+  9
+$PEXTMAX
+ 10
+-1e+20
+ 20
+-1e+20
+ 30
+-1e+20
+  9
+$PLIMMIN
+ 10
+0.0
+ 20
+0.0
+  9
+$PLIMMAX
+ 10
+420.0
+ 20
+297.0
+  9
+$UNITMODE
+ 70
+0
+  9
+$VISRETAIN
+ 70
+1
+  9
+$PLINEGEN
+ 70
+0
+  9
+$PSLTSCALE
+ 70
+1
+  9
+$TREEDEPTH
+ 70
+3020
+  9
+$CMLSTYLE
+  2
+Standard
+  9
+$CMLJUST
+ 70
+0
+  9
+$CMLSCALE
+ 40
+20.0
+  9
+$PROXYGRAPHICS
+ 70
+1
+  9
+$MEASUREMENT
+ 70
+1
+  9
+$CELWEIGHT
+370
+-1
+  9
+$ENDCAPS
+280
+0
+  9
+$JOINSTYLE
+280
+0
+  9
+$LWDISPLAY
+290
+0
+  9
+$INSUNITS
+ 70
+4
+  9
+$HYPERLINKBASE
+  1
+
+  9
+$STYLESHEET
+  1
+
+  9
+$XEDIT
+290
+1
+  9
+$CEPSNTYPE
+380
+0
+  9
+$PSTYLEMODE
+290
+1
+  9
+$FINGERPRINTGUID
+  2
+{9C44D085-AD78-4B93-9AEF-268C804D0036}
+  9
+$VERSIONGUID
+  2
+{CCB4FA8D-E0A5-4BB5-B00A-ED6DA51A345A}
+  9
+$EXTNAMES
+290
+1
+  9
+$PSVPSCALE
+ 40
+0.0
+  9
+$OLESTARTUP
+290
+0
+  9
+$SORTENTS
+280
+127
+  9
+$INDEXCTL
+280
+0
+  9
+$HIDETEXT
+280
+1
+  9
+$XCLIPFRAME
+280
+1
+  9
+$HALOGAP
+280
+0
+  9
+$OBSCOLOR
+ 70
+257
+  9
+$OBSLTYPE
+280
+0
+  9
+$INTERSECTIONDISPLAY
+280
+0
+  9
+$INTERSECTIONCOLOR
+ 70
+257
+  9
+$DIMASSOC
+280
+2
+  9
+$PROJECTNAME
+  1
+
+  9
+$CAMERADISPLAY
+290
+0
+  9
+$LENSLENGTH
+ 40
+50.0
+  9
+$CAMERAHEIGHT
+ 40
+0.0
+  9
+$STEPSPERSEC
+ 40
+24.0
+  9
+$STEPSIZE
+ 40
+100.0
+  9
+$3DDWFPREC
+ 40
+2.0
+  9
+$PSOLWIDTH
+ 40
+0.005
+  9
+$PSOLHEIGHT
+ 40
+0.08
+  9
+$LOFTANG1
+ 40
+1.570796326795
+  9
+$LOFTANG2
+ 40
+1.570796326795
+  9
+$LOFTMAG1
+ 40
+0.0
+  9
+$LOFTMAG2
+ 40
+0.0
+  9
+$LOFTPARAM
+ 70
+7
+  9
+$LOFTNORMALS
+280
+1
+  9
+$LATITUDE
+ 40
+37.795
+  9
+$LONGITUDE
+ 40
+-122.394
+  9
+$NORTHDIRECTION
+ 40
+0.0
+  9
+$TIMEZONE
+ 70
+-8000
+  9
+$LIGHTGLYPHDISPLAY
+280
+1
+  9
+$TILEMODELIGHTSYNCH
+280
+1
+  9
+$CMATERIAL
+347
+20
+  9
+$SOLIDHIST
+280
+0
+  9
+$SHOWHIST
+280
+1
+  9
+$DWFFRAME
+280
+2
+  9
+$DGNFRAME
+280
+2
+  9
+$REALWORLDSCALE
+290
+1
+  9
+$INTERFERECOLOR
+ 62
+256
+  9
+$CSHADOW
+280
+0
+  9
+$SHADOWPLANELOCATION
+ 40
+0.0
+  0
+ENDSEC
+  0
+SECTION
+  2
+CLASSES
+  0
+CLASS
+  1
+ACDBDICTIONARYWDFLT
+  2
+AcDbDictionaryWithDefault
+  3
+ObjectDBX Classes
+ 90
+0
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+SUN
+  2
+AcDbSun
+  3
+SCENEOE
+ 90
+1153
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+VISUALSTYLE
+  2
+AcDbVisualStyle
+  3
+ObjectDBX Classes
+ 90
+4095
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+MATERIAL
+  2
+AcDbMaterial
+  3
+ObjectDBX Classes
+ 90
+1153
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+SCALE
+  2
+AcDbScale
+  3
+ObjectDBX Classes
+ 90
+1153
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+TABLESTYLE
+  2
+AcDbTableStyle
+  3
+ObjectDBX Classes
+ 90
+4095
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+MLEADERSTYLE
+  2
+AcDbMLeaderStyle
+  3
+ACDB_MLEADERSTYLE_CLASS
+ 90
+4095
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+DICTIONARYVAR
+  2
+AcDbDictionaryVar
+  3
+ObjectDBX Classes
+ 90
+0
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+CELLSTYLEMAP
+  2
+AcDbCellStyleMap
+  3
+ObjectDBX Classes
+ 90
+1152
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+MENTALRAYRENDERSETTINGS
+  2
+AcDbMentalRayRenderSettings
+  3
+SCENEOE
+ 90
+1024
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+ACDBDETAILVIEWSTYLE
+  2
+AcDbDetailViewStyle
+  3
+ObjectDBX Classes
+ 90
+1025
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+ACDBSECTIONVIEWSTYLE
+  2
+AcDbSectionViewStyle
+  3
+ObjectDBX Classes
+ 90
+1025
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+RASTERVARIABLES
+  2
+AcDbRasterVariables
+  3
+ISM
+ 90
+0
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+LAYOUT
+  2
+AcDbLayout
+  3
+ObjectDBX Classes
+ 90
+0
+ 91
+0
+280
+0
+281
+0
+  0
+CLASS
+  1
+ACDBPLACEHOLDER
+  2
+AcDbPlaceHolder
+  3
+ObjectDBX Classes
+ 90
+0
+ 91
+0
+280
+0
+281
+0
+  0
+ENDSEC
+  0
+SECTION
+  2
+TABLES
+  0
+TABLE
+  2
+VPORT
+  5
+8
+330
+0
+100
+AcDbSymbolTable
+ 70
+1
+  0
+VPORT
+  5
+23
+330
+8
+100
+AcDbSymbolTableRecord
+100
+AcDbViewportTableRecord
+  2
+*Active
+ 70
+0
+ 10
+0.0
+ 20
+0.0
+ 11
+1.0
+ 21
+1.0
+ 12
+0.0
+ 22
+0.0
+ 13
+0.0
+ 23
+0.0
+ 14
+0.5
+ 24
+0.5
+ 15
+0.5
+ 25
+0.5
+ 16
+0.0
+ 26
+0.0
+ 36
+1.0
+ 17
+0.0
+ 27
+0.0
+ 37
+0.0
+ 40
+1000.0
+ 41
+1.34
+ 42
+50.0
+ 43
+0.0
+ 44
+0.0
+ 50
+0.0
+ 51
+0.0
+ 71
+0
+ 72
+1000
+ 73
+1
+ 74
+3
+ 75
+0
+ 76
+0
+ 77
+0
+ 78
+0
+281
+0
+ 65
+0
+146
+0.0
+  0
+ENDTAB
+  0
+TABLE
+  2
+LTYPE
+  5
+2
+330
+0
+100
+AcDbSymbolTable
+ 70
+3
+  0
+LTYPE
+  5
+24
+330
+2
+100
+AcDbSymbolTableRecord
+100
+AcDbLinetypeTableRecord
+  2
+ByBlock
+ 70
+0
+  3
+
+ 72
+65
+ 73
+0
+ 40
+0.0
+  0
+LTYPE
+  5
+25
+330
+2
+100
+AcDbSymbolTableRecord
+100
+AcDbLinetypeTableRecord
+  2
+ByLayer
+ 70
+0
+  3
+
+ 72
+65
+ 73
+0
+ 40
+0.0
+  0
+LTYPE
+  5
+26
+330
+2
+100
+AcDbSymbolTableRecord
+100
+AcDbLinetypeTableRecord
+  2
+Continuous
+ 70
+0
+  3
+
+ 72
+65
+ 73
+0
+ 40
+0.0
+  0
+ENDTAB
+  0
+TABLE
+  2
+LAYER
+  5
+1
+330
+0
+100
+AcDbSymbolTable
+ 70
+4
+  0
+LAYER
+  5
+27
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+0
+ 70
+0
+ 62
+7
+  6
+Continuous
+370
+-3
+390
+13
+347
+21
+  0
+LAYER
+  5
+28
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+Defpoints
+ 70
+0
+ 62
+7
+  6
+Continuous
+290
+0
+370
+-3
+390
+13
+347
+21
+  0
+LAYER
+  5
+2F
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+HILFSLINIE
+ 70
+0
+ 62
+1
+  6
+Continuous
+370
+-3
+390
+13
+347
+21
+  0
+LAYER
+  5
+30
+330
+1
+100
+AcDbSymbolTableRecord
+100
+AcDbLayerTableRecord
+  2
+BEMASSUNG
+ 70
+0
+ 62
+3
+  6
+Continuous
+370
+-3
+390
+13
+347
+21
+  0
+ENDTAB
+  0
+TABLE
+  2
+STYLE
+  5
+5
+330
+0
+100
+AcDbSymbolTable
+ 70
+1
+  0
+STYLE
+  5
+29
+330
+5
+100
+AcDbSymbolTableRecord
+100
+AcDbTextStyleTableRecord
+  2
+Standard
+ 70
+0
+ 40
+0.0
+ 41
+1.0
+ 50
+0.0
+ 71
+0
+ 42
+2.5
+  3
+txt
+  4
+
+  0
+ENDTAB
+  0
+TABLE
+  2
+VIEW
+  5
+7
+330
+0
+100
+AcDbSymbolTable
+ 70
+0
+  0
+ENDTAB
+  0
+TABLE
+  2
+UCS
+  5
+6
+330
+0
+100
+AcDbSymbolTable
+ 70
+0
+  0
+ENDTAB
+  0
+TABLE
+  2
+APPID
+  5
+3
+330
+0
+100
+AcDbSymbolTable
+ 70
+3
+  0
+APPID
+  5
+2A
+330
+3
+100
+AcDbSymbolTableRecord
+100
+AcDbRegAppTableRecord
+  2
+ACAD
+ 70
+0
+  0
+APPID
+  5
+3B
+330
+3
+100
+AcDbSymbolTableRecord
+100
+AcDbRegAppTableRecord
+  2
+HATCHBACKGROUNDCOLOR
+ 70
+0
+  0
+APPID
+  5
+3C
+330
+3
+100
+AcDbSymbolTableRecord
+100
+AcDbRegAppTableRecord
+  2
+EZDXF
+ 70
+0
+  0
+ENDTAB
+  0
+TABLE
+  2
+DIMSTYLE
+  5
+4
+330
+0
+100
+AcDbSymbolTable
+ 70
+1
+100
+AcDbDimStyleTable
+  0
+DIMSTYLE
+105
+2B
+330
+4
+100
+AcDbSymbolTableRecord
+100
+AcDbDimStyleTableRecord
+  2
+Standard
+ 70
+0
+ 40
+1.0
+ 41
+2.5
+ 42
+0.625
+ 43
+3.75
+ 44
+1.25
+ 45
+0.0
+ 46
+0.0
+ 47
+0.0
+ 48
+0.0
+ 49
+2.5
+140
+2.5
+141
+2.5
+142
+0.0
+143
+0.03937007874
+144
+1.0
+145
+0.0
+146
+1.0
+147
+0.625
+148
+0.0
+ 69
+0
+ 70
+0
+ 71
+0
+ 72
+0
+ 73
+0
+ 74
+0
+ 75
+0
+ 76
+0
+ 77
+1
+ 78
+8
+ 79
+3
+170
+0
+171
+3
+172
+1
+173
+0
+174
+0
+175
+0
+176
+0
+177
+0
+178
+0
+179
+2
+271
+2
+272
+2
+273
+2
+274
+3
+275
+0
+276
+0
+277
+2
+278
+44
+279
+0
+280
+0
+281
+0
+282
+0
+283
+0
+284
+8
+285
+0
+286
+0
+288
+0
+289
+3
+290
+0
+371
+-2
+372
+-2
+  0
+ENDTAB
+  0
+TABLE
+  2
+BLOCK_RECORD
+  5
+9
+330
+0
+100
+AcDbSymbolTable
+ 70
+2
+  0
+BLOCK_RECORD
+  5
+17
+330
+9
+100
+AcDbSymbolTableRecord
+100
+AcDbBlockTableRecord
+  2
+*Model_Space
+340
+1A
+ 70
+0
+280
+1
+281
+0
+  0
+BLOCK_RECORD
+  5
+1B
+330
+9
+100
+AcDbSymbolTableRecord
+100
+AcDbBlockTableRecord
+  2
+*Paper_Space
+340
+1E
+ 70
+0
+280
+1
+281
+0
+  0
+ENDTAB
+  0
+ENDSEC
+  0
+SECTION
+  2
+BLOCKS
+  0
+BLOCK
+  5
+18
+330
+17
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockBegin
+  2
+*Model_Space
+ 70
+0
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  3
+*Model_Space
+  1
+
+  0
+ENDBLK
+  5
+19
+330
+17
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockEnd
+  0
+BLOCK
+  5
+1C
+330
+1B
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockBegin
+  2
+*Paper_Space
+ 70
+0
+ 10
+0.0
+ 20
+0.0
+ 30
+0.0
+  3
+*Paper_Space
+  1
+
+  0
+ENDBLK
+  5
+1D
+330
+1B
+100
+AcDbEntity
+  8
+0
+100
+AcDbBlockEnd
+  0
+ENDSEC
+  0
+SECTION
+  2
+ENTITIES
+  0
+LWPOLYLINE
+  5
+31
+330
+17
+100
+AcDbEntity
+  8
+0
+100
+AcDbPolyline
+ 90
+8
+ 70
+1
+ 10
+10.0
+ 20
+0.0
+ 10
+140.0
+ 20
+0.0
+ 42
+0.41421356237309503
+ 10
+150.0
+ 20
+10.0
+ 10
+150.0
+ 20
+70.0
+ 42
+0.41421356237309503
+ 10
+140.0
+ 20
+80.0
+ 10
+10.0
+ 20
+80.0
+ 42
+0.41421356237309503
+ 10
+0.0
+ 20
+70.0
+ 10
+0.0
+ 20
+10.0
+ 42
+0.41421356237309503
+  0
+LWPOLYLINE
+  5
+32
+330
+17
+100
+AcDbEntity
+  8
+0
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+30.0
+ 20
+35.0
+ 10
+50.0
+ 20
+35.0
+ 42
+1.0
+ 10
+50.0
+ 20
+45.0
+ 10
+30.0
+ 20
+45.0
+ 42
+1.0
+  0
+LWPOLYLINE
+  5
+33
+330
+17
+100
+AcDbEntity
+  8
+0
+100
+AcDbPolyline
+ 90
+4
+ 70
+1
+ 10
+85.0
+ 20
+35.0
+ 10
+105.0
+ 20
+35.0
+ 42
+1.0
+ 10
+105.0
+ 20
+45.0
+ 10
+85.0
+ 20
+45.0
+ 42
+1.0
+  0
+LINE
+  5
+34
+330
+17
+100
+AcDbEntity
+  8
+0
+100
+AcDbLine
+ 10
+85.0
+ 20
+70.0
+ 30
+0.0
+ 11
+85.0
+ 21
+55.0
+ 31
+0.0
+  0
+LINE
+  5
+35
+330
+17
+100
+AcDbEntity
+  8
+0
+100
+AcDbLine
+ 10
+65.0
+ 20
+55.0
+ 30
+0.0
+ 11
+85.0
+ 21
+55.0
+ 31
+0.0
+  0
+LINE
+  5
+36
+330
+17
+100
+AcDbEntity
+  8
+0
+100
+AcDbLine
+ 10
+65.0
+ 20
+70.0
+ 30
+0.0
+ 11
+65.0
+ 21
+55.0
+ 31
+0.0
+  0
+LINE
+  5
+37
+330
+17
+100
+AcDbEntity
+  8
+0
+100
+AcDbLine
+ 10
+65.0
+ 20
+70.0
+ 30
+0.0
+ 11
+85.0
+ 21
+70.0
+ 31
+0.0
+  0
+CIRCLE
+  5
+38
+330
+17
+100
+AcDbEntity
+  8
+0
+100
+AcDbCircle
+ 10
+75.0
+ 20
+20.0
+ 30
+0.0
+ 40
+6.0
+  0
+LINE
+  5
+39
+330
+17
+100
+AcDbEntity
+  8
+HILFSLINIE
+100
+AcDbLine
+ 10
+-10.0
+ 20
+40.0
+ 30
+0.0
+ 11
+160.0
+ 21
+40.0
+ 31
+0.0
+  0
+TEXT
+  5
+3A
+330
+17
+100
+AcDbEntity
+  8
+BEMASSUNG
+100
+AcDbText
+ 10
+20.0
+ 20
+90.0
+ 30
+0.0
+ 40
+5.0
+  1
+Halteblech t=3
+ 11
+20.0
+ 21
+90.0
+ 31
+0.0
+100
+AcDbText
+  0
+ENDSEC
+  0
+SECTION
+  2
+OBJECTS
+  0
+DICTIONARY
+  5
+A
+330
+0
+100
+AcDbDictionary
+281
+1
+  3
+ACAD_COLOR
+350
+B
+  3
+ACAD_GROUP
+350
+C
+  3
+ACAD_LAYOUT
+350
+D
+  3
+ACAD_MATERIAL
+350
+E
+  3
+ACAD_MLEADERSTYLE
+350
+F
+  3
+ACAD_MLINESTYLE
+350
+10
+  3
+ACAD_PLOTSETTINGS
+350
+11
+  3
+ACAD_PLOTSTYLENAME
+350
+12
+  3
+ACAD_SCALELIST
+350
+14
+  3
+ACAD_TABLESTYLE
+350
+15
+  3
+ACAD_VISUALSTYLE
+350
+16
+  3
+EZDXF_META
+350
+2D
+  0
+DICTIONARY
+  5
+B
+330
+A
+100
+AcDbDictionary
+281
+1
+  0
+DICTIONARY
+  5
+C
+330
+A
+100
+AcDbDictionary
+281
+1
+  0
+DICTIONARY
+  5
+D
+330
+A
+100
+AcDbDictionary
+281
+1
+  3
+Model
+350
+1A
+  3
+Layout1
+350
+1E
+  0
+DICTIONARY
+  5
+E
+330
+A
+100
+AcDbDictionary
+281
+1
+  3
+ByBlock
+350
+1F
+  3
+ByLayer
+350
+20
+  3
+Global
+350
+21
+  0
+DICTIONARY
+  5
+F
+330
+A
+100
+AcDbDictionary
+281
+1
+  3
+Standard
+350
+2C
+  0
+DICTIONARY
+  5
+10
+330
+A
+100
+AcDbDictionary
+281
+1
+  3
+Standard
+350
+22
+  0
+DICTIONARY
+  5
+11
+330
+A
+100
+AcDbDictionary
+281
+1
+  0
+ACDBDICTIONARYWDFLT
+  5
+12
+330
+A
+100
+AcDbDictionary
+281
+1
+  3
+Normal
+350
+13
+100
+AcDbDictionaryWithDefault
+340
+13
+  0
+ACDBPLACEHOLDER
+  5
+13
+330
+12
+  0
+DICTIONARY
+  5
+14
+330
+A
+100
+AcDbDictionary
+281
+1
+  0
+DICTIONARY
+  5
+15
+330
+A
+100
+AcDbDictionary
+281
+1
+  0
+DICTIONARY
+  5
+16
+330
+A
+100
+AcDbDictionary
+281
+1
+  0
+LAYOUT
+  5
+1A
+330
+D
+100
+AcDbPlotSettings
+  1
+
+  4
+A3
+  6
+
+ 40
+7.5
+ 41
+20.0
+ 42
+7.5
+ 43
+20.0
+ 44
+420.0
+ 45
+297.0
+ 46
+0.0
+ 47
+0.0
+ 48
+0.0
+ 49
+0.0
+140
+0.0
+141
+0.0
+142
+1.0
+143
+1.0
+ 70
+1024
+ 72
+1
+ 73
+0
+ 74
+5
+  7
+
+ 75
+16
+ 76
+0
+ 77
+2
+ 78
+300
+147
+1.0
+148
+0.0
+149
+0.0
+100
+AcDbLayout
+  1
+Model
+ 70
+1
+ 71
+0
+ 10
+0.0
+ 20
+0.0
+ 11
+420.0
+ 21
+297.0
+ 12
+0.0
+ 22
+0.0
+ 32
+0.0
+ 14
+1e+20
+ 24
+1e+20
+ 34
+1e+20
+ 15
+-1e+20
+ 25
+-1e+20
+ 35
+-1e+20
+146
+0.0
+ 13
+0.0
+ 23
+0.0
+ 33
+0.0
+ 16
+1.0
+ 26
+0.0
+ 36
+0.0
+ 17
+0.0
+ 27
+1.0
+ 37
+0.0
+ 76
+1
+330
+17
+  0
+LAYOUT
+  5
+1E
+330
+D
+100
+AcDbPlotSettings
+  1
+
+  4
+A3
+  6
+
+ 40
+7.5
+ 41
+20.0
+ 42
+7.5
+ 43
+20.0
+ 44
+420.0
+ 45
+297.0
+ 46
+0.0
+ 47
+0.0
+ 48
+0.0
+ 49
+0.0
+140
+0.0
+141
+0.0
+142
+1.0
+143
+1.0
+ 70
+0
+ 72
+1
+ 73
+0
+ 74
+5
+  7
+
+ 75
+16
+ 76
+0
+ 77
+2
+ 78
+300
+147
+1.0
+148
+0.0
+149
+0.0
+100
+AcDbLayout
+  1
+Layout1
+ 70
+1
+ 71
+1
+ 10
+0.0
+ 20
+0.0
+ 11
+420.0
+ 21
+297.0
+ 12
+0.0
+ 22
+0.0
+ 32
+0.0
+ 14
+1e+20
+ 24
+1e+20
+ 34
+1e+20
+ 15
+-1e+20
+ 25
+-1e+20
+ 35
+-1e+20
+146
+0.0
+ 13
+0.0
+ 23
+0.0
+ 33
+0.0
+ 16
+1.0
+ 26
+0.0
+ 36
+0.0
+ 17
+0.0
+ 27
+1.0
+ 37
+0.0
+ 76
+1
+330
+1B
+  0
+MATERIAL
+  5
+1F
+102
+{ACAD_REACTORS
+330
+E
+102
+}
+330
+E
+100
+AcDbMaterial
+  1
+ByBlock
+  2
+
+ 70
+0
+ 40
+1.0
+ 71
+1
+ 41
+1.0
+ 91
+-1023410177
+ 42
+1.0
+ 72
+1
+  3
+
+ 73
+1
+ 74
+1
+ 75
+1
+ 44
+0.5
+ 73
+0
+ 45
+1.0
+ 46
+1.0
+ 77
+1
+  4
+
+ 78
+1
+ 79
+1
+170
+1
+ 48
+1.0
+171
+1
+  6
+
+172
+1
+173
+1
+174
+1
+140
+1.0
+141
+1.0
+175
+1
+  7
+
+176
+1
+177
+1
+178
+1
+143
+1.0
+179
+1
+  8
+
+270
+1
+271
+1
+272
+1
+145
+1.0
+146
+1.0
+273
+1
+  9
+
+274
+1
+275
+1
+276
+1
+ 42
+1.0
+ 72
+1
+  3
+
+ 73
+1
+ 74
+1
+ 75
+1
+ 94
+63
+  0
+MATERIAL
+  5
+20
+102
+{ACAD_REACTORS
+330
+E
+102
+}
+330
+E
+100
+AcDbMaterial
+  1
+ByLayer
+  2
+
+ 70
+0
+ 40
+1.0
+ 71
+1
+ 41
+1.0
+ 91
+-1023410177
+ 42
+1.0
+ 72
+1
+  3
+
+ 73
+1
+ 74
+1
+ 75
+1
+ 44
+0.5
+ 73
+0
+ 45
+1.0
+ 46
+1.0
+ 77
+1
+  4
+
+ 78
+1
+ 79
+1
+170
+1
+ 48
+1.0
+171
+1
+  6
+
+172
+1
+173
+1
+174
+1
+140
+1.0
+141
+1.0
+175
+1
+  7
+
+176
+1
+177
+1
+178
+1
+143
+1.0
+179
+1
+  8
+
+270
+1
+271
+1
+272
+1
+145
+1.0
+146
+1.0
+273
+1
+  9
+
+274
+1
+275
+1
+276
+1
+ 42
+1.0
+ 72
+1
+  3
+
+ 73
+1
+ 74
+1
+ 75
+1
+ 94
+63
+  0
+MATERIAL
+  5
+21
+102
+{ACAD_REACTORS
+330
+E
+102
+}
+330
+E
+100
+AcDbMaterial
+  1
+Global
+  2
+
+ 70
+0
+ 40
+1.0
+ 71
+1
+ 41
+1.0
+ 91
+-1023410177
+ 42
+1.0
+ 72
+1
+  3
+
+ 73
+1
+ 74
+1
+ 75
+1
+ 44
+0.5
+ 73
+0
+ 45
+1.0
+ 46
+1.0
+ 77
+1
+  4
+
+ 78
+1
+ 79
+1
+170
+1
+ 48
+1.0
+171
+1
+  6
+
+172
+1
+173
+1
+174
+1
+140
+1.0
+141
+1.0
+175
+1
+  7
+
+176
+1
+177
+1
+178
+1
+143
+1.0
+179
+1
+  8
+
+270
+1
+271
+1
+272
+1
+145
+1.0
+146
+1.0
+273
+1
+  9
+
+274
+1
+275
+1
+276
+1
+ 42
+1.0
+ 72
+1
+  3
+
+ 73
+1
+ 74
+1
+ 75
+1
+ 94
+63
+  0
+MLINESTYLE
+  5
+22
+102
+{ACAD_REACTORS
+330
+10
+102
+}
+330
+10
+100
+AcDbMlineStyle
+  2
+Standard
+ 70
+0
+  3
+
+ 62
+256
+ 51
+90.0
+ 52
+90.0
+ 71
+2
+ 49
+0.5
+ 62
+256
+  6
+BYLAYER
+ 49
+-0.5
+ 62
+256
+  6
+BYLAYER
+  0
+MLEADERSTYLE
+  5
+2C
+102
+{ACAD_REACTORS
+330
+F
+102
+}
+330
+F
+100
+AcDbMLeaderStyle
+179
+2
+170
+2
+171
+1
+172
+0
+ 90
+2
+ 40
+0.0
+ 41
+0.0
+173
+1
+ 91
+-1056964608
+ 92
+-2
+290
+1
+ 42
+2.0
+291
+1
+ 43
+8.0
+  3
+Standard
+ 44
+4.0
+300
+
+342
+29
+174
+1
+175
+1
+176
+0
+178
+1
+ 93
+-1056964608
+ 45
+4.0
+292
+0
+297
+0
+ 46
+4.0
+ 94
+-1056964608
+ 47
+1.0
+ 49
+1.0
+140
+1.0
+294
+1
+141
+0.0
+177
+0
+142
+1.0
+295
+0
+296
+0
+143
+3.75
+271
+0
+272
+9
+273
+9
+  0
+DICTIONARY
+  5
+2D
+330
+A
+100
+AcDbDictionary
+280
+1
+281
+1
+  3
+CREATED_BY_EZDXF
+350
+2E
+  3
+WRITTEN_BY_EZDXF
+350
+3D
+  0
+DICTIONARYVAR
+  5
+2E
+330
+2D
+100
+DictionaryVariables
+280
+0
+  1
+1.4.5 @ 2026-11-10T19:56:56.963882+00:00
+  0
+DICTIONARYVAR
+  5
+3D
+330
+2D
+100
+DictionaryVariables
+280
+0
+  1
+1.4.5 @ 2026-11-10T19:56:56.964909+00:00
+  0
+ENDSEC
+  0
+EOF
+`};async function be(n){if(!Object.hasOwn(Se,n))throw new Error("Beispielteil fehlt: "+n);return Se[n]}var Dt=["mm","cm","m","in","ft"],xn=cn(U.last),A={lang:"de",settings:z(cn(U.settings)),license:{token:null,valid:!1,payload:null,reason:null},parts:[],selectedId:null,quote:{customer:"",number:"",numberEdited:!1,date:de()},last:xn&&typeof xn=="object"?xn:{}},b=$n(A.lang),$=hn(A.lang,A.settings.currency),Te=null,kn=new WeakMap,ln=()=>A.license.valid,Le=()=>A.parts.find(n=>n.id===A.selectedId)??null,Un=()=>A.parts.map(n=>({part:n,...ce(n,A.settings)}));function q(n,t=!1){let e=E("#toast");clearTimeout(Te),e.textContent=n,e.classList.toggle("is-error",t),Te=setTimeout(()=>{e.textContent=""},t?9e3:5e3)}function At(){return ln()?1/0:dn.maxParts-A.parts.length}function Et(n,t,e){try{let s=oe(n,t,A.settings,A.last);return s.flat.prims.length===0?(e.push(b("err.noGeometry",{file:n})),!1):(A.parts.push(s),!0)}catch(s){let i=s instanceof G&&["binary","empty"].includes(s.code)?`err.${s.code}`:"err.invalid";return e.push(b(i,{file:n})),!1}}var wn=Promise.resolve();function ye(n){return wn=wn.then(()=>ft(n)).catch(()=>q(b("err.sample"),!0)),wn}async function ft(n){let t=[],e=0,s=null,i=!1;for(let r of n){if(At()<=0){i=!0;break}let o=await r.read(t);o!==null&&Et(r.name,o,t)&&(e++,s??=A.parts[A.parts.length-1].id)}s!==null&&(A.selectedId=s),e>0&&(Z(),k()),t.length?q(t.join(" "),!0):i?q(b("toast.limit",{max:dn.maxParts}),!0):e>0&&q(b("toast.added",{n:e}))}function he(n){let t=[...n];t.length!==0&&ye(t.map(e=>({name:e.name,read:async s=>e.size>K.maxFileMb*1024*1024?(s.push(b("err.tooBig",{file:e.name,mb:K.maxFileMb})),null):Qn(await e.arrayBuffer())})))}function St(){ye(K.samples.map(n=>({name:n,read:async t=>{try{return await be(n)}catch{return t.includes(b("err.sample"))||t.push(b("err.sample")),null}}})))}function bt(n){let t=A.parts.findIndex(e=>e.id===n);t<0||(A.parts.splice(t,1),A.selectedId===n&&(A.selectedId=A.parts[Math.min(t,A.parts.length-1)]?.id??null,Z()),k())}function Tt(n){A.selectedId=n,Z(),k()}function Ie(){let n=ln(),t=E("#btn-license");t.textContent=b("plan.badge",{plan:b(n?"plan.pro":"plan.free")}),t.dataset.plan=n?"pro":"free",E("#csv-tag").hidden=n,E("#free-note").hidden=n,E("#free-note-text").textContent=`${b("quote.freeNote",{max:dn.maxParts})} `}function ht(n){N(E("#part-list")).append(...n.map(({part:t,material:e,price:s})=>l("li",{class:"part-item"},l("button",{type:"button",class:"part-select","aria-current":t.id===A.selectedId?"true":null,onclick:()=>Tt(t.id)},l("span",{class:"part-name"},t.name),l("span",{class:"part-meta"},`${e.name} · ${$.num(t.thickness,2)} mm · ${$.num(t.qty,0)} ${b("unit.pcs")}`),l("span",{class:"part-meta num"},s?`${$.money(s.unitPrice)} ${b("parts.each")}`:"–")),l("button",{type:"button",class:"part-remove","aria-label":b("parts.remove",{name:t.name}),title:b("parts.remove",{name:t.name}),onclick:()=>bt(t.id)},"×")))),E("#parts-empty").hidden=n.length>0}function $e(n,t){N(E("#p-thickness")).append(...t.thicknesses.map(e=>l("option",{value:String(e.t),selected:e.t===n.thickness},$.num(e.t,2))))}function Ce(n){N(E("#layers")).append(...n.layers.map(t=>l("li",null,l("label",null,l("input",{type:"checkbox",checked:!n.ignoreLayers.includes(t.name),onchange:e=>{n.ignoreLayers=e.target.checked?n.ignoreLayers.filter(s=>s!==t.name):[...n.ignoreLayers,t.name],V(n,A.settings),k()}}),l("span",{class:"layer-name"},t.name),l("span",{class:"layer-info"},b("layers.count",{count:t.count,length:$.length(t.length)}))))))}function Z(){let n=Le();if(E("#detail").hidden=!n,E("#detail-empty").hidden=!!n,!n)return;let t=on(n,A.settings);E("#part-name").value=n.name,N(E("#p-material")).append(...A.settings.materials.map(s=>l("option",{value:s.id,selected:s.id===n.materialId},s.name))),$e(n,t),E("#p-qty").value=String(n.qty),E("#p-bends").value=String(n.bends),E("#p-extra").value=String(n.extra),E("#p-tol").value=String(n.tol);let e=b(`unit.${n.flat.unit.source==="manual"?gt(n):n.flat.unit.name}`);N(E("#p-units")).append(l("option",{value:"auto",selected:n.units==="auto"},b("p.unitsAuto",{unit:e})),...Dt.map(s=>l("option",{value:s,selected:n.units===s},b(`unit.${s}`)))),Ce(n)}function gt(n){return{1:"in",2:"ft",4:"mm",5:"cm",6:"m"}[n.dxf.header.insunits]??A.settings.defaultUnit}function Lt(n){let{part:t,price:e,breaks:s,warnings:i}=n,r=t.analysis;kn.has(r)||kn.set(r,fn(r));let o=kn.get(r),a=E("#preview");o?(a.firstChild!==o||a.childNodes.length!==1)&&N(a).append(o):N(a).append(l("p",{class:"muted"},b("warn.none")));let c=[["m.cutLength",$.length(r.cutLength)],["m.pierces",$.num(r.pierces,0)],["m.contours",b("m.contoursValue",{closed:r.closedCount,open:r.openCount})],["m.size",r.rect?$.dims(r.rect.w,r.rect.h):"–"],["m.area",$.area(r.netArea)],["m.weight",e?$.weight(e.weightKg):"–"],["m.cutTime",e?$.time(e.cutTimeSec):"–"]];N(E("#metrics")).append(...c.map(([u,m])=>l("div",{class:"metric"},l("dt",null,b(u)),l("dd",null,m)))),N(E("#warnings")).append(...i.map(u=>{let m=u.vars?.unit?{...u.vars,unit:b(`unit.${u.vars.unit}`)}:u.vars;return l("li",{class:`w-${u.level}`},b(u.key,m))}));let d=N(E("#cost-table tbody"));if(E("#cost-none").hidden=!!e,E("#cost-table").hidden=!e,e){let u=(m,D,S)=>l("tr",{class:S},l("td",null,m),l("td",{class:"r"},$.money(D)));d.append(u(b("cost.material",{weight:$.weight(e.chargedWeightKg)}),e.materialCost),u(b("cost.cutting",{time:$.time(e.cutTimeSec)}),e.cutCost),u(b("cost.setup"),e.setupPerPart)),e.bendCost>0&&d.append(u(b("cost.bending"),e.bendCost)),e.extraCost>0&&d.append(u(b("cost.extra"),e.extraCost)),d.append(u(b("cost.markup",{pct:$.num(A.settings.markupPct,2)}),e.markup),u(b("cost.unit"),e.unitPrice,"sum"),u(b("cost.total",{qty:$.num(e.qty,0)}),e.total,"sum"))}N(E("#breaks-table tbody")).append(...s.map(u=>l("tr",{class:e&&u.qty===e.qty?"is-current":null},l("td",null,$.num(u.qty,0)),l("td",{class:"r"},$.money(u.unitPrice)),l("td",{class:"r"},$.money(u.total)))))}function Re(n){let t=n.filter(r=>r.price),e=_n(t.map(r=>r.price.total),A.settings);E("#quote-table").hidden=n.length===0,E("#quote-empty").hidden=n.length>0,N(E("#quote-table tbody")).append(...n.map(({part:r,price:o},a)=>l("tr",null,l("td",null,String(a+1)),l("td",null,r.name),l("td",{class:"r"},$.num(r.qty,0)),l("td",{class:"r"},o?$.money(o.unitPrice):"–"),l("td",{class:"r"},o?$.money(o.total):"–"))));let s=[[b("quote.net"),e.net,null]];e.surcharge>0&&s.push([b("quote.surcharge"),e.surcharge,null]),s.push([b("quote.vat",{pct:$.num(A.settings.vatPct,2)}),e.vat,null]),s.push([b("quote.gross"),e.gross,"grand"]),N(E("#quote-totals")).append(...s.flatMap(([r,o,a])=>[l("dt",{class:a},r),l("dd",{class:a},$.money(o))]));let i=t.length===0;return E("#btn-print").disabled=i,E("#btn-csv").disabled=i,E("#btn-clear").disabled=n.length===0,{priced:t,totals:e}}function k(){let n=Un();ht(n);let t=n.find(e=>e.part.id===A.selectedId);t&&Lt(t),Re(n)}function Me(){b=$n(A.lang),$=hn(A.lang,A.settings.currency),document.documentElement.lang=A.lang,document.title=b("app.title");for(let t of document.querySelectorAll("[data-i18n]"))t.textContent=b(t.dataset.i18n);E("#preview").setAttribute("aria-label",b("detail.preview"));let n=E("#brand-link");n.setAttribute("aria-label",n.getAttribute("href")==="#"?"KerfQuote":`KerfQuote – ${b("nav.home")}`),E("#lang").value=A.lang,Ie(),Fn(),Z(),k(),Gn.refresh()}function yt(){let{priced:n,totals:t}=Re(Un());if(n.length===0)return;Ae(E("#print-root"),{settings:A.settings,quote:A.quote,rows:n,totals:t,t:b,fmt:$,isPro:ln()});let e=document.title;document.title=`${b("doc.title")} ${A.quote.number}`.trim(),window.addEventListener("afterprint",()=>{document.title=e},{once:!0});let s=!1,i=()=>{s=!0};window.addEventListener("beforeprint",i,{once:!0}),window.print(),setTimeout(()=>{window.removeEventListener("beforeprint",i),!s&&(document.title=e,q(b("toast.printBlocked"),!0))},1e3)}function It(){if(!ln()){q(b("toast.csvPro"),!0),Bn();return}let n=Un().filter(s=>s.price).map(({part:s,material:i,price:r})=>({name:s.name,material:i.name,thickness:s.thickness,qty:r.qty,cutLength:s.analysis.cutLength,pierces:s.analysis.pierces,weightKg:r.weightKg,unitPrice:r.unitPrice,total:r.total})),t=["pos","name","material","thickness","qty","cutLength","pierces","weight","unitPrice","total"].map(s=>b(`csv.${s}`)),e=`${(A.quote.number||"angebot").replace(/[^\w.-]+/g,"_")}.csv`;Sn(e,De(n,{lang:A.lang,header:t}),"text/csv;charset=utf-8")}function Fn(){let n=A.license,t=E("#license-status");t.classList.toggle("is-pro",n.valid),n.valid?t.textContent=b("license.statusPro",{name:n.payload.name??"",date:$.date(n.payload.exp)}):n.reason==="expired"&&n.payload?t.textContent=`${b("license.statusFree")} ${b("license.errExpired",{date:$.date(n.payload.exp)})}`:t.textContent=b("license.statusFree");let e=N(E("#license-buy"));/^https:\/\//.test(K.checkoutUrl)?e.append(l("a",{class:"btn",href:K.checkoutUrl,target:"_blank",rel:"noopener"},b("license.buy"))):e.append(l("span",{class:"muted"},b("license.noCheckout"))),E("#btn-remove-license").hidden=!n.token}function Bn(){E("#license-error").textContent="",Fn();let n=E("#dlg-license");n.open||n.showModal()}function Yn(){Ie(),Fn(),Gn.refresh(),k()}async function $t(){let n=E("#license-key").value.replace(/\s+/g,""),t=await Pn(n,yn);if(!t.valid){let e={format:"license.errFormat",signature:"license.errSignature",expired:"license.errExpired",unconfigured:"license.errUnconfigured"}[t.reason];E("#license-error").textContent=b(e,{date:t.payload?$.date(t.payload.exp):""});return}A.license={token:n,valid:!0,payload:t.payload,reason:null},j(U.license,n),E("#license-key").value="",E("#license-error").textContent="",Yn(),q(b("license.activated"))}function Ct(){A.license={token:null,valid:!1,payload:null,reason:null},fe(U.license),Yn(),q(b("license.removed"))}function qn(){A.quote.numberEdited||(A.quote.number=pe(A.settings.quotePrefix,A.quote.date),E("#q-number").value=A.quote.number)}var Gn=Ee({dialog:E("#dlg-settings"),body:E("#settings-body"),getSettings:()=>A.settings,getT:()=>b,isPro:ln,toast:q,commit:n=>{let t=A.settings.defaultUnit;if(A.settings=z(n),j(U.settings,A.settings),$=hn(A.lang,A.settings.currency),A.settings.defaultUnit!==t)for(let e of A.parts)V(e,A.settings);qn(),Z(),k()}});function Rt(n){if(n.value===""||!n.checkValidity())return null;let t=Number(n.value);return Number.isFinite(t)?t:null}function Mt(){let n=e=>s=>{let i=Le();i&&e(i,s.target)};E("#part-name").addEventListener("input",n((e,s)=>{e.name=s.value.trim()||e.name,k()})),E("#p-material").addEventListener("change",n((e,s)=>{e.materialId=s.value,$e(e,on(e,A.settings)),ge(e),k()})),E("#p-thickness").addEventListener("change",n((e,s)=>{e.thickness=Number(s.value),ge(e),k()}));let t=(e,s)=>E(e).addEventListener("input",n((i,r)=>{let o=Rt(r);o!==null&&(s(i,o),k())}));t("#p-qty",(e,s)=>{e.qty=s}),t("#p-bends",(e,s)=>{e.bends=s}),t("#p-extra",(e,s)=>{e.extra=s}),t("#p-tol",(e,s)=>{e.tol=s,V(e,A.settings)}),E("#p-units").addEventListener("change",n((e,s)=>{e.units=s.value,V(e,A.settings),Ce(e),k()}))}function ge(n){A.last={materialId:n.materialId,thickness:n.thickness},j(U.last,A.last)}function Pt(){let n=E("#dropzone"),t=E("#file-input");t.addEventListener("change",()=>{he(t.files),t.value=""});for(let e of["dragenter","dragover"])window.addEventListener(e,s=>{s.preventDefault(),n.classList.add("is-over")});window.addEventListener("dragleave",e=>{e.relatedTarget||n.classList.remove("is-over")}),window.addEventListener("drop",e=>{e.preventDefault(),n.classList.remove("is-over"),he(e.dataTransfer?.files??[])}),E("#btn-sample").addEventListener("click",St);for(let e of document.querySelectorAll("[data-close-dialog]"))e.addEventListener("click",()=>e.closest("dialog").close());E("#btn-settings").addEventListener("click",()=>Gn.open()),E("#btn-license").addEventListener("click",Bn),E("#btn-unlock").addEventListener("click",Bn),E("#btn-activate").addEventListener("click",$t),E("#btn-remove-license").addEventListener("click",Ct),E("#btn-print").addEventListener("click",yt),E("#btn-csv").addEventListener("click",It),bn(E("#btn-clear"),()=>b("quote.clearConfirm"),()=>{A.parts=[],A.selectedId=null,Z(),k()}),E("#lang").addEventListener("change",e=>{A.lang=Q.includes(e.target.value)?e.target.value:"en",j(U.lang,A.lang),Me()}),E("#q-customer").addEventListener("input",e=>{A.quote.customer=e.target.value}),E("#q-number").addEventListener("input",e=>{A.quote.number=e.target.value.trim(),A.quote.numberEdited=!0}),E("#q-date").addEventListener("change",e=>{if(!e.target.value){e.target.value=A.quote.date;return}A.quote.date=e.target.value,qn()}),Mt()}async function Ot(){let n=new URLSearchParams(location.search).get("lang"),t=cn(U.lang);Q.includes(n)?(A.lang=n,j(U.lang,n)):A.lang=Q.includes(t)?t:Xn(navigator.languages??[navigator.language]),E("#q-date").value=A.quote.date,qn(),Pt(),ue(document),Me();let e=cn(U.license);if(typeof e=="string"&&e){let s=await Pn(e,yn);A.license={token:e,valid:s.valid,payload:s.payload??null,reason:s.reason??null},Yn()}document.documentElement.dataset.ready="true"}Ot();})();</script>
+</body>
+</html>

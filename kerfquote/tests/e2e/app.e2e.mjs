@@ -53,7 +53,14 @@ async function openApp({ locale = 'de-DE', pro = false, viewport = { width: 1440
   // Der Test nutzt ein eigenes Schlüsselpaar; der echte öffentliche Schlüssel wird nur für diesen Lauf ersetzt.
   await context.route('**/src/license-public-key.js', (route) =>
     route.fulfill({ contentType: 'text/javascript', body: publicKeyModule(keys.publicJwk) }));
-  await context.addInitScript(() => { window.print = () => { window.__printed = (window.__printed ?? 0) + 1; }; });
+  // Ersatz für den Druckdialog; meldet sich wie ein echter Browser mit beforeprint/afterprint
+  await context.addInitScript(() => {
+    window.print = () => {
+      window.__printed = (window.__printed ?? 0) + 1;
+      window.dispatchEvent(new Event('beforeprint'));
+      window.dispatchEvent(new Event('afterprint'));
+    };
+  });
   if (pro) {
     await context.addInitScript((token) => {
       if (!localStorage.getItem('kerfquote.license')) localStorage.setItem('kerfquote.license', JSON.stringify(token));
@@ -356,7 +363,7 @@ test('Einstellungen: Stundensatz und Währung wirken sofort und bleiben nach dem
   assert.ok(await page.locator('#s-company').isHidden());
   await page.locator('#dlg-settings summary', { hasText: 'Firma' }).click();
   await page.fill('#s-company', 'Blechwerk Muster GmbH');
-  await page.locator('#dlg-settings button[value="close"]').click();
+  await page.locator('#dlg-settings [data-close-dialog]').click();
 
   const custom = sanitizeSettings({ ...settings, machineRate: 240, setupCost: 0, currency: 'CHF' });
   const chf = createFormat('de', 'CHF');
@@ -390,7 +397,7 @@ test('Einstellungen: Material anlegen, Dicke ergänzen, zurücksetzen mit Rückf
   await page.fill('#s-m3-v1', '3000');
   await page.fill('#s-m3-p1', '0.4');
   await page.locator('#s-m3-p1').blur();
-  await page.locator('#dlg-settings button[value="close"]').click();
+  await page.locator('#dlg-settings [data-close-dialog]').click();
 
   assert.equal(await page.locator('#p-material option').count(), 4);
   await page.selectOption('#p-material', { label: 'Messing CuZn37' });
@@ -402,7 +409,7 @@ test('Einstellungen: Material anlegen, Dicke ergänzen, zurücksetzen mit Rückf
   const reset = page.getByRole('button', { name: 'Auf Standardwerte zurücksetzen' });
   await reset.click();
   await page.getByRole('button', { name: 'Alle Einstellungen auf die Standardwerte zurücksetzen?' }).click();
-  await page.locator('#dlg-settings button[value="close"]').click();
+  await page.locator('#dlg-settings [data-close-dialog]').click();
   assert.equal(await page.locator('#p-material option').count(), 3);
   assert.equal(await page.locator('#p-material').inputValue(), 's235');
   await done();
@@ -434,7 +441,7 @@ test('Logo: in Free gesperrt; in Pro erscheint es im Angebot und lässt sich wie
   await page.setInputFiles('#s-logo', { name: 'text.png', mimeType: 'text/plain', buffer: Buffer.from('kein Bild') });
   await page.waitForFunction(() => document.querySelector('#toast').classList.contains('is-error'));
   assert.equal(await page.locator('#dlg-settings img.logo-preview').count(), 1);
-  await page.locator('#dlg-settings button[value="close"]').click();
+  await page.locator('#dlg-settings [data-close-dialog]').click();
 
   await page.click('#btn-print');
   const logo = page.locator('#print-root img.doc-logo');
@@ -445,7 +452,7 @@ test('Logo: in Free gesperrt; in Pro erscheint es im Angebot und lässt sich wie
   await page.click('#btn-settings');
   await page.getByRole('button', { name: 'Logo entfernen' }).click();
   assert.equal(await page.locator('#dlg-settings img.logo-preview').count(), 0);
-  await page.locator('#dlg-settings button[value="close"]').click();
+  await page.locator('#dlg-settings [data-close-dialog]').click();
   await page.click('#btn-print');
   assert.equal(await page.locator('#print-root img').count(), 0);
   assert.equal(norm(await page.locator('#print-root .doc-company').innerText()), 'Blechwerk Muster GmbH');
@@ -489,7 +496,7 @@ test('Einstellungen: Staffelmengen, Zeile und Material löschen, Export und Impo
   assert.equal(exported.materials.length, 2);
   assert.deepEqual(exported.materials[0].thicknesses[0], { t: 1.5, speed: 7000, pierce: 0.3 });
   assert.deepEqual(exported, sanitizeSettings(exported), 'Export ist bereits vollständig und gültig');
-  await page.locator('#dlg-settings button[value="close"]').click();
+  await page.locator('#dlg-settings [data-close-dialog]').click();
 
   assert.deepEqual(await page.locator('#breaks-table tbody td:first-child').allInnerTexts(), ['1', '20', '300']);
   assert.ok(await page.locator('#quote-totals dt', { hasText: 'MwSt. 20 %' }).isVisible());

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Kleiner statischer Webserver für die lokale Entwicklung:  node tools/serve.mjs [Port]
-// (Die App nutzt ES-Module und lässt sich deshalb nicht per Doppelklick als file:// öffnen.)
+// (Die Website nutzt ES-Module und lässt sich deshalb nicht per Doppelklick als file:// öffnen.
+//  Dafür gibt es die Einzeldatei standalone/kerfquote.html.)
 
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
