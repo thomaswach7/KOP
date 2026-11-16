@@ -82,7 +82,7 @@ lib['r'] = [r0, warp_variant(r0, 0.12, 1.08), warp_variant(r0, -0.08, 0.92)]
 
 # ---- schlechte Varianten entfernen (nach Sichtung des Kontaktblatts)
 DROP = {'q': [3], 'z': [0, 3], 't': [1], 'H': [0, 2], 'T': [0], 'F': [1], 'Z': [0], 'S': [0],
-        'G': [0], '4': [1], 'U': [3], 's': [3], 'k': [0, 2], 'l': [0], '2': [2]}
+        'G': [0], '4': [1], 'U': [3], 's': [3], 'k': [0, 2], 'l': [0], '2': [2], '5': [0]}
 for c, idx in DROP.items():
     lib[c] = [v for i, v in enumerate(lib[c]) if i not in idx]
 # ---- Streupunkte (Fremd-Krümel) aus den Glyphen entfernen

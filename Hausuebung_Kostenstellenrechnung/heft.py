@@ -403,7 +403,7 @@ class Page:
                 out.append(0.5 * (2 * p1 + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t ** 2 + (-p0 + 3 * p1 - 3 * p2 + p3) * t ** 3))
         out.append(pts[-1]); return np.array(out)
 
-    def stroke(self, pts, w=0.32, alpha=0.9, jitter=0.12):
+    def stroke(self, pts, w=0.38, alpha=0.92, jitter=0.12):
         R = self.R; pts = np.asarray(pts, float); dense = [pts[0]]
         for a, b in zip(pts[:-1], pts[1:]):
             m = max(2, int(np.linalg.norm(b - a) / 1.5))
