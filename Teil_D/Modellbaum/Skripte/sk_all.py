@@ -1,4 +1,5 @@
 import math
+from matplotlib.patches import Circle
 from skizzen import SK
 import replay as R
 R_freistich = R.freistich
@@ -191,6 +192,44 @@ def s_pos2_bohrung():
     B = B.resize((round(B.width*A.height/B.height*0.8), round(A.height*0.8)))
     C = Image.new("RGB", (A.width + B.width + 40, A.height), "white"); C.paste(A, (0, 0)); C.paste(B, (A.width + 40, (A.height - B.height)//2))
     C.save("mb/pos2_s7.png")
+    s_pos2_muster()
+
+
+def s_pos2_muster():
+    """KE 8: Achsenmuster der Bohrung um A_X, 6 Stueck, 60 Grad (Blick auf die Flanschflaeche bei 43)."""
+    import numpy as np
+    from dimlib import TN
+    th = np.linspace(0, 2*math.pi, 300)
+    k = SK(-100, 112, -115, 98, 1.0)
+    circ = lambda c, r: [k.T(c[0] + r*math.cos(t), c[1] + r*math.sin(t)) for t in th]
+    for r in (85, 25):
+        k.line(circ((0, 0), r), lw=0.35, ls="--")
+    nut = [(-4, math.sqrt(15**2 - 16)), (-4, 18.3), (4, 18.3), (4, math.sqrt(15**2 - 16))]
+    a0 = math.degrees(math.atan2(nut[3][1], 4))
+    bo = [(15*math.cos(math.radians(t)), 15*math.sin(math.radians(t))) for t in np.linspace(a0, 180 - a0 + 360, 200)]
+    k.line([k.T(*p) for p in nut[3:] + bo + nut[:1]] + [k.T(*p) for p in nut], lw=0.35, ls="--")
+    k.ax.plot(*zip(*circ((0, 0), 75)), color="k", lw=TN, dashes=(14, 3, 1.5, 3))
+    for j in range(6):
+        w = math.radians(60*j); c = (75*math.cos(w), 75*math.sin(w))
+        k.line(circ(c, 4.5), lw=0.6 if j == 0 else 0.45); k.line(circ(c, 7.5), lw=0.6 if j == 0 else 0.45)
+        k.cl(k.T(c[0] - 10*math.cos(w), c[1] - 10*math.sin(w)), k.T(c[0] + 10*math.cos(w), c[1] + 10*math.sin(w)))
+        t = (90*math.cos(w), 90*math.sin(w))
+        k.text(*k.T(t[0], t[1] - 1.8), str(j + 1), 4.5, ha="center", weight="bold")
+    k.cl(k.T(-97, 0), k.T(97, 0)); k.cl(k.T(0, -92), k.T(0, 92))
+    k.text(*k.T(-97, -6.5), "VORNE", 2.8); k.text(*k.T(1.5, 94), "OBEN (TOP)", 2.8)
+    k.text(*k.T(6, 14), "Nut", 2.8); k.text(*k.T(-12, -5.5), "A_X", 3.5, ha="center")
+    k.ax.add_patch(Circle(k.T(0, 0), 0.9, color="k"))
+    arc = [k.T(62*math.cos(t), 62*math.sin(t)) for t in np.radians(np.linspace(0, 60, 60))]
+    k.line(arc); k.arrow(arc[0], arc[5]); k.arrow(arc[-1], arc[-6])
+    k.text(*k.T(51*math.cos(math.radians(30)) - 2, 51*math.sin(math.radians(30)) - 2), "60°", 3.5)
+    arc = [k.T(55*math.cos(t), 55*math.sin(t)) for t in np.radians(np.linspace(75, 285, 120))]
+    k.line(arc, lw=0.35); k.arrow(arc[-1], arc[-6])
+    k.text(*k.T(-52, -32), "Musterrichtung", 2.8, ha="center")
+    k.dim(k.T(-75, 0), k.T(75, 0), k.T(0, -92)[1], "Ø150", "h", tpos=0.3)
+    k.text(*k.T(-98, -101), "1 = Bohrung aus KE 7 (auf VORNE), 2 bis 6 = Muster um A_X, je 60°.", 2.8)
+    k.text(*k.T(-98, -106), "Die Nut liegt mittig zwischen 2 und 3 (je 30°). Richtung egal, 6 × 60° = 360°.", 2.8)
+    k.text(*k.T(-98, -111), "Blick auf die Flanschfläche bei 43 (Nabenseite). Gestrichelt: Körperkanten.", 2.8)
+    k.png("mb/pos2_s8.png")
 
 def s_pos1():
     k = SK(-24, 96, -8, 54, 1.8)

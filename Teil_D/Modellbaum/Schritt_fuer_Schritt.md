@@ -211,7 +211,12 @@ Dateiname `POS02_ABTRIEBSNABE` · Werkstoff EN-GJS-700-2 (Maße aus STEP) · Vor
 
 ### KE 8 – Muster
 
-- Bohrung (oder Gruppe) im Modellbaum anklicken → Muster → Typ Achse → A_X → 6 Stück, 60° → ✔.
+- Bohrung aus KE 7 (oder die Gruppe aus den zwei Bohrungen) im Modellbaum anklicken → Muster.
+- Typ „Achse“ → Achse A_X anklicken (Achse der Nabe).
+- Anzahl in der 1. Richtung: 6, Winkel zwischen den Mitgliedern: 60° → ✔. (Gleichwertig: Winkelbereich 360°, gleichmäßig verteilt.)
+- Kontrolle: Die Vorschau zeigt 6 schwarze Punkte auf Ø150. Die Nut liegt mittig zwischen zwei Bohrungen. Die Drehrichtung ist egal, weil 6 × 60° = 360° ergibt.
+
+![KE 8 – Muster](Bilder/pos2_s8.png)
 
 ✅ **Volumen nach diesem KE: 350.370 mm³**
 

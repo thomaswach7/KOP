@@ -119,7 +119,12 @@ TEILE = [
     "Ersatzweise: zwei einfache Bohrungen Ø15 × 8,6 und Ø9 „Durch alle“ an derselben Stelle → zu einer Gruppe zusammenfassen.",
     "Kontrolle: Die Senkung liegt auf der Nabenseite (Schraubenkopf), die Bohrung Ø9 kommt bei 55 heraus.",
    ], ("pos2_s7.png", 75), v("pos2", 6)),
-   ("KE 8 – Muster", ["Bohrung (oder Gruppe) im Modellbaum anklicken → Muster → Typ Achse → A_X → 6 Stück, 60° → ✔."], None, v("pos2", 7)),
+   ("KE 8 – Muster", [
+    "Bohrung aus KE 7 (oder die Gruppe aus den zwei Bohrungen) im Modellbaum anklicken → Muster.",
+    "Typ „Achse“ → Achse A_X anklicken (Achse der Nabe).",
+    "Anzahl in der 1. Richtung: 6, Winkel zwischen den Mitgliedern: 60° → ✔. (Gleichwertig: Winkelbereich 360°, gleichmäßig verteilt.)",
+    "Kontrolle: Die Vorschau zeigt 6 schwarze Punkte auf Ø150. Die Nut liegt mittig zwischen zwei Bohrungen. Die Drehrichtung ist egal, weil 6 × 60° = 360° ergibt.",
+   ], ("pos2_s8.png", 80), v("pos2", 7)),
   ]),
 
  dict(key="pos3", titel="Pos. 3 – Gehäuse", datei="POS03_GEHAEUSE", werkstoff="E295",
