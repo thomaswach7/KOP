@@ -115,7 +115,9 @@ with PdfPages("Anleitung_Schritt_fuer_Schritt.pdf") as pdf:
         for kt, zeilen, bild, vol in t["schritte"]:
             f.ueberschrift(kt, 10.5)
             for z in zeilen: f.zeile(z)
-            if bild: f.bild("mb/" + bild, 32, 95)
+            if bild:                                     # bild = Dateiname oder (Dateiname, Hoehe in mm) fuer Skizzen mit Massen
+                name, hb = bild if isinstance(bild, tuple) else (bild, 32)
+                f.bild("mb/" + name, hb, 95)
             if vol: f.volumen(vol)
         letzte = [s[3] for s in t["schritte"] if s[3]][-1]
         f.platz(10); f.y -= 1
@@ -138,7 +140,7 @@ for t in TEILE:
         for z in zeilen:
             pre = "⚠ " if z.startswith("! ") else ("➜ " if z.startswith("> ") else "")
             L.append("- " + pre + z.lstrip("-!> ").strip())
-        if bild: L += ["", f"![{kt}](Bilder/{bild})"]
+        if bild: L += ["", f"![{kt}](Bilder/{bild[0] if isinstance(bild, tuple) else bild})"]
         if vol: L += ["", f"✅ **Volumen nach diesem KE: {vt(vol)}**"]
         L.append("")
 open("Schritt_fuer_Schritt.md", "w").write("\n".join(L) + "\n")

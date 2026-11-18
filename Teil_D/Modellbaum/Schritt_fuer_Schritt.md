@@ -189,7 +189,11 @@ Dateiname `POS02_ABTRIEBSNABE` · Werkstoff EN-GJS-700-2 (Maße aus STEP) · Vor
 
 ### KE 6 – Passfedernut
 
-- Extrudieren → Skizze auf RECHTS → Rechteck 8 breit, symmetrisch zur Mitte, bis 18,3 → Durch alle → Material entfernen.
+- Extrudieren → Skizze auf RECHTS (Stirnfläche bei 0). Rechteck 8 breit, symmetrisch zu OBEN. Untere Kante auf VORNE (Achse), obere Kante 18,3 von VORNE.
+- Kontrolle: 18,3 + Bohrungsradius 15 = 33,3 (Maß in der Zeichnung). 33,3 nicht zusätzlich in die Skizze eintragen, sonst ist sie überbestimmt.
+- Tiefe „Durch alle“, Richtung ins Teil (Pfeil ggf. umdrehen) → Material entfernen → ✔. Die Nut endet von selbst bei 54 (dahinter ist der Hohlraum Ø66).
+
+![KE 6 – Passfedernut](Bilder/pos2_s6.png)
 
 ✅ **Volumen nach diesem KE: 360.786 mm³**
 

@@ -123,6 +123,19 @@ def s_pos2():
     r2(k, 56, 33, 135, lang=9)
     fr_marke(k, 56, 68, "Freistich F2", -14, 8, rad=3.2); fr_marke(k, 57, 37.5, "Freistich F3", -16, 10, rad=3.2)
     k.png("mb/pos2_s1.png")
+    # Skizze Passfedernut (KE 6) auf RECHTS (Stirnflaeche x = 0), DIN 6885: b = 8 JS9, d + t2 = 33,3
+    th = [i/200*2*math.pi for i in range(201)]
+    k = SK(-30, 44, -30, 34, 2.6)
+    k.line([k.T(25*math.cos(t), 25*math.sin(t)) for t in th], lw=0.35, ls="--")     # Nabe O50 (Koerperkante)
+    k.line([k.T(15*math.cos(t), 15*math.sin(t)) for t in th], lw=0.35, ls="--")     # Bohrung O30 (Koerperkante)
+    k.line([k.T(-4, 0), k.T(-4, 18.3), k.T(4, 18.3), k.T(4, 0), k.T(-4, 0)])        # Rechteck = Nut
+    k.cl(k.T(-28, 0), k.T(33, 0)); k.cl(k.T(0, -28), k.T(0, 31))
+    k.text(*k.T(31.5, -3.2), "VORNE (FRONT)", 2.8); k.text(*k.T(0.8, 29.5), "OBEN (TOP)", 2.8)
+    k.dim(k.T(-4, 18.3), k.T(4, 18.3), k.T(0, 26.5)[1], "8", "h", tpos=0.78)
+    k.dim(k.T(4, 18.3), k.T(4, 0), k.T(30, 0)[0], "18,3", "v", ext2=False)   # Bezug = Mittellinie VORNE
+    k.dim(k.T(-4, 18.3), k.T(-4, -15), k.T(-21, 0)[0], "(33,3)", "v", tpos=0.75)   # Hilfsmass (nur zur Kontrolle, in Creo nicht eintragen)
+    k.text(*k.T(-29, -27.5), "gestrichelt: Ø30 und Ø50 (Körperkanten als Bezug)", 2.8)
+    k.png("mb/pos2_s6.png")
 
 def s_pos1():
     k = SK(-24, 96, -8, 54, 1.8)

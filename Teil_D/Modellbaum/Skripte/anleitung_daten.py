@@ -107,7 +107,11 @@ TEILE = [
    ("KE 3 – Rundung R5", ["Die 2 Innenkanten bei 55 (am Ø125 und am Lagerrohr) → R5."], None, v("pos2", 2)),
    ("KE 4 – Rundung R2", ["Außenkante Nabe bei 0 (Ø50) und Flanschkante Ø170 bei 43 → R2."], None, v("pos2", 3)),
    ("KE 5 – Fase 1,5 × 45°", ["Modell → Fase (Kantenfase) → D = 1,5 → Kante Ø136 bei 62 → ✔."], None, v("pos2", 4)),
-   ("KE 6 – Passfedernut", ["Extrudieren → Skizze auf RECHTS → Rechteck 8 breit, symmetrisch zur Mitte, bis 18,3 → Durch alle → Material entfernen."], None, v("pos2", 5)),
+   ("KE 6 – Passfedernut", [
+    "Extrudieren → Skizze auf RECHTS (Stirnfläche bei 0). Rechteck 8 breit, symmetrisch zu OBEN. Untere Kante auf VORNE (Achse), obere Kante 18,3 von VORNE.",
+    "Kontrolle: 18,3 + Bohrungsradius 15 = 33,3 (Maß in der Zeichnung). 33,3 nicht zusätzlich in die Skizze eintragen, sonst ist sie überbestimmt.",
+    "Tiefe „Durch alle“, Richtung ins Teil (Pfeil ggf. umdrehen) → Material entfernen → ✔. Die Nut endet von selbst bei 54 (dahinter ist der Hohlraum Ø66).",
+   ], ("pos2_s6.png", 80), v("pos2", 5)),
    ("KE 7 – Bohrung mit Senkung (1 Stück)", [
     "Modell → Bohrung. Platzierung: Flanschfläche bei 43 anklicken, Typ „Durchmesser“, Versatzreferenzen: Achse A_X und Ebene VORNE (Winkel 0°), Durchmesser 150.",
     "Bohrung Ø9 „Durch alle“ mit Senkung Ø15, Tiefe 8,6 (Standardbohrung ISO M8 mit Senkung, oder zwei einfache Bohrungen Ø15 × 8,6 und Ø9 durch → zu einer Gruppe zusammenfassen).",
