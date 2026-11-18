@@ -199,8 +199,13 @@ Dateiname `POS02_ABTRIEBSNABE` · Werkstoff EN-GJS-700-2 (Maße aus STEP) · Vor
 
 ### KE 7 – Bohrung mit Senkung (1 Stück)
 
-- Modell → Bohrung. Platzierung: Flanschfläche bei 43 anklicken, Typ „Durchmesser“, Versatzreferenzen: Achse A_X und Ebene VORNE (Winkel 0°), Durchmesser 150.
-- Bohrung Ø9 „Durch alle“ mit Senkung Ø15, Tiefe 8,6 (Standardbohrung ISO M8 mit Senkung, oder zwei einfache Bohrungen Ø15 × 8,6 und Ø9 durch → zu einer Gruppe zusammenfassen).
+- Modell → Bohrung. Platzierung: Flanschfläche bei 43 (Nabenseite) anklicken, Typ „Durchmesser“, Versatzreferenzen: Achse A_X und Ebene VORNE (Winkel 0°), Durchmesser 150.
+- Bohrung „Einfach“, Ø9, Tiefe „Durch alle“. Reiter „Form“: „Stirnsenkung hinzufügen“ (zylindrisch) → Ø15, Tiefe 8,6.
+- ⚠ Nicht „Senkung hinzufügen“ nehmen: das ist die kegelige 90°-Senkung für Senkschrauben.
+- Ersatzweise: zwei einfache Bohrungen Ø15 × 8,6 und Ø9 „Durch alle“ an derselben Stelle → zu einer Gruppe zusammenfassen.
+- Kontrolle: Die Senkung liegt auf der Nabenseite (Schraubenkopf), die Bohrung Ø9 kommt bei 55 heraus.
+
+![KE 7 – Bohrung mit Senkung (1 Stück)](Bilder/pos2_s7.png)
 
 ✅ **Volumen nach diesem KE: 359.050 mm³**
 

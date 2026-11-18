@@ -136,6 +136,61 @@ def s_pos2():
     k.dim(k.T(-4, 18.3), k.T(-4, -15), k.T(-21, 0)[0], "(33,3)", "v", tpos=0.75)   # Hilfsmass (nur zur Kontrolle, in Creo nicht eintragen)
     k.text(*k.T(-29, -27.5), "gestrichelt: Ø30 und Ø50 (Körperkanten als Bezug)", 2.8)
     k.png("mb/pos2_s6.png")
+    s_pos2_bohrung()
+
+
+def s_pos2_bohrung():
+    """KE 7/8: Lage der Bohrung (Blick auf die Flanschflaeche bei 43 von der Nabenseite) + Bohrungsprofil im Schnitt."""
+    import numpy as np
+    from shapely.geometry import box
+    from dimlib import TN
+    th = np.linspace(0, 2*math.pi, 300)
+    circ = lambda c, r: [k.T(c[0] + r*math.cos(t), c[1] + r*math.sin(t)) for t in th]
+    # --- Bild 1: Lage ---
+    k = SK(-100, 112, -115, 98, 1.0)
+    for r in (85, 25):
+        k.line(circ((0, 0), r), lw=0.35, ls="--")                                   # Flansch O170, Nabe O50 (Koerperkanten)
+    nut = [(-4, math.sqrt(15**2 - 16)), (-4, 18.3), (4, 18.3), (4, math.sqrt(15**2 - 16))]
+    a0 = math.degrees(math.atan2(nut[3][1], 4))
+    bo = [(15*math.cos(math.radians(t)), 15*math.sin(math.radians(t))) for t in np.linspace(a0, 180 - a0 + 360, 200)]
+    k.line([k.T(*p) for p in nut[3:] + bo + nut[:1]] + [k.T(*p) for p in nut], lw=0.35, ls="--")   # Bohrung O30 mit Nut
+    k.ax.plot(*zip(*circ((0, 0), 75)), color="k", lw=TN, dashes=(14, 3, 1.5, 3))          # Lochkreis
+    k.line(circ((75, 0), 4.5)); k.line(circ((75, 0), 7.5))                             # Bohrung + Stirnsenkung
+    for j in range(1, 6):                                                              # spaetere Musterpositionen
+        c = (75*math.cos(math.radians(60*j)), 75*math.sin(math.radians(60*j)))
+        k.line(circ(c, 4.5), lw=0.3, ls=":")
+    k.cl(k.T(-97, 0), k.T(97, 0)); k.cl(k.T(0, -92), k.T(0, 92))
+    k.text(*k.T(-97, 1.5), "VORNE", 2.8); k.text(*k.T(1.5, 90), "OBEN (TOP)", 2.8)
+    k.text(*k.T(6, 14), "Nut", 2.8)
+    k.dim(k.T(-75, 0), k.T(75, 0), k.T(0, -92)[1], "Ø150", "h", tpos=0.3)
+    arc = [k.T(64*math.cos(t), 64*math.sin(t)) for t in np.radians(np.linspace(0, 60, 60))]
+    k.line(arc); k.arrow(arc[0], arc[5]); k.arrow(arc[-1], arc[-6])
+    k.text(*k.T(56*math.cos(math.radians(30)) - 2, 56*math.sin(math.radians(30)) - 2), "60°", 3.5)
+    k.leader(k.T(75 + 7.5*math.cos(math.radians(-50)), 7.5*math.sin(math.radians(-50))), k.T(88, -30), "Ø15 / Ø9", end_len=20)
+    k.text(*k.T(-98, -101), "Bohrung auf VORNE (Winkel 0°). Nach dem Muster KE 8 (punktiert, 6 × 60°)", 2.8)
+    k.text(*k.T(-98, -106), "liegt die Nut mittig zwischen zwei Bohrungen (je 30°).", 2.8)
+    k.text(*k.T(-98, -111), "Blick auf die Flanschfläche bei 43 (Nabenseite). Gestrichelt: Körperkanten.", 2.8)
+    k.png("mb/pos2_s7a.png")
+    # --- Bild 2: Profil im Schnitt durch die Bohrung ---
+    k = SK(33, 66, 61, 96, 4.0)
+    mat = box(43, 65, 55, 85).difference(box(43, 67.5, 51.6, 82.5)).difference(box(51.6, 70.5, 55, 79.5))
+    for g in getattr(mat, "geoms", [mat]): k.hatch(g, k.T, 45, 2.5)
+    k.prof([(43, 65), (43, 67.5), (51.6, 67.5), (51.6, 70.5), (55, 70.5), (55, 65)], close=False)
+    k.prof([(43, 85), (43, 82.5), (51.6, 82.5), (51.6, 79.5), (55, 79.5), (55, 85), (43, 85)], close=False)
+    xs = np.linspace(43, 55, 40); k.line([k.T(x, 65 + 0.35*math.sin((x - 43)*1.6)) for x in xs], lw=TN)   # Bruchlinie
+    k.cl(k.T(39, 75), k.T(59, 75))
+    k.dim(k.T(43, 82.5), k.T(43, 67.5), k.T(37.5, 0)[0], "Ø15H13", "v")
+    k.dim(k.T(55, 79.5), k.T(55, 70.5), k.T(60.5, 0)[0], "Ø9H13", "v")
+    k.dim(k.T(43, 85), k.T(51.6, 82.5), k.T(0, 89)[1], "8,6", "h")
+    k.dim(k.T(43, 85), k.T(55, 85), k.T(0, 93.5)[1], "(12)", "h")
+    k.text(*k.T(40.5, 62.6), "bei 43 (Nabenseite)", 2.8, ha="center"); k.text(*k.T(56.5, 62.6), "bei 55", 2.8, ha="center")
+    k.text(*k.T(44, 75.8), "Achse auf Ø150", 2.8)
+    k.png("mb/pos2_s7b.png")
+    from PIL import Image
+    A, B = Image.open("mb/pos2_s7a.png").convert("RGB"), Image.open("mb/pos2_s7b.png").convert("RGB")
+    B = B.resize((round(B.width*A.height/B.height*0.8), round(A.height*0.8)))
+    C = Image.new("RGB", (A.width + B.width + 40, A.height), "white"); C.paste(A, (0, 0)); C.paste(B, (A.width + 40, (A.height - B.height)//2))
+    C.save("mb/pos2_s7.png")
 
 def s_pos1():
     k = SK(-24, 96, -8, 54, 1.8)

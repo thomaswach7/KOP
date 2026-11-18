@@ -113,9 +113,12 @@ TEILE = [
     "Tiefe „Durch alle“, Richtung ins Teil (Pfeil ggf. umdrehen) → Material entfernen → ✔. Die Nut endet von selbst bei 54 (dahinter ist der Hohlraum Ø66).",
    ], ("pos2_s6.png", 80), v("pos2", 5)),
    ("KE 7 – Bohrung mit Senkung (1 Stück)", [
-    "Modell → Bohrung. Platzierung: Flanschfläche bei 43 anklicken, Typ „Durchmesser“, Versatzreferenzen: Achse A_X und Ebene VORNE (Winkel 0°), Durchmesser 150.",
-    "Bohrung Ø9 „Durch alle“ mit Senkung Ø15, Tiefe 8,6 (Standardbohrung ISO M8 mit Senkung, oder zwei einfache Bohrungen Ø15 × 8,6 und Ø9 durch → zu einer Gruppe zusammenfassen).",
-   ], None, v("pos2", 6)),
+    "Modell → Bohrung. Platzierung: Flanschfläche bei 43 (Nabenseite) anklicken, Typ „Durchmesser“, Versatzreferenzen: Achse A_X und Ebene VORNE (Winkel 0°), Durchmesser 150.",
+    "Bohrung „Einfach“, Ø9, Tiefe „Durch alle“. Reiter „Form“: „Stirnsenkung hinzufügen“ (zylindrisch) → Ø15, Tiefe 8,6.",
+    "! Nicht „Senkung hinzufügen“ nehmen: das ist die kegelige 90°-Senkung für Senkschrauben.",
+    "Ersatzweise: zwei einfache Bohrungen Ø15 × 8,6 und Ø9 „Durch alle“ an derselben Stelle → zu einer Gruppe zusammenfassen.",
+    "Kontrolle: Die Senkung liegt auf der Nabenseite (Schraubenkopf), die Bohrung Ø9 kommt bei 55 heraus.",
+   ], ("pos2_s7.png", 75), v("pos2", 6)),
    ("KE 8 – Muster", ["Bohrung (oder Gruppe) im Modellbaum anklicken → Muster → Typ Achse → A_X → 6 Stück, 60° → ✔."], None, v("pos2", 7)),
   ]),
 
