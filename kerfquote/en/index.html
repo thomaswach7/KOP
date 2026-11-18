@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; object-src 'none'; base-uri 'self'">
+  <title>Laser cutting quote calculator from DXF – KerfQuote</title>
+  <meta name="description" content="Quote laser, plasma and waterjet cut parts straight from the DXF: cut length, pierces, weight and price – in your browser, nothing uploaded. Try it free.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="KerfQuote">
+  <meta property="og:title" content="Laser cutting quote calculator from DXF – KerfQuote">
+  <meta property="og:description" content="Quote laser, plasma and waterjet cut parts straight from the DXF: cut length, pierces, weight and price – in your browser, nothing uploaded. Try it free.">
+  <meta property="og:locale" content="en_US">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/base.css">
+  <link rel="stylesheet" href="../assets/landing.css">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"KerfQuote","applicationCategory":"BusinessApplication","operatingSystem":"Web","inLanguage":["de","en"],"description":"Quote laser, plasma and waterjet cut parts straight from the DXF: cut length, pierces, weight and price – in your browser, nothing uploaded. Try it free.","offers":[{"@type":"Offer","name":"Free","price":"0","priceCurrency":"USD"},{"@type":"Offer","name":"Pro","price":"540","priceCurrency":"USD"}]}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Which DXF files are supported?","acceptedAnswer":{"@type":"Answer","text":"ASCII DXF from release R12 onwards with lines, arcs, circles, polylines, ellipses, splines and block references. Binary DXF and DWG are not read – save the drawing as ASCII DXF in your CAD system."}},{"@type":"Question","name":"Are my drawings uploaded?","acceptedAnswer":{"@type":"Answer","text":"No. The file is analysed entirely in your browser. Your settings are stored locally on your computer as well."}},{"@type":"Question","name":"How accurate is the calculation?","acceptedAnswer":{"@type":"Answer","text":"Cut length, pierces and area are computed exactly from the geometry. The price is as accurate as the figures behind it: tune feed rates, hourly rate and material prices to your shop once."}},{"@type":"Question","name":"Does it work for plasma, waterjet or oxy-fuel too?","acceptedAnswer":{"@type":"Answer","text":"Yes. The model is process-independent: you enter the feed rate and pierce time of your machine per material and thickness."}},{"@type":"Question","name":"Does it take nesting into account?","acceptedAnswer":{"@type":"Answer","text":"No. Material is charged by the smallest bounding rectangle of the part plus an allowance. That is common practice for quoting and errs on the safe side."}},{"@type":"Question","name":"How do I get the Pro version?","acceptedAnswer":{"@type":"Answer","text":"After purchase you receive a license key that you paste into the app under “License”. The license is valid for twelve months."}},{"@type":"Question","name":"Do I need an account?","acceptedAnswer":{"@type":"Answer","text":"No. Open the app and start."}}]}</script>
+</head>
+<body>
+  <header class="site-head">
+    <div class="wrap">
+      <a class="brand" href="../"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#c2410c"/><path d="M8 23 L17 9" stroke="#fff" stroke-width="3" stroke-linecap="round"/><path d="M19.5 23 L24 16" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".55"/><circle cx="17" cy="9" r="2.6" fill="#ffd9c2"/></svg><span>KerfQuote</span></a>
+      <nav class="site-nav" aria-label="Main navigation">
+        <a class="nav-link" href="#features">Features</a>
+        <a class="nav-link" href="#calc">How it calculates</a>
+        <a class="nav-link" href="#pricing">Pricing</a>
+        <a class="nav-link" href="#faq">FAQ</a>
+        <a href="../" lang="de" hreflang="de">Deutsch</a>
+        <a class="btn btn-primary" href="../app/?lang=en">Open app</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <div>
+          <h1>Laser cutting quotes: from DXF to quote in <em>30 seconds</em>.</h1>
+          <p class="lead">KerfQuote prices laser, plasma and waterjet cut parts straight from the drawing: cut length, pierces, weight and price – using your own machine rates.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary btn-lg" href="../app/?lang=en">Try it free</a>
+            <a class="btn btn-lg" href="#calc">See how it calculates</a>
+          </div>
+          <p class="trust">No sign-up, no installation. Your drawings never leave your computer.</p>
+        </div>
+        <figure class="mock" role="img" aria-label="Example: flange with seven inner contours, 672 mm cut length, 8 pierces">
+        <div class="mock-bar" aria-hidden="true"><i></i><i></i><i></i></div>
+        <svg viewBox="0 0 400 260" aria-hidden="true">
+          <circle class="m-fill" cx="200" cy="130" r="90"/>
+          <circle class="m-outer" cx="200" cy="130" r="90"/>
+          <circle class="m-inner" cx="200" cy="130" r="30"/>
+          <circle class="m-inner" cx="267.5" cy="130.0" r="6.75"/><circle class="m-inner" cx="233.8" cy="71.5" r="6.75"/><circle class="m-inner" cx="166.3" cy="71.5" r="6.75"/><circle class="m-inner" cx="132.5" cy="130.0" r="6.75"/><circle class="m-inner" cx="166.2" cy="188.5" r="6.75"/><circle class="m-inner" cx="233.8" cy="188.5" r="6.75"/>
+          <path class="m-kerf" d="M290 130 A90 90 0 0 0 200 40"/>
+          <circle class="m-spark" cx="200" cy="40" r="5"/>
+        </svg>
+        <dl class="mock-stats" aria-hidden="true">
+          <div><dt>Cut length</dt><dd>672.3 mm</dd></div>
+          <div><dt>Pierces</dt><dd>8</dd></div>
+          <div class="is-price"><dt>Unit price at 100</dt><dd>€1.48</dd></div>
+        </dl>
+      </figure>
+      </div>
+    </section>
+
+    <section class="band" aria-labelledby="why-h">
+      <div class="wrap">
+        <p class="eyebrow">Why KerfQuote</p>
+        <h2 id="why-h">The first quote in the inbox usually wins the job.</h2>
+        <p class="lead">Many requests go unanswered because quoting by hand takes too long. KerfQuote does the measuring for you.</p>
+        <div class="cards">
+        <article class="card">
+          <h3>Minutes instead of hours</h3>
+          <p>Drop in the DXF, pick material and quantity, done. Cut length and pierces are measured exactly from the geometry.</p>
+        </article>
+        <article class="card">
+          <h3>Traceable instead of gut feeling</h3>
+          <p>Every price is broken down: material, cutting time, setup, markup. You see at once where the cost comes from.</p>
+        </article>
+        <article class="card">
+          <h3>Confidential by design</h3>
+          <p>The drawing is analysed in your browser and never uploaded. That also fits the NDAs you have with your customers.</p>
+        </article>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="how-h">
+      <div class="wrap">
+        <p class="eyebrow">How it works</p>
+        <h2 id="how-h">Three steps to a quote</h2>
+        <div class="cards">
+        <article class="card">
+          <span class="num-badge" aria-hidden="true">1</span>
+          <h3>Add the DXF</h3>
+          <p>Drop in one or more files. KerfQuote detects the units, resolves blocks and hides dimension and construction layers.</p>
+        </article>
+        <article class="card">
+          <span class="num-badge" aria-hidden="true">2</span>
+          <h3>Check and configure</h3>
+          <p>Open contours and duplicate lines are flagged. Then choose material, thickness, quantity and bends.</p>
+        </article>
+        <article class="card">
+          <span class="num-badge" aria-hidden="true">3</span>
+          <h3>Send the quote</h3>
+          <p>Review the quantity breaks, add the customer details and print the quote or save it as PDF.</p>
+        </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="band" id="features" aria-labelledby="features-h">
+      <div class="wrap">
+        <p class="eyebrow">Features</p>
+        <h2 id="features-h">Everything cut-part quoting needs</h2>
+        <div class="cards">
+        <article class="card">
+          <h3>Cut length straight from the DXF</h3>
+          <p>Measured exactly from lines, arcs, circles, polylines, ellipses, splines and blocks – in millimetres or inches.</p>
+        </article>
+        <article class="card">
+          <h3>Catch drawing errors</h3>
+          <p>Open contours, duplicate entities and undersized holes show up before they cost money.</p>
+        </article>
+        <article class="card">
+          <h3>Quantity breaks at a glance</h3>
+          <p>Setup cost is spread across the quantity automatically.</p>
+        </article>
+        <article class="card">
+          <h3>Your own material tables</h3>
+          <p>Feed rate, pierce time, density and price per material and thickness – tuned to your machine.</p>
+        </article>
+        <article class="card">
+          <h3>Quote as PDF</h3>
+          <p>With a thumbnail per item, minimum order value and VAT.</p>
+        </article>
+        <article class="card">
+          <h3>English and German</h3>
+          <p>Interface and quote in both languages, currency of your choice.</p>
+        </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="calc" aria-labelledby="calc-h">
+      <div class="wrap">
+        <p class="eyebrow">Transparency</p>
+        <h2 id="calc-h">How laser cutting cost is calculated</h2>
+        <p class="lead">No black-box pricing: the model is deliberately simple and follows the usual job-shop costing.</p>
+        <div class="formula" tabindex="0" role="group" aria-labelledby="calc-h">
+          <div><b>Material</b> = (bounding rectangle + allowance) × thickness × density × price per kg</div>
+          <div><b>Cutting</b> = (cut length ÷ feed rate + pierces × pierce time) × machine hourly rate</div>
+          <div><b>Setup</b> = setup cost per item ÷ quantity</div>
+          <div><b>Unit price</b> = (material + cutting + setup + bending + extras) × (1 + markup)</div>
+        </div>
+        <p class="note">The bundled feed rates and material prices are starting values for a 4 kW fiber laser. Enter your own figures and the prices will be right. Nesting several parts on one sheet is not calculated.</p>
+      </div>
+    </section>
+
+    <section class="band" id="pricing" aria-labelledby="pricing-h">
+      <div class="wrap">
+        <p class="eyebrow">Pricing</p>
+        <h2 id="pricing-h">Start free, upgrade when you need it</h2>
+        <p class="lead">Analysing your DXF files is free for good. Pro pays off as soon as you regularly write quotes with several items.</p>
+        <div class="plans">
+          <article class="plan">
+            <h3>Free</h3>
+            <p class="price">$0</p>
+            <ul>
+            <li>Unlimited DXF analysis</li>
+            <li>Costing with your own rates</li>
+            <li>Up to 2 items per quote</li>
+            <li>Quote carries a KerfQuote note</li>
+            </ul>
+            <a class="btn" href="../app/?lang=en">Get started</a>
+          </article>
+          <article class="plan is-pro">
+            <h3>Pro</h3>
+            <p class="price">$45 <small>per month</small></p>
+            <p class="muted">billed annually, $540 per year</p>
+            <ul>
+            <li>Unlimited items per quote</li>
+            <li>Your own logo on quotes</li>
+            <li>Quotes without the KerfQuote note</li>
+            <li>CSV export for Excel and ERP</li>
+            </ul>
+            <a class="btn btn-primary" href="../app/?lang=en">Unlock in the app</a>
+          </article>
+        </div>
+        <p class="note">All prices exclude applicable taxes.</p>
+      </div>
+    </section>
+
+    <section id="faq" aria-labelledby="faq-h">
+      <div class="wrap">
+        <p class="eyebrow">Questions and answers</p>
+        <h2 id="faq-h">Frequently asked questions</h2>
+        <div class="faq">
+          <details>
+            <summary>Which DXF files are supported?</summary>
+            <p>ASCII DXF from release R12 onwards with lines, arcs, circles, polylines, ellipses, splines and block references. Binary DXF and DWG are not read – save the drawing as ASCII DXF in your CAD system.</p>
+          </details>
+          <details>
+            <summary>Are my drawings uploaded?</summary>
+            <p>No. The file is analysed entirely in your browser. Your settings are stored locally on your computer as well.</p>
+          </details>
+          <details>
+            <summary>How accurate is the calculation?</summary>
+            <p>Cut length, pierces and area are computed exactly from the geometry. The price is as accurate as the figures behind it: tune feed rates, hourly rate and material prices to your shop once.</p>
+          </details>
+          <details>
+            <summary>Does it work for plasma, waterjet or oxy-fuel too?</summary>
+            <p>Yes. The model is process-independent: you enter the feed rate and pierce time of your machine per material and thickness.</p>
+          </details>
+          <details>
+            <summary>Does it take nesting into account?</summary>
+            <p>No. Material is charged by the smallest bounding rectangle of the part plus an allowance. That is common practice for quoting and errs on the safe side.</p>
+          </details>
+          <details>
+            <summary>How do I get the Pro version?</summary>
+            <p>After purchase you receive a license key that you paste into the app under “License”. The license is valid for twelve months.</p>
+          </details>
+          <details>
+            <summary>Do I need an account?</summary>
+            <p>No. Open the app and start.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="band final" aria-labelledby="final-h">
+      <div class="wrap">
+        <h2 id="final-h">Try it on your next request for quote.</h2>
+        <p class="lead">The sample parts load with one click.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary btn-lg" href="../app/?lang=en">Open app</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-foot">
+    <div class="wrap">
+      <span>KerfQuote · Cut-part quoting from DXF</span>
+      <nav aria-label="Legal">
+        <a href="../impressum.html">Legal notice (German)</a>
+        <a href="../datenschutz.html">Privacy (German)</a>
+        <a href="../" lang="de" hreflang="de">Deutsch</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>
