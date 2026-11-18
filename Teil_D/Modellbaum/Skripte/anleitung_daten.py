@@ -114,9 +114,9 @@ TEILE = [
    ], ("pos2_s6.png", 80), v("pos2", 5)),
    ("KE 7 – Bohrung mit Senkung (1 Stück)", [
     "Modell → Bohrung. Platzierung: Flanschfläche bei 43 (Nabenseite) anklicken, Typ „Durchmesser“ (nicht „Linear“), Versatzreferenzen: Achse A_X → Durchmesser 150, mit Strg Ebene VORNE → Winkel 30° (= 30° neben der Nut).",
-    "Bohrung „Einfach“, Ø9, Tiefe „Durch alle“. Reiter „Form“: „Stirnsenkung hinzufügen“ (zylindrisch) → Ø15, Tiefe 8,6.",
-    "! Nicht „Senkung hinzufügen“ nehmen: das ist die kegelige 90°-Senkung für Senkschrauben.",
-    "Fehlt „Stirnsenkung hinzufügen“: Profil von „Flach“ auf „Bohrloch“ stellen. Ersatzweise: zwei einfache Bohrungen Ø15 × 8,6 und Ø9 „Durch alle“ an derselben Stelle → zu einer Gruppe zusammenfassen.",
+    "Typ „Einfach“, Profil „Bohrloch“ → Knopf „Stirnsenker“ einschalten. Reiter Form: Stirnsenker Ø15, Tiefe 8,6 · Bohrung Ø9 · „Durch alle“.",
+    "! Nicht „Kegelsenker“ nehmen: das ist die kegelige 90°-Senkung für Senkschrauben.",
+    "Ersatzweise: zwei einfache Bohrungen Ø15 × 8,6 und Ø9 „Durch alle“ an derselben Stelle → zu einer Gruppe zusammenfassen.",
     "Kontrolle: Die Senkung liegt auf der Nabenseite (Schraubenkopf), die Bohrung Ø9 kommt bei 55 heraus.",
    ], ("pos2_s7.png", 75), v("pos2", 6)),
    ("KE 8 – Muster", [
@@ -159,7 +159,7 @@ TEILE = [
    ("KE 3 – Rundung R2", ["Außenkante Ø170 bei 0 → R2."], None, v("pos4", 2)),
    ("KE 4 – Fase 1,5 × 45°", ["Kante Ø136 bei 19 → D = 1,5."], None, v("pos4", 3)),
    ("KE 5 – Bohrung mit Senkung (1 Stück)", [
-    "Wie Pos. 2, KE 7, aber Platzierung auf der Flanschfläche bei 0. Ø9 durch, Senkung Ø15 × 8,6, Durchmesser 150, Winkel 0° zu VORNE.",
+    "Wie Pos. 2, KE 7, aber Platzierung auf der Flanschfläche bei 0. Ø9 durch, Stirnsenker Ø15 × 8,6, Durchmesser 150, Winkel 0° zu VORNE.",
    ], None, v("pos4", 4)),
    ("KE 6 – Muster", ["Muster → Typ Achse → A_X → 6 Stück, 60°."], None, v("pos4", 5)),
   ]),

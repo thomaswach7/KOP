@@ -122,13 +122,14 @@ Nach jedem KE steht das Volumen, das du dann haben musst (Analyse → Masseneige
 
 - Modell → Bohrung. Im Dashboard oben:
 - Typ „Einfach“ · Durchmesser 9 · Tiefe: im Auswahlfeld neben dem Tiefensymbol „Durch alle“ wählen.
-- Reiter Form → „Stirnsenkung hinzufügen“ → Durchmesser 15, Tiefe 8,6.
-- ➜ Fehlt „Stirnsenkung hinzufügen“: Profil von „Flach“ auf „Bohrloch“ umstellen.
-- ⚠ Nicht „Senkung hinzufügen“ nehmen: das ist die kegelige 90°-Senkung für Senkschrauben. Hier sitzt eine Zylinderschraube M8 (Pos. 10).
+- Gruppe Profil: „Bohrloch“ wählen. Daneben erscheinen die Knöpfe „Kegelsenker“ und „Stirnsenker“ → „Stirnsenker“ einschalten.
+- Reiter Form: Stirnsenker Ø15, Tiefe 8,6 · Bohrung Ø9 · „Durch alle“. Haken „Kegelgesenkte Ausgangsbohrung“ und „Abstand oben“ aus lassen.
+- ⚠ Nicht „Kegelsenker“ nehmen: das ist die kegelige 90°-Senkung für Senkschrauben. Hier sitzt eine Zylinderschraube M8 (Pos. 10).
 - Reiter Platzierung → Platzierung: die Flanschfläche bei 43 anklicken (Nabenseite, auf dieser Seite sitzt der Schraubenkopf).
 - Typ: „Durchmesser“ (nicht „Linear“).
 - Versatzreferenzen: Achse A_X anklicken → Wert Durchmesser 150. Dann Strg gedrückt halten und Ebene VORNE anklicken → Wert Winkel 30.
 - Kontrolle in der Vorschau: Die Bohrung liegt auf Ø150, 30° neben der Nut. Die Senkung ist auf der Nabenseite.
+- ➜ Zeigt Creo statt 30° einen anderen Winkel (z. B. 210°), ist das nur dann gleichwertig, wenn er sich von 30° um ein Vielfaches von 60° unterscheidet (90°, 150°, 210°, 270°, 330°) UND die Winkelreferenz VORNE ist. Am sichersten: Wert auf 30 setzen.
 - ➜ Ersatzweg: zwei einfache Bohrungen an derselben Stelle (Ø15 Tiefe 8,6 und Ø9 „Durch alle“, beide mit Ø150 und Winkel 30°). Beide im Modellbaum mit Strg markieren → Rechtsklick → Gruppe.
 
 ![KE 7 – Bohrung mit Stirnsenkung (1 Stück)](Bilder/pos2_s7.png)
@@ -161,7 +162,7 @@ Nach jedem KE steht das Volumen, das du dann haben musst (Analyse → Masseneige
 | Volumen nach KE 6 unverändert (362.289) | Die Nut wurde aus dem Teil hinaus extrudiert: Richtung umdrehen. |
 | Eine Bohrung liegt genau über der Nut | In KE 7 fehlt der Winkel 30° (Typ „Linear“ oder Winkel 0 zu VORNE). |
 | Senkung auf der falschen Seite | Platzierungsfläche war die Fläche bei 55. Richtig: Flanschfläche bei 43 (Nabenseite). |
-| Senkung ist kegelig | „Senkung hinzufügen“ statt „Stirnsenkung hinzufügen“ gewählt. |
+| Senkung ist kegelig | „Kegelsenker“ statt „Stirnsenker“ eingeschaltet. |
 | Andere Reihenfolge der KE | Erlaubt. Das Endvolumen ist gleich (350.370 mm³), nur die Zwischenwerte ändern sich (Tabelle unten). |
 
 ## Volumen bei anderer Reihenfolge (Nut und Bohrungen vor den Rundungen)
