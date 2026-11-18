@@ -61,8 +61,8 @@ TEILE = [
    ("KE 3 – Ebene DTM1", [
     "Modell → Ebene → im Modellbaum RECHTS anklicken → Versatz 47 (Pfeil ins Teil) → OK.",
    ], None, None),
-   ("KE 4 – Extrudieren: Arme", [
-    "Modell → Extrudieren → Platzierung → Definieren → Skizzierebene DTM1, Referenz OBEN, Ausrichtung Oben → Skizzieren → Skizzieransicht.",
+   ("KE 4 – Profil: Arme", [
+    "Modell → Profil → Platzierung → Definieren → Skizzierebene DTM1, Referenz OBEN, Ausrichtung Oben → Skizzieren → Skizzieransicht.",
     "Gruppe Skizze → Mittellinie: eine auf die senkrechte, eine auf die waagrechte lila Linie.",
     "Oberer Arm: Rechteck zeichnen → obere Linie löschen → Bogen (3-Punkt/Tangente am Ende) von Ecke zu Ecke, bis an beiden Seiten „T“ erscheint.",
     "Bedingung Symmetrisch: senkrechte Mittellinie → linke untere Ecke → rechte untere Ecke.",
@@ -75,17 +75,17 @@ TEILE = [
     "Rundung → 9 → die 4 geraden Kanten, an denen die 18 mm auseinanderliegenden Armseiten auf den Ø77 treffen (Strg) → ✔.",
     "! Unbedingt VOR dem Fuß, sonst schlägt die Rundung fehl.",
    ], None, v("pos1", 3)),
-   ("KE 6 – Extrudieren: Fuß", [
+   ("KE 6 – Profil: Fuß", [
     "Skizze wieder auf DTM1 (Referenz OBEN, Oben). Mittellinien wie bei KE 4.",
     "Rechteck symmetrisch zur senkrechten Mittellinie: 18 breit, Unterkante 30, Oberkante 39,5 (= Ø79) über der Mitte. Spiegeln.",
     "✔ → Tiefe Symmetrisch 20 → ✔.",
    ], "pos1_s6.png", v("pos1", 4)),
    ("KE 7 – Bohrungen Ø8H8", [
-    "Extrudieren → Skizze auf DTM1 → Kreis Ø8, Mittelpunkt auf der senkrechten Mittellinie, 52 über der Mitte → Spiegeln.",
+    "Profil → Skizze auf DTM1 → Kreis Ø8, Mittelpunkt auf der senkrechten Mittellinie, 52 über der Mitte → Spiegeln.",
     "✔ → Tiefe Symmetrisch 20 → Knopf „Material entfernen“ → ✔.",
    ], None, v("pos1", 5)),
    ("KE 8 – Passfedernut", [
-    "Extrudieren → Skizze auf RECHTS (Referenz OBEN, Oben) → Arme stehen oben/unten.",
+    "Profil → Skizze auf RECHTS (Referenz OBEN, Oben) → Arme stehen oben/unten.",
     "Rechteck quer zu den Armen: 8 hoch, symmetrisch zur waagrechten Mittellinie, von der Mitte bis 18,3 zur Seite.",
     "✔ → Tiefe „Durch alle“ (Pfeil ins Teil) → Material entfernen → ✔. Kontrolle: 15 + 18,3 = 33,3.",
    ], None, v("pos1", 6)),
@@ -108,15 +108,15 @@ TEILE = [
    ("KE 4 – Rundung R2", ["Außenkante Nabe bei 0 (Ø50) und Flanschkante Ø170 bei 43 → R2."], None, v("pos2", 3)),
    ("KE 5 – Fase 1,5 × 45°", ["Modell → Fase (Kantenfase) → D = 1,5 → Kante Ø136 bei 62 → ✔."], None, v("pos2", 4)),
    ("KE 6 – Passfedernut", [
-    "Extrudieren → Skizze auf RECHTS (Stirnfläche bei 0). Rechteck 8 breit, symmetrisch zu OBEN. Untere Kante auf VORNE (Achse), obere Kante 18,3 von VORNE.",
+    "Profil → Skizze auf RECHTS (Stirnfläche bei 0), Referenz OBEN, Ausrichtung Oben. Rechteck 8 breit, symmetrisch zu VORNE. Untere Kante auf OBEN (Achse), obere Kante 18,3 von OBEN.",
     "Kontrolle: 18,3 + Bohrungsradius 15 = 33,3 (Maß in der Zeichnung). 33,3 nicht zusätzlich in die Skizze eintragen, sonst ist sie überbestimmt.",
     "Tiefe „Durch alle“, Richtung ins Teil (Pfeil ggf. umdrehen) → Material entfernen → ✔. Die Nut endet von selbst bei 54 (dahinter ist der Hohlraum Ø66).",
    ], ("pos2_s6.png", 80), v("pos2", 5)),
    ("KE 7 – Bohrung mit Senkung (1 Stück)", [
-    "Modell → Bohrung. Platzierung: Flanschfläche bei 43 (Nabenseite) anklicken, Typ „Durchmesser“, Versatzreferenzen: Achse A_X und Ebene VORNE (Winkel 0°), Durchmesser 150.",
+    "Modell → Bohrung. Platzierung: Flanschfläche bei 43 (Nabenseite) anklicken, Typ „Durchmesser“ (nicht „Linear“), Versatzreferenzen: Achse A_X → Durchmesser 150, mit Strg Ebene VORNE → Winkel 30° (= 30° neben der Nut).",
     "Bohrung „Einfach“, Ø9, Tiefe „Durch alle“. Reiter „Form“: „Stirnsenkung hinzufügen“ (zylindrisch) → Ø15, Tiefe 8,6.",
     "! Nicht „Senkung hinzufügen“ nehmen: das ist die kegelige 90°-Senkung für Senkschrauben.",
-    "Ersatzweise: zwei einfache Bohrungen Ø15 × 8,6 und Ø9 „Durch alle“ an derselben Stelle → zu einer Gruppe zusammenfassen.",
+    "Fehlt „Stirnsenkung hinzufügen“: Profil von „Flach“ auf „Bohrloch“ stellen. Ersatzweise: zwei einfache Bohrungen Ø15 × 8,6 und Ø9 „Durch alle“ an derselben Stelle → zu einer Gruppe zusammenfassen.",
     "Kontrolle: Die Senkung liegt auf der Nabenseite (Schraubenkopf), die Bohrung Ø9 kommt bei 55 heraus.",
    ], ("pos2_s7.png", 75), v("pos2", 6)),
    ("KE 8 – Muster", [
@@ -171,37 +171,37 @@ TEILE = [
     "Der Ursprung (Kreuzung der lila Linien) ist die Kupplungsachse. Das Gewicht liegt UNTER dem Ursprung.",
     "Winkel werden von der senkrechten Linie nach unten gemessen.",
    ], None, None),
-   ("KE 1 – Extrudieren: Schuh (Bogen-Langloch)", [
-    "Extrudieren → Skizze auf VORNE (Referenz RECHTS, Rechts).",
+   ("KE 1 – Profil: Schuh (Bogen-Langloch)", [
+    "Profil → Skizze auf VORNE (Referenz RECHTS, Rechts).",
     "Gruppe Skizze → Mittellinie: eine senkrecht durch den Ursprung, zwei schräge vom Ursprung nach unten, symmetrisch, Winkel zwischen ihnen 104,26°.",
     "Bogen (Mittelpunkt und Enden): Mittelpunkt im Ursprung, R51,5, von schräger Linie zu schräger Linie. Genauso R60.",
     "An beiden Enden je einen Bogen (3-Punkt/Tangente) von R51,5 zu R60 nach außen → wird automatisch R4,25.",
     "✔ → Tiefe Symmetrisch 54 → ✔.",
    ], None, v("pos51", 0)),
-   ("KE 2 – Extrudieren: Belagsitz R62", [
+   ("KE 2 – Profil: Belagsitz R62", [
     "Neue Skizze auf VORNE: zwei Mittellinien symmetrisch, Winkel 102°.",
     "Bogen R59 und Bogen R62 (Mittelpunkt im Ursprung), dazu zwei kurze Linien auf den schrägen Mittellinien → geschlossener Ringabschnitt.",
     "✔ → Symmetrisch 54 → ✔. (R59 liegt im Schuh, damit beide verschmelzen.)",
    ], None, v("pos51", 1)),
    ("KE 3 – Ebene DTM1", ["Ebene → VORNE → Versatz 9."], None, None),
-   ("KE 4 – Extrudieren: Arm", [
+   ("KE 4 – Profil: Arm", [
     "Skizze auf DTM1 (Referenz RECHTS). Mittellinien symmetrisch mit 135° Winkel.",
     "Bogen R43 und Bogen R60 (Mittelpunkt im Ursprung), an den Enden je ein tangentialer Bogen nach außen → R8,5.",
     "✔ → Tiefe 9, Richtung WEG von VORNE → ✔.",
    ], "pos51_s3.png", v("pos51", 2)),
    ("KE 5 – Planfläche außen", [
-    "Extrudieren → Skizze auf die äußere Armfläche → 2 Kreise R9 (Ø18), Mittelpunkte auf den 135°-Linien im Abstand 51,5 vom Ursprung.",
+    "Profil → Skizze auf die äußere Armfläche → 2 Kreise R9 (Ø18), Mittelpunkte auf den 135°-Linien im Abstand 51,5 vom Ursprung.",
     "Tiefe 1 → Material entfernen → ✔.",
    ], None, v("pos51", 3)),
    ("KE 6 – Planfläche innen", ["Dasselbe auf der inneren Armfläche (zeigt zur Nut), Tiefe 1. Ergebnis: Nutbreite 20, außen 34."], None, v("pos51", 4)),
    ("KE 7 – Spiegeln", ["KE 4, 5 und 6 im Modellbaum mit Strg markieren → Spiegeln → VORNE → ✔."], None, v("pos51", 5)),
-   ("KE 8 – Bohrungen Ø8H9", ["Extrudieren → Skizze auf VORNE → 2 Kreise Ø8 an denselben Stellen (R51,5, 135°) → Symmetrisch 40 → Material entfernen."], None, v("pos51", 6)),
+   ("KE 8 – Bohrungen Ø8H9", ["Profil → Skizze auf VORNE → 2 Kreise Ø8 an denselben Stellen (R51,5, 135°) → Symmetrisch 40 → Material entfernen."], None, v("pos51", 6)),
   ]),
 
  dict(key="pos52", titel="Pos. 5.2 – Belag", datei="POS05-2_BELAG", werkstoff="Reibbelag",
   kontur=None, bild="pos52_s1.png",
   schritte=[
-   ("KE 1 – Extrudieren", [
+   ("KE 1 – Profil", [
     "Skizze auf VORNE: zwei Mittellinien vom Ursprung nach unten, symmetrisch, 92°.",
     "Bogen R62 und Bogen R65 (Mittelpunkt im Ursprung) + zwei kurze Linien → Ringabschnitt.",
     "Symmetrisch 54 → ✔.",
@@ -216,7 +216,7 @@ TEILE = [
   ]),
 
  dict(key="pos6", titel="Pos. 6 – Scheibe", datei="POS06_SCHEIBE", werkstoff="S235JR", kontur=None, bild="pos6_s1.png",
-  schritte=[("KE 1 – Extrudieren", ["Skizze auf VORNE → Kreis Ø16 und Kreis Ø9, beide Mittelpunkte im Ursprung → Tiefe 1,5 → ✔."], None, v("pos6", 0))]),
+  schritte=[("KE 1 – Profil", ["Skizze auf VORNE → Kreis Ø16 und Kreis Ø9, beide Mittelpunkte im Ursprung → Tiefe 1,5 → ✔."], None, v("pos6", 0))]),
 
  dict(key="pos7", titel="Pos. 7 – Zugfeder (ungespannt)", datei="POS07_ZUGFEDER", werkstoff="Federstahl", kontur=None, bild="pos7_s1.png",
   schritte=[

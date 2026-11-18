@@ -5,6 +5,8 @@ Die gleiche Anleitung gibt es als PDF: `Modellbaum_Einzelteile.pdf` (eine Seite 
 
 > **Ausführliche Fassung:** `Anleitung_Schritt_fuer_Schritt.pdf` bzw. [`Schritt_fuer_Schritt.md`](Schritt_fuer_Schritt.md) – jedes Teil Klick für Klick, Konturtabellen für die Drehskizzen und das Volumen nach jedem KE.
 
+> **Nur Abtriebsnabe (Pos. 2), von Anfang an:** `Anleitung_Abtriebsnabe.pdf` bzw. [`Anleitung_Abtriebsnabe.md`](Anleitung_Abtriebsnabe.md) – mit bemaßten Skizzen für Passfedernut, Bohrung mit Stirnsenkung und Muster.
+
 Ich habe jede Anleitung mit einem Skript Schritt für Schritt nachgebaut (`Skripte/replay.py`). Die Sollvolumen stammen aus diesem Nachbau.
 
 ## Grundregeln

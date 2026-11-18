@@ -91,57 +91,62 @@ class Flow:
     def ende(self):
         self._fuss(); self.pdf.savefig(self.fig); plt.close(self.fig)
 
-with PdfPages("Anleitung_Schritt_fuer_Schritt.pdf") as pdf:
-    f = Flow(pdf); f.neue_seite("")
-    f.titel("Fliehkraftkupplung – Schritt für Schritt in Creo 12",
-            "Jedes Teil KE für KE, mit Klickfolgen und Zwischenvolumen zur Kontrolle")
-    f.text("Diese Anleitung ergänzt die Kurzfassung „Modellbaum_Einzelteile.pdf“. Sie nutzt die deutschen Namen aus Creo: "
-           "Ebenen VORNE / OBEN / RECHTS, Achse A_X, Bedingung „Zusammenfallend“. x-Maße zählen ab der Ebene RECHTS. "
-           "Nach jedem KE steht das Volumen, das du dann haben musst. Stimmt es, ist der Schritt richtig.", 9.2)
-    for kopf, zeilen in ALLGEMEIN:
-        f.ueberschrift(kopf)
-        for z in zeilen: f.zeile(z)
-    f.ueberschrift("Freistich DIN 509 – E 0,6 × 0,3 (Pos. 1, 2, 4) – in der Drehskizze")
-    for z in FREISTICH: f.zeile(z)
-    f.bild("mb/fr_welle.png", 30, 80)
-    f.text("Einstichgrund: Pos. 1 Ø44,4 (F1) · Ø136-Bund Ø135,4 (F2) · Lagersitz-Bohrung Ø75 → Ø75,6 (F3). Details: Seite 2 der Kurzfassung.", 8.3, style="italic")
-    for t in TEILE:
-        f.neue_seite(t["titel"])
-        f.titel(t["titel"], f"Dateiname: {t['datei']}   |   Werkstoff: {t['werkstoff']}   |   Vorlage: mmns_part_solid_abs")
-        if t["bild"]: f.bild("mb/" + t["bild"], 50)
-        if t["kontur"]:
-            f.ueberschrift("Kontur für die Drehskizze (Punkt für Punkt, x ab RECHTS)", 10)
-            f.tabelle(("Punkt", "x", "Ø", "Hinweis"), t["kontur"], [14, 18, 22, 126])
-        for kt, zeilen, bild, vol in t["schritte"]:
-            f.ueberschrift(kt, 10.5)
+def main():
+    with PdfPages("Anleitung_Schritt_fuer_Schritt.pdf") as pdf:
+        f = Flow(pdf); f.neue_seite("")
+        f.titel("Fliehkraftkupplung – Schritt für Schritt in Creo 12",
+                "Jedes Teil KE für KE, mit Klickfolgen und Zwischenvolumen zur Kontrolle")
+        f.text("Diese Anleitung ergänzt die Kurzfassung „Modellbaum_Einzelteile.pdf“. Sie nutzt die deutschen Namen aus Creo: "
+               "Ebenen VORNE / OBEN / RECHTS, Achse A_X, Bedingung „Zusammenfallend“. x-Maße zählen ab der Ebene RECHTS. "
+               "Nach jedem KE steht das Volumen, das du dann haben musst. Stimmt es, ist der Schritt richtig.", 9.2)
+        for kopf, zeilen in ALLGEMEIN:
+            f.ueberschrift(kopf)
             for z in zeilen: f.zeile(z)
-            if bild:                                     # bild = Dateiname oder (Dateiname, Hoehe in mm) fuer Skizzen mit Massen
-                name, hb, wb = (bild[0], bild[1], 170) if isinstance(bild, tuple) else (bild, 32, 95)
-                f.bild("mb/" + name, hb, wb)
-            if vol: f.volumen(vol)
-        letzte = [s[3] for s in t["schritte"] if s[3]][-1]
-        f.platz(10); f.y -= 1
-        f.text(f"Fertig. Endvolumen {vt(letzte)}. Alle KE im Modellbaum umbenennen und speichern.", 9.5, bold=True, farbe="#2d6a2d")
-    f.ende()
+        f.ueberschrift("Freistich DIN 509 – E 0,6 × 0,3 (Pos. 1, 2, 4) – in der Drehskizze")
+        for z in FREISTICH: f.zeile(z)
+        f.bild("mb/fr_welle.png", 30, 80)
+        f.text("Einstichgrund: Pos. 1 Ø44,4 (F1) · Ø136-Bund Ø135,4 (F2) · Lagersitz-Bohrung Ø75 → Ø75,6 (F3). Details: Seite 2 der Kurzfassung.", 8.3, style="italic")
+        for t in TEILE:
+            f.neue_seite(t["titel"])
+            f.titel(t["titel"], f"Dateiname: {t['datei']}   |   Werkstoff: {t['werkstoff']}   |   Vorlage: mmns_part_solid_abs")
+            if t["bild"]: f.bild("mb/" + t["bild"], 50)
+            if t["kontur"]:
+                f.ueberschrift("Kontur für die Drehskizze (Punkt für Punkt, x ab RECHTS)", 10)
+                f.tabelle(("Punkt", "x", "Ø", "Hinweis"), t["kontur"], [14, 18, 22, 126])
+            for kt, zeilen, bild, vol in t["schritte"]:
+                f.ueberschrift(kt, 10.5)
+                for z in zeilen: f.zeile(z)
+                if bild:                                     # bild = Dateiname oder (Dateiname, Hoehe in mm) fuer Skizzen mit Massen
+                    name, hb, wb = (bild[0], bild[1], 170) if isinstance(bild, tuple) else (bild, 32, 95)
+                    f.bild("mb/" + name, hb, wb)
+                if vol: f.volumen(vol)
+            letzte = [s[3] for s in t["schritte"] if s[3]][-1]
+            f.platz(10); f.y -= 1
+            f.text(f"Fertig. Endvolumen {vt(letzte)}. Alle KE im Modellbaum umbenennen und speichern.", 9.5, bold=True, farbe="#2d6a2d")
+        f.ende()
 
-# ---------------- Markdown ----------------
-L = ["# Fliehkraftkupplung – Schritt für Schritt in Creo 12", "",
-     "Ausführliche Fassung zur Kurzanleitung `Modellbaum_Einzelteile.pdf`. Nach jedem KE steht das Volumen, das du haben musst.", ""]
-for kopf, zeilen in ALLGEMEIN:
-    L += [f"## {kopf}", ""] + [("- " + z.lstrip("-!> ").strip()) for z in zeilen] + [""]
-L += ["## Freistich DIN 509 – E 0,6 × 0,3 (in der Drehskizze)", ""] + [f"{i}. {z}" for i, z in enumerate(FREISTICH, 1)] + ["", "![Freistich](Bilder/fr_welle.png)", ""]
-for t in TEILE:
-    L += [f"## {t['titel']}", "", f"Dateiname `{t['datei']}` · Werkstoff {t['werkstoff']} · Vorlage `mmns_part_solid_abs`", ""]
-    if t["bild"]: L += [f"![{t['titel']}](Bilder/{t['bild']})", ""]
-    if t["kontur"]:
-        L += ["| Punkt | x | Ø | Hinweis |", "|---|---|---|---|"] + [f"| {a} | {b} | {c} | {d} |" for a, b, c, d in t["kontur"]] + [""]
-    for kt, zeilen, bild, vol in t["schritte"]:
-        L += [f"### {kt}", ""]
-        for z in zeilen:
-            pre = "⚠ " if z.startswith("! ") else ("➜ " if z.startswith("> ") else "")
-            L.append("- " + pre + z.lstrip("-!> ").strip())
-        if bild: L += ["", f"![{kt}](Bilder/{bild[0] if isinstance(bild, tuple) else bild})"]
-        if vol: L += ["", f"✅ **Volumen nach diesem KE: {vt(vol)}**"]
-        L.append("")
-open("Schritt_fuer_Schritt.md", "w").write("\n".join(L) + "\n")
-print("ok")
+    # ---------------- Markdown ----------------
+    L = ["# Fliehkraftkupplung – Schritt für Schritt in Creo 12", "",
+         "Ausführliche Fassung zur Kurzanleitung `Modellbaum_Einzelteile.pdf`. Nach jedem KE steht das Volumen, das du haben musst.", ""]
+    for kopf, zeilen in ALLGEMEIN:
+        L += [f"## {kopf}", ""] + [("- " + z.lstrip("-!> ").strip()) for z in zeilen] + [""]
+    L += ["## Freistich DIN 509 – E 0,6 × 0,3 (in der Drehskizze)", ""] + [f"{i}. {z}" for i, z in enumerate(FREISTICH, 1)] + ["", "![Freistich](Bilder/fr_welle.png)", ""]
+    for t in TEILE:
+        L += [f"## {t['titel']}", "", f"Dateiname `{t['datei']}` · Werkstoff {t['werkstoff']} · Vorlage `mmns_part_solid_abs`", ""]
+        if t["bild"]: L += [f"![{t['titel']}](Bilder/{t['bild']})", ""]
+        if t["kontur"]:
+            L += ["| Punkt | x | Ø | Hinweis |", "|---|---|---|---|"] + [f"| {a} | {b} | {c} | {d} |" for a, b, c, d in t["kontur"]] + [""]
+        for kt, zeilen, bild, vol in t["schritte"]:
+            L += [f"### {kt}", ""]
+            for z in zeilen:
+                pre = "⚠ " if z.startswith("! ") else ("➜ " if z.startswith("> ") else "")
+                L.append("- " + pre + z.lstrip("-!> ").strip())
+            if bild: L += ["", f"![{kt}](Bilder/{bild[0] if isinstance(bild, tuple) else bild})"]
+            if vol: L += ["", f"✅ **Volumen nach diesem KE: {vt(vol)}**"]
+            L.append("")
+    open("Schritt_fuer_Schritt.md", "w").write("\n".join(L) + "\n")
+    print("ok")
+
+
+if __name__ == "__main__":
+    main()
