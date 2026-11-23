@@ -116,6 +116,19 @@ Immer aktiv:
 Hinweis: Ein Mapkey kann andere, in deiner `config.pro` definierte Mapkeys aufrufen. Deren Inhalt prüft der Server nicht.
 Mapkeys können jeden Menübefehl ausführen – gib Werkzeugaufrufe in Claude nur frei, wenn du weißt, was sie tun.
 
+### ⚠️ CREOSON im Netzwerk absichern
+
+CREOSON hat **kein Passwort** und lauscht auf **allen** Netzwerkadressen (Port 9056). Jeder, der diesen Port deines PCs
+erreicht (z. B. im Schulnetz), könnte Creo steuern – einschließlich Batch-Dateien starten. Deshalb:
+
+- Fragt Windows beim ersten Start von CREOSON nach Netzwerkzugriff für Java: **nicht zulassen**.
+- Besser: Firewall-Regel (das Installationsskript setzt sie automatisch, wenn es als Administrator läuft):
+  ```powershell
+  New-NetFirewallRule -DisplayName "CREOSON Port 9056 nur lokal" -Direction Inbound -Protocol TCP -LocalPort 9056 -Action Block
+  ```
+  Der MCP-Server verbindet sich über `localhost` – das blockiert die Regel nicht.
+- CREOSON nur laufen lassen, solange du damit arbeitest.
+
 ## Konfiguration (Umgebungsvariablen)
 
 | Variable | Standard | Bedeutung |

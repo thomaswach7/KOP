@@ -133,6 +133,19 @@ if (-not $SkipClaudeConfig) {
   Write-Host "Eingetragen in $cfgPath (Sicherung: .bak)"
 }
 
+Step "Netzwerkschutz: CREOSON hat kein Passwort und lauscht auf allen Netzwerkadressen"
+$fwName = "CREOSON Port $Port nur lokal"
+$isAdmin = ([Security.Principal.WindowsPrincipal]$me).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if ($isAdmin) {
+  if (-not (Get-NetFirewallRule -DisplayName $fwName -ErrorAction SilentlyContinue)) {
+    New-NetFirewallRule -DisplayName $fwName -Direction Inbound -Protocol TCP -LocalPort $Port -Action Block | Out-Null
+  }
+  Write-Host "Firewall-Regel '$fwName' aktiv: andere Rechner im Netz erreichen CREOSON nicht (localhost bleibt erlaubt)."
+} else {
+  Write-Warning "Ohne Administratorrechte keine Firewall-Regel gesetzt. Wenn Windows beim ersten CREOSON-Start nach Netzwerkzugriff fragt: NICHT zulassen (Abbrechen). Oder als Administrator ausführen:"
+  Write-Host "  New-NetFirewallRule -DisplayName '$fwName' -Direction Inbound -Protocol TCP -LocalPort $Port -Action Block"
+}
+
 Step "Fertig - nächste Schritte"
 Write-Host "1. CREOSON starten:   $CreosonDir\creoson_run.bat   (Fenster offen lassen)"
 Write-Host "2. Creo starten:      $CreosonDir\nitro_proe_remote.bat"
