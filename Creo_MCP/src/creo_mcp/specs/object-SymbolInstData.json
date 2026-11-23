@@ -1,0 +1,25 @@
+{
+  "object_name" : "SymbolInstData",
+  "description" : "Information about a drawing symbol instance",
+  "data" : [ {
+    "name" : "id",
+    "type" : "integer",
+    "description" : "Symbol ID"
+  }, {
+    "name" : "symbol_name",
+    "type" : "string",
+    "description" : "Symbol definition name"
+  }, {
+    "name" : "sheet",
+    "type" : "integer",
+    "description" : "Sheet Number"
+  }, {
+    "name" : "location",
+    "type" : "object:JLPoint",
+    "description" : "Location of symbol instance, in drawing coordinates"
+  }, {
+    "name" : "attach_type",
+    "type" : "string",
+    "description" : "Type of attachment location (free,offset,parametric,unknown)"
+  } ]
+}

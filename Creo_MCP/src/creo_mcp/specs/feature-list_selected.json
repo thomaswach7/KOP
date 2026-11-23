@@ -1,0 +1,74 @@
+{
+  "spec" : {
+    "function_description" : "List features that have been selected",
+    "command" : "feature",
+    "function" : "list_selected",
+    "request" : [ {
+      "name" : "paths",
+      "type" : "boolean",
+      "description" : "Whether feature number and component path is returned with the data",
+      "default" : "false"
+    } ],
+    "response" : [ {
+      "name" : "featlist",
+      "type" : "object_array:FeatSelectData",
+      "description" : "List of feature information"
+    } ]
+  },
+  "examples" : [ {
+    "request" : {
+      "sessionId" : "~sessionId~",
+      "command" : "feature",
+      "function" : "list_selected"
+    },
+    "response" : {
+      "status" : {
+        "error" : false
+      },
+      "data" : {
+        "featlist" : [ {
+          "name" : "CS3",
+          "type" : "COORDINATE SYSTEM",
+          "status" : "ACTIVE",
+          "file" : "box.prt",
+          "feat_id" : 44
+        }, {
+          "name" : "CS0",
+          "type" : "COORDINATE SYSTEM",
+          "status" : "ACTIVE",
+          "file" : "box.prt",
+          "feat_id" : 40
+        } ]
+      }
+    }
+  }, {
+    "request" : {
+      "sessionId" : "~sessionId~",
+      "command" : "feature",
+      "function" : "list_selected"
+    },
+    "response" : {
+      "status" : {
+        "error" : false
+      },
+      "data" : {
+        "featlist" : [ {
+          "name" : "CS3",
+          "type" : "COORDINATE SYSTEM",
+          "status" : "ACTIVE",
+          "feat_id" : 44,
+          "feat_number" : 3,
+          "path" : [ 30, 44 ]
+        }, {
+          "name" : "CS0",
+          "type" : "COORDINATE SYSTEM",
+          "status" : "ACTIVE",
+          "file" : "box.prt",
+          "feat_id" : 40,
+          "feat_number" : 1,
+          "path" : [ 30, 40 ]
+        } ]
+      }
+    }
+  } ]
+}
