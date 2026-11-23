@@ -46,19 +46,18 @@ def register(server: MCPServer, ctx: ToolContext) -> None:
 
     @server.tool(name="creo_connect", title="Connect / start Creo", annotations=SESSION, structured_output=False)
     async def creo_connect(
-        start_creo: Annotated[bool, Field(description="Start Creo via CREOSON's nitro_proe_remote.bat if it is not running.")] = False,
-        start_dir: Annotated[str | None, Field(description="Folder containing nitro_proe_remote.bat (default: CREO_START_DIR).")] = None,
+        start_creo: Annotated[bool, Field(description="Start Creo with the configured start script (CREO_START_DIR) if it is not running.")] = False,
         retries: Annotated[int, Field(description="Connection retries after starting (10 s each).", ge=0, le=30)] = 5,
     ) -> str:
-        """Connect to the running Creo session through CREOSON, optionally starting Creo first.
-        Creo must have been started with CREOSON support (nitro_proe_remote.bat sets PRO_COMM_MSG_EXE)."""
+        """Connect to the running Creo session through CREOSON, optionally starting Creo first with the start
+        script configured by the user (CREO_START_DIR/nitro_proe_remote.bat, which sets PRO_COMM_MSG_EXE)."""
         running = await ctx.call("connection", "is_creo_running")
         if not running.get("running") and start_creo:
-            directory = start_dir or ctx.settings.start_dir
+            directory = ctx.settings.start_dir
             if not directory:
                 return (
                     "Creo is not running and no start folder is configured. Set CREO_START_DIR to the CREOSON folder "
-                    "that contains nitro_proe_remote.bat (CreosonSetup creates it), or pass start_dir."
+                    "that contains nitro_proe_remote.bat (the install script creates it) in the MCP server configuration."
                 )
             await ctx.call(
                 "connection",

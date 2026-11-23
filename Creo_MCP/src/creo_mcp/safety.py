@@ -55,7 +55,6 @@ _SESSION = {
     ("file", "close_window"),
     ("file", "refresh"),
     ("file", "repaint"),
-    ("file", "erase_not_displayed"),
     ("file", "backup"),
     ("view", "activate"),
     ("drawing", "select_sheet"),
@@ -92,6 +91,8 @@ def guard_call(settings: Settings, command: str, function: str, data: Mapping[st
         check_mapkey(str(data.get("script") or ""), settings.allow_system_mapkeys)
     if (command, function) == ("creo", "set_config") and "mapkey" in str(data.get("name") or "").lower():
         check_mapkey(str(data.get("value") or ""), settings.allow_system_mapkeys)
+    if (command, function) == ("connection", "start_creo"):
+        _check_start_creo(settings, data)
     category = classify(command, function)
     if settings.read_only and category in ("write", "dangerous"):
         raise SafetyError(
@@ -102,6 +103,31 @@ def guard_call(settings: Settings, command: str, function: str, data: Mapping[st
         raise SafetyError(
             f"{command}.{function} can destroy data outside the model (files, folders, unsaved Creo work). "
             "It is blocked unless CREO_MCP_ALLOW_DANGEROUS=1 is set in the MCP server configuration."
+        )
+
+
+def _norm_path(path: str) -> str:
+    return path.replace("\\", "/").rstrip("/").lower()
+
+
+def _check_start_creo(settings: Settings, data: Mapping[str, Any]) -> None:
+    """start_creo führt eine .bat-Datei aus – nur das vom Nutzer konfigurierte Startskript ist erlaubt.
+
+    Sonst könnte ein (z. B. per Prompt-Injection gesteuerter) Aufruf eine fremde nitro_proe_remote.bat
+    aus einem beliebigen Ordner oder einer Netzwerkfreigabe starten.
+    """
+    trusted = settings.start_dir
+    requested_dir = str(data.get("start_dir") or "")
+    requested_cmd = str(data.get("start_command") or "")
+    if not trusted:
+        raise SafetyError(
+            "connection.start_creo runs a batch file and is only allowed with the start script configured in "
+            "CREO_START_DIR (MCP server configuration). Set CREO_START_DIR, or start Creo yourself."
+        )
+    if _norm_path(requested_dir) != _norm_path(trusted) or requested_cmd.lower() != settings.start_command.lower():
+        raise SafetyError(
+            f"connection.start_creo may only run {settings.start_command} from CREO_START_DIR ({trusted}); "
+            f"the requested folder {requested_dir!r} is not allowed."
         )
 
 

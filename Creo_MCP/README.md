@@ -105,7 +105,14 @@ Prompts: `pdf_zu_creo_modell` (PDF → Modell → Zeichnung), `modellbaum_pruefe
 | `CREO_MCP_ALLOW_DANGEROUS=1` | erlaubt Dateien/Ordner löschen, Creo beenden, Windchill-Workspace leeren (sonst gesperrt) |
 | `CREO_MCP_ALLOW_SYSTEM_MAPKEYS=1` | erlaubt Mapkeys mit `@SYSTEM` (Betriebssystem-Befehle) – sonst gesperrt |
 
+Immer aktiv:
+- `creo_connect(start_creo=true)` bzw. `connection.start_creo` startet **nur** `nitro_proe_remote.bat` aus dem in
+  `CREO_START_DIR` eingetragenen Ordner – ein anderer Ordner (z. B. aus einer präparierten PDF) wird abgelehnt.
+- Mapkey-Definitionen über `creo.set_config` werden genauso auf `@SYSTEM` geprüft wie direkte Mapkeys.
+- Im Nur-Lesen-Modus wird auch das Verwerfen nicht angezeigter Modelle (`erase_not_displayed`) gesperrt.
+
 Hinweis: Ein Mapkey kann andere, in deiner `config.pro` definierte Mapkeys aufrufen. Deren Inhalt prüft der Server nicht.
+Mapkeys können jeden Menübefehl ausführen – gib Werkzeugaufrufe in Claude nur frei, wenn du weißt, was sie tun.
 
 ## Konfiguration (Umgebungsvariablen)
 
@@ -140,7 +147,7 @@ Hinweis: Ein Mapkey kann andere, in deiner `config.pro` definierte Mapkeys aufru
 
 ```bash
 pip install -e ".[dev]"
-pytest                      # 116 Tests gegen den simulierten CREOSON-Server (prüft jede Anfrage gegen die CREOSON-Spezifikation)
+pytest                      # 123 Tests gegen den simulierten CREOSON-Server (prüft jede Anfrage gegen die CREOSON-Spezifikation)
 python -m creo_mcp mock     # nur den simulierten CREOSON-Server auf Port 9056 starten
 ```
 
