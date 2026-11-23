@@ -6,7 +6,7 @@
       "env": {
         "CREOSON_URL": "http://localhost:9056/creoson",
         "CREO_VERSION": "12",
-        "CREO_START_DIR": "C:\\CreosonServer",
+        "CREO_START_DIR": "C:\\Creoson_DEINNAME",
         "CREO_TEMPLATE_DIR": "C:\\Program Files\\PTC\\Creo 12.4.4.0\\Common Files\\templates"
       }
     },

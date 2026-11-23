@@ -4,7 +4,7 @@
 
 .DESCRIPTION
   1. Python-Umgebung (.venv) im Ordner Creo_MCP anlegen und das Paket installieren
-  2. CREOSON 3.0.2 herunterladen, SHA256 prüfen, entpacken (Standard C:\CreosonServer)
+  2. CREOSON 3.0.2 herunterladen, SHA256 prüfen, entpacken (Standard C:\Creoson_<Benutzer>, nur für dich beschreibbar)
   3. setvars.bat (für creoson_run.bat) und nitro_proe_remote.bat (Creo-Start mit PRO_COMM_MSG_EXE) schreiben
   4. PRO_COMM_MSG_EXE dauerhaft für den Benutzer setzen (dann ist auch ein normal gestartetes Creo erreichbar)
   5. Eintrag "creo" in %APPDATA%\Claude\claude_desktop_config.json (Sicherung .bak, UTF-8 ohne BOM)
@@ -14,7 +14,9 @@
   powershell -ExecutionPolicy Bypass -File scripts\install_windows.ps1 -WorkDir "D:\Schule\Creo" -SkipClaudeConfig
 #>
 param(
-  [string]$CreosonDir = "C:\CreosonServer",
+  # Ohne Leerzeichen (CREOSON startet das Startskript per Runtime.exec, Leerzeichen brechen den Pfad)
+  # und pro Benutzer; der Ordner wird unten für andere Benutzer gesperrt.
+  [string]$CreosonDir = ("C:\Creoson_" + ($env:USERNAME -replace '[^A-Za-z0-9_-]', '')),
   [string]$WorkDir = "$env:USERPROFILE\Documents\Creo",
   [int]$Port = 9056,
   [switch]$SkipCreoson,
@@ -61,6 +63,22 @@ if ($creo) {
   Write-Warning "Keine Creo-Installation gefunden. Startskripte bitte später von Hand anpassen."
 }
 
+Step "CREOSON-Ordner anlegen und für andere Benutzer sperren"
+if ($CreosonDir -match "\s") { throw "Der CREOSON-Ordner darf keine Leerzeichen enthalten (CREOSON startet Creo sonst nicht): $CreosonDir" }
+$me = [Security.Principal.WindowsIdentity]::GetCurrent()
+$adminSid = "S-1-5-32-544"
+if (Test-Path $CreosonDir) {
+  $owner = (Get-Acl $CreosonDir).GetOwner([Security.Principal.SecurityIdentifier]).Value
+  if ($owner -ne $me.User.Value -and $owner -ne $adminSid) {
+    throw "$CreosonDir gehört einem anderen Benutzer ($owner). Aus Sicherheitsgründen abgebrochen - bitte -CreosonDir mit einem eigenen Ordner angeben."
+  }
+} else {
+  New-Item -ItemType Directory -Path $CreosonDir | Out-Null
+}
+# Vererbung entfernen: nur du, SYSTEM und Administratoren (SIDs, damit es auch auf deutschem Windows passt)
+& icacls $CreosonDir /inheritance:r /grant:r "*$($me.User.Value):(OI)(CI)F" "*S-1-5-18:(OI)(CI)F" "*$($adminSid):(OI)(CI)F" | Out-Null
+if ($LASTEXITCODE -ne 0) { throw "Rechte für $CreosonDir konnten nicht gesetzt werden (icacls)." }
+
 if (-not $SkipCreoson) {
   Step "CREOSON 3.0.2 herunterladen und prüfen"
   $zip = Join-Path $env:TEMP "CreosonServerWithSetup-3.0.2-win64.zip"
@@ -76,13 +94,10 @@ if ($creo -and (Test-Path $CreosonDir)) {
   Step "Startskripte schreiben"
   New-Item -ItemType Directory -Force -Path $WorkDir | Out-Null
   $setvars = Join-Path $CreosonDir "setvars.bat"
-  if (-not (Test-Path $setvars)) {
-    $content = "@echo off`r`nset ""PROE_COMMON=$Common""`r`nset ""PROE_ENV=x86e_win64""`r`nset ""JAVA_HOME=$CreosonDir\jre""`r`nset ""JSON_PORT=$Port""`r`n"
-    [IO.File]::WriteAllText($setvars, $content, $BatEncoding)
-    Write-Host "setvars.bat geschrieben (CREOSON-Start: $CreosonDir\creoson_run.bat)"
-  } else {
-    Write-Host "setvars.bat existiert schon - nicht verändert."
-  }
+  # Immer neu schreiben - eine vorhandene (evtl. fremde) setvars.bat wird nicht übernommen.
+  $content = "@echo off`r`nset ""PROE_COMMON=$Common""`r`nset ""PROE_ENV=x86e_win64""`r`nset ""JAVA_HOME=$CreosonDir\jre""`r`nset ""JSON_PORT=$Port""`r`n"
+  [IO.File]::WriteAllText($setvars, $content, $BatEncoding)
+  Write-Host "setvars.bat geschrieben (CREOSON-Start: $CreosonDir\creoson_run.bat)"
   $bat = "@echo off`r`nrem Startet Creo so, dass CREOSON sich verbinden kann (J-Link async)`r`nset ""PRO_COMM_MSG_EXE=$MsgExe""`r`ncd /d ""$WorkDir""`r`nstart """" ""$Parametric""`r`n"
   [IO.File]::WriteAllText((Join-Path $CreosonDir "nitro_proe_remote.bat"), $bat, $BatEncoding)
   Write-Host "nitro_proe_remote.bat geschrieben (Arbeitsverzeichnis: $WorkDir)"

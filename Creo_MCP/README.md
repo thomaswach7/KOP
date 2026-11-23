@@ -39,14 +39,14 @@ Claude Desktop oder Claude Code.
    Das Skript
    - legt `.venv` an und installiert `creo-mcp`,
    - lädt **CREOSON 3.0.2** und prüft die SHA256-Prüfsumme,
-   - schreibt `C:\CreosonServer\setvars.bat` und `nitro_proe_remote.bat`,
+   - legt `C:\Creoson_<Benutzername>` an (ohne Leerzeichen, nur für dich beschreibbar) und schreibt dort `setvars.bat` und `nitro_proe_remote.bat`,
    - setzt `PRO_COMM_MSG_EXE` für deinen Benutzer,
    - trägt `creo` in `%APPDATA%\Claude\claude_desktop_config.json` ein (Sicherung `.bak`).
 
-   Optionen: `-WorkDir "D:\Schule\Creo"` (Creo-Arbeitsverzeichnis), `-CreosonDir`, `-SkipCreoson`, `-SkipClaudeConfig`, `-NoUserEnv`.
-2. **CREOSON starten:** `C:\CreosonServer\creoson_run.bat` (Fenster offen lassen).
+   Optionen: `-WorkDir "D:\Schule\Creo"` (Creo-Arbeitsverzeichnis), `-CreosonDir` (ohne Leerzeichen!), `-SkipCreoson`, `-SkipClaudeConfig`, `-NoUserEnv`.
+2. **CREOSON starten:** `C:\Creoson_<Benutzername>\creoson_run.bat` (Fenster offen lassen).
    Alternativ `CreosonSetup.exe` → Creo-Ordner `…\Creo 12.x\Common Files` wählen → „Start CREOSON“.
-3. **Creo starten:** `C:\CreosonServer\nitro_proe_remote.bat`. Wichtig: Ein Creo, das ohne `PRO_COMM_MSG_EXE`
+3. **Creo starten:** `C:\Creoson_<Benutzername>\nitro_proe_remote.bat`. Wichtig: Ein Creo, das ohne `PRO_COMM_MSG_EXE`
    gestartet wurde, ist für CREOSON unsichtbar („Unable to connect to Creo through J-Link“). Nach dem
    Installationsskript reicht nach einer Neuanmeldung auch der normale Creo-Start.
 4. **Prüfen:** `.\.venv\Scripts\python.exe -m creo_mcp doctor` – zeigt ✅/❌ für jeden Weg und was zu tun ist.
@@ -110,6 +110,8 @@ Immer aktiv:
   `CREO_START_DIR` eingetragenen Ordner – ein anderer Ordner (z. B. aus einer präparierten PDF) wird abgelehnt.
 - Mapkey-Definitionen über `creo.set_config` werden genauso auf `@SYSTEM` geprüft wie direkte Mapkeys.
 - Im Nur-Lesen-Modus wird auch das Verwerfen nicht angezeigter Modelle (`erase_not_displayed`) gesperrt.
+- Das Installationsskript legt den CREOSON-Ordner nur für dich beschreibbar an; einen Ordner, der einem anderen Benutzer
+  gehört, verwendet es nicht (Schutz auf Schul-PCs mit mehreren Konten).
 
 Hinweis: Ein Mapkey kann andere, in deiner `config.pro` definierte Mapkeys aufrufen. Deren Inhalt prüft der Server nicht.
 Mapkeys können jeden Menübefehl ausführen – gib Werkzeugaufrufe in Claude nur frei, wenn du weißt, was sie tun.
