@@ -26,6 +26,7 @@ class Settings:
     start_dir: str | None = None
     start_command: str = "nitro_proe_remote.bat"
     max_tree_nodes: int = 400
+    template_dir: str | None = None
 
     @classmethod
     def from_env(cls, env: Mapping[str, str] | None = None) -> Settings:
@@ -42,4 +43,5 @@ class Settings:
             start_dir=env.get("CREO_START_DIR") or None,
             start_command=env.get("CREO_START_COMMAND", cls.start_command) or cls.start_command,
             max_tree_nodes=int(env.get("CREO_MCP_MAX_TREE_NODES", cls.max_tree_nodes)),
+            template_dir=env.get("CREO_TEMPLATE_DIR") or None,
         )
