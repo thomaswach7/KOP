@@ -108,6 +108,7 @@ class MockCreo:
         self.exports: list[dict[str, Any]] = []
         self.selected: list[tuple[str, int]] = []
         self.config: dict[str, str] = {}
+        self.creo_running = True
         self._next_id = 1000
 
     # -- Hilfen -------------------------------------------------------------

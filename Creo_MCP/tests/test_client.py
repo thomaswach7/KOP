@@ -1,0 +1,61 @@
+import pytest
+
+from creo_mcp.client import CreosonClient
+from creo_mcp.config import Settings
+from creo_mcp.errors import CreosonConnectionError, CreosonError
+
+
+async def test_first_call_connects_and_sets_creo_version(mock, settings):
+    client = CreosonClient(settings)
+    data = await client.call("creo", "pwd")
+    assert data["dirname"] == "C:/Creo_MCP/arbeit"
+    names = [(c[0], c[1]) for c in mock.state.calls]
+    assert names[:2] == [("connection", "connect"), ("creo", "set_creo_version")]
+    assert mock.state.creo_versions[client.session_id] == 12
+    await client.aclose()
+
+
+async def test_creoson_error_is_raised_with_message(settings):
+    client = CreosonClient(settings)
+    with pytest.raises(CreosonError) as exc:
+        await client.call("file", "open", {"file": "gibtsnicht.prt"})
+    assert "gibtsnicht.prt" in str(exc.value)
+    await client.aclose()
+
+
+async def test_reconnects_once_when_session_was_lost(mock, settings):
+    client = CreosonClient(settings)
+    await client.call("creo", "pwd")
+    old = client.session_id
+    mock.state.sessions.clear()  # CREOSON neu gestartet
+    data = await client.call("creo", "pwd")
+    assert data["dirname"]
+    assert client.session_id != old
+    assert mock.state.creo_versions[client.session_id] == 12
+    await client.aclose()
+
+
+async def test_unreachable_creoson_gives_actionable_error():
+    client = CreosonClient(Settings(creoson_url="http://127.0.0.1:9/creoson", timeout=2))
+    with pytest.raises(CreosonConnectionError) as exc:
+        await client.call("creo", "pwd")
+    text = str(exc.value)
+    assert "CREOSON" in text and "creo_doctor" in text
+    await client.aclose()
+
+
+async def test_creo_not_running_error_has_start_hint(mock, settings):
+    mock.state.creo_running = False
+    client = CreosonClient(settings)
+    with pytest.raises(CreosonError) as exc:
+        await client.call("file", "get_active")
+    assert "Unable to connect to Creo" in str(exc.value)
+    assert "nitro_proe_remote.bat" in str(exc.value)
+    await client.aclose()
+
+
+async def test_version_call_skipped_when_disabled(mock):
+    client = CreosonClient(Settings(creoson_url=mock.url, creo_version=None))
+    await client.call("creo", "pwd")
+    assert ("creo", "set_creo_version") not in [(c[0], c[1]) for c in mock.state.calls]
+    await client.aclose()

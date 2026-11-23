@@ -18,6 +18,7 @@ class MockError(Exception):
 Handler = Callable[[MockCreo, dict[str, Any]], dict[str, Any] | None]
 _HANDLERS: dict[tuple[str, str], Handler] = {}
 _NO_SESSION_NEEDED = {("connection", "connect"), ("connection", "is_creo_running"), ("connection", "kill_creo")}
+_NO_CREO_NEEDED = {"connection", "server"}
 
 
 def handler(command: str, function: str) -> Callable[[Handler], Handler]:
@@ -40,6 +41,8 @@ def handle_request(state: MockCreo, payload: dict[str, Any]) -> dict[str, Any]:
     session_id = payload.get("sessionId")
     if (command, function) not in _NO_SESSION_NEEDED and session_id not in state.sessions:
         return _error("No session found")
+    if not state.creo_running and command not in _NO_CREO_NEEDED and (command, function) != ("creo", "set_creo_version"):
+        return _error("Unable to connect to Creo through J-Link")
     fn = _HANDLERS.get((command, function))
     if fn is None:
         return _error(f"Function {command}.{function} is not simulated in the CREOSON mock")
@@ -165,7 +168,7 @@ def _disconnect(state: MockCreo, data: dict[str, Any]) -> None:
 
 @handler("connection", "is_creo_running")
 def _running(state: MockCreo, data: dict[str, Any]) -> dict[str, Any]:
-    return {"running": True}
+    return {"running": state.creo_running}
 
 
 for _fn in ("start_creo", "stop_creo", "kill_creo"):
