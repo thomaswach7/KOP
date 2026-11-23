@@ -166,3 +166,13 @@ async def test_resources_and_prompts(mcp_client):
     assert "Grundkörper" in tree.contents[0].text
     prompts = {p.name for p in (await mcp_client.list_prompts()).prompts}
     assert {"pdf_zu_creo_modell", "modellbaum_pruefen"} <= prompts
+
+
+async def test_doctor_tool(mcp_client):
+    text = _text(await mcp_client.call_tool("creo_doctor", {}))
+    assert "CREOSON server" in text and "✅" in text
+
+
+async def test_feature_relations_needs_windows(mcp_client):
+    res = await mcp_client.call_tool("creo_feature_relations", {"file": "abtriebsnabe.prt", "feat_id": 40})
+    assert res.is_error and "Windows" in _text(res)

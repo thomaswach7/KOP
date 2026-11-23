@@ -70,6 +70,7 @@ class ToolContext:
     settings: Settings
     client: CreosonClient
     catalog: FunctionCatalog
+    vbapi: Any = None  # VbApiSession, wird bei Bedarf verbunden
 
     async def call(self, command: str, function: str, data: dict[str, Any] | None = None) -> dict[str, Any]:
         """CREOSON-Aufruf mit Sicherheitsprüfung; erwartete Fehler werden zu ToolError (für das Modell lesbar)."""
