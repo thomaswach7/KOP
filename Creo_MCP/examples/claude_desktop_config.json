@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "creo": {
+      "command": "C:\\Users\\DEINNAME\\KOP\\Creo_MCP\\.venv\\Scripts\\python.exe",
+      "args": ["-m", "creo_mcp"],
+      "env": {
+        "CREOSON_URL": "http://localhost:9056/creoson",
+        "CREO_VERSION": "12",
+        "CREO_START_DIR": "C:\\CreosonServer",
+        "CREO_TEMPLATE_DIR": "C:\\Program Files\\PTC\\Creo 12.4.4.0\\Common Files\\templates"
+      }
+    },
+    "creo-demo": {
+      "command": "C:\\Users\\DEINNAME\\KOP\\Creo_MCP\\.venv\\Scripts\\python.exe",
+      "args": ["-m", "creo_mcp", "demo"]
+    }
+  }
+}

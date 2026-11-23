@@ -1,0 +1,44 @@
+<!-- Evaluationsfragen für den Demo-Modus (python -m creo_mcp demo, simulierte Fliehkraftkupplung).
+     Alle Fragen sind nur lesend lösbar und haben eine eindeutige, stabile Antwort. -->
+<evaluation>
+  <qa_pair>
+    <question>In der Baugruppe fliehkraftkupplung.asm enthält die Abtriebsnabe ein Muster aus Bohrungen. Wie viele Bohrungs-KEs gehören zu diesem Muster?</question>
+    <answer>4</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Welches KE der Abtriebsnabe (abtriebsnabe.prt) hat die Feature-ID 60? Antworte nur mit dem KE-Namen.</question>
+    <answer>Passfedernut</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Wie oft ist das Teil scheibe.prt insgesamt in fliehkraftkupplung.asm verbaut?</question>
+    <answer>2</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Welchen Wert in mm hat das Maß d3 der Abtriebsnabe? Antworte nur mit der Zahl.</question>
+    <answer>14</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Welcher Wert steht im Parameter WERKSTOFF der Abtriebsnabe?</question>
+    <answer>EN-GJS-700-2</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Wie groß ist das Gesamtvolumen der Unterbaugruppe fliehgewicht.asm in mm³? Antworte mit einer ganzen Zahl ohne Tausendertrennzeichen.</question>
+    <answer>98809</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Welches Einzelteil der Fliehkraftkupplung hat das größte Volumen? Antworte mit dem Dateinamen.</question>
+    <answer>gehaeuse.prt</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Wie viele KEs hat die Abtriebsnabe insgesamt, einschließlich Bezugsebenen, Achse, Koordinatensystem, Muster- und Gruppenköpfen?</question>
+    <answer>16</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Wie heißt die Gruppe in der Abtriebsnabe, die die beiden Fasen-KEs enthält?</question>
+    <answer>Fasen</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Welche Feature-Nummer (Regenerationsreihenfolge) hat das KE Freistich_DIN509 in der Abtriebsnabe?</question>
+    <answer>16</answer>
+  </qa_pair>
+</evaluation>
