@@ -74,9 +74,10 @@ class ToolContext:
 
     async def call(self, command: str, function: str, data: dict[str, Any] | None = None) -> dict[str, Any]:
         """CREOSON-Aufruf mit Sicherheitsprüfung; erwartete Fehler werden zu ToolError (für das Modell lesbar)."""
+        payload = clean(data)
         try:
-            guard_call(self.settings, command, function)
-            return await self.client.call(command, function, clean(data))
+            guard_call(self.settings, command, function, payload)
+            return await self.client.call(command, function, payload)
         except CreoMCPError as exc:
             raise ToolError(str(exc)) from exc
 

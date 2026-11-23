@@ -68,3 +68,18 @@ def test_normalize_mapkey_keeps_plain_macro():
 def test_command_builder():
     assert command("ProCmdModelSave") == "~ Command `ProCmdModelSave` ;"
     assert command("ProCmdNamedViewsGalSelect", "FRONT") == "~ Command `ProCmdNamedViewsGalSelect` `FRONT`;"
+
+
+def test_config_mapkey_with_system_is_blocked():
+    with pytest.raises(SafetyError):
+        guard_call(Settings(), "creo", "set_config", {"name": "mapkey", "value": "zz @SYSTEMdel x;"})
+
+
+def test_other_config_options_are_allowed():
+    guard_call(Settings(), "creo", "set_config", {"name": "regen_failure_handling", "value": "resolve_mode"})
+
+
+def test_guard_checks_mapkey_script_content():
+    with pytest.raises(SafetyError):
+        guard_call(Settings(), "interface", "mapkey", {"script": "~ Command `A` ;@SYSTEMdir;"})
+    guard_call(Settings(allow_system_mapkeys=True), "interface", "mapkey", {"script": "@SYSTEMdir;"})

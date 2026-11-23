@@ -53,6 +53,7 @@ class CreosonClient:
     def __init__(self, settings: Settings, transport: httpx.AsyncBaseTransport | None = None):
         self.settings = settings
         self.session_id: str | None = None
+        self.version_warning: str | None = None
         self._http = httpx.AsyncClient(timeout=settings.timeout, transport=transport)
         self._lock = asyncio.Lock()
 
@@ -84,8 +85,14 @@ class CreosonClient:
         if status.get("error") or not resp.get("sessionId"):
             raise CreosonError(with_hint(status.get("message") or "connect returned no sessionId"), "connection", "connect")
         self.session_id = resp["sessionId"]
+        self.version_warning = None
         if self.settings.creo_version:
-            await self._request("creo", "set_creo_version", {"version": self.settings.creo_version})
+            try:
+                await self._request("creo", "set_creo_version", {"version": self.settings.creo_version})
+            except CreosonError as exc:
+                # Sitzung trotzdem nutzen; nur Funktionen wie suppress/regenerate können dann scheitern.
+                self.version_warning = f"set_creo_version({self.settings.creo_version}) failed: {exc.message}"
+                log.warning(self.version_warning)
 
     async def _request(self, command: str, function: str, data: dict[str, Any] | None) -> dict[str, Any]:
         payload: dict[str, Any] = {"command": command, "function": function}

@@ -53,3 +53,11 @@ async def test_doctor_windows_checks_use_probes(mock):
     assert "Creo 12.4.4.0" in _by_name(checks, "Creo installation").detail
     vb = _by_name(checks, "VB API")
     assert vb.ok is False and "vb_api_register.bat" in vb.hint
+
+
+async def test_doctor_survives_failing_creo_call(mock):
+    mock.state.fail_functions[("creo", "pwd")] = "XToolkitGeneralError"
+    settings = Settings(creoson_url=mock.url)
+    checks = await run_diagnostics(settings, CreosonClient(settings), platform="linux")
+    check = _by_name(checks, "Creo connection")
+    assert check.ok is False and "XToolkitGeneralError" in check.detail

@@ -23,6 +23,16 @@ class ParamSpec:
     type: str
     description: str = ""
     default: str | None = None
+    required: bool = False
+    valid_values: tuple[str, ...] = ()
+
+    def enum(self) -> tuple[str, ...]:
+        """Erlaubte Werte – nur wenn die Liste aus einfachen Wörtern besteht (keine Beschreibungen) und Text-Typ."""
+        if self.type != "string" or not self.valid_values:
+            return ()
+        if any(" " in v for v in self.valid_values):
+            return ()
+        return self.valid_values
 
 
 @dataclass(frozen=True)
@@ -55,6 +65,8 @@ def _params(raw: list[dict[str, Any]] | None) -> tuple[ParamSpec, ...]:
             type=p.get("type", ""),
             description=p.get("description", ""),
             default=p.get("default"),
+            required=bool(p.get("required")),
+            valid_values=tuple(v.strip() for v in str(p.get("valid_values") or "").split(",") if v.strip()),
         )
         for p in raw or []
     )
@@ -143,17 +155,37 @@ class FunctionCatalog:
         spec = self.get(command, function)
         if spec is None:
             return [self.unknown_function_hint(command, function)]
+        data = data or {}
+        problems = [
+            f"Parameter '{p.name}' is required for {spec.qualified_name}."
+            for p in spec.request
+            if p.required and data.get(p.name) is None
+        ]
+        problems += self._check_fields(spec.qualified_name, spec.request, data)
+        return problems
+
+    def _check_fields(self, where: str, fields: tuple[ParamSpec, ...], data: dict[str, Any]) -> list[str]:
         problems: list[str] = []
-        known = {p.name: p for p in spec.request}
-        for key, value in (data or {}).items():
+        known = {p.name: p for p in fields}
+        for key, value in data.items():
             param = known.get(key)
             if param is None:
                 allowed = ", ".join(known) or "(none)"
-                problems.append(f"Unknown parameter '{key}' for {spec.qualified_name}. Allowed: {allowed}.")
-            elif not _type_ok(param.type, value):
-                problems.append(
-                    f"Parameter '{key}' of {spec.qualified_name} must be of type {param.type}, got {value!r}."
-                )
+                problems.append(f"Unknown parameter '{key}' for {where}. Allowed: {allowed}.")
+                continue
+            if not _type_ok(param.type, value):
+                problems.append(f"Parameter '{key}' of {where} must be of type {param.type}, got {value!r}.")
+                continue
+            enum = param.enum()
+            if enum and isinstance(value, str) and value.lower() not in {e.lower() for e in enum}:
+                problems.append(f"Parameter '{key}' of {where} must be one of {', '.join(enum)}; got {value!r}.")
+            if ":" in param.type and value is not None:
+                obj = self.get_object(param.type.split(":", 1)[1])
+                if obj is not None:
+                    items = value if isinstance(value, list) else [value]
+                    for item in items:
+                        if isinstance(item, dict):
+                            problems += self._check_fields(f"{where}.{key}", obj.fields, item)
         return problems
 
     def describe(self, command: str, function: str) -> str:

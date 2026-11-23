@@ -105,3 +105,17 @@ def test_calls_are_logged_for_assertions(mock):
     _call(mock.url, sid, "creo", "set_creo_version", {"version": 12})
     assert ("creo", "set_creo_version") in [(c[0], c[1]) for c in mock.state.calls]
     assert mock.state.creo_versions[sid] == 12
+
+
+def test_mock_enforces_creoson_spec(mock):
+    sid = _session(mock.url)
+    res = _call(mock.url, sid, "interface", "export_file", {"type": "STL"})
+    assert res["status"]["error"] is True
+    assert "Spec violation" in res["status"]["message"]
+
+
+def test_mock_can_simulate_failures(mock):
+    sid = _session(mock.url)
+    mock.state.fail_functions[("creo", "pwd")] = "XToolkitGeneralError"
+    res = _call(mock.url, sid, "creo", "pwd")
+    assert res["status"]["error"] is True and "XToolkitGeneralError" in res["status"]["message"]

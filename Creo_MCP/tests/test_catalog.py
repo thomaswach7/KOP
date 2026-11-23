@@ -46,3 +46,27 @@ def test_object_types_are_described():
     obj = cat.get_object("FeatureData")
     assert obj is not None
     assert "feat_id" in [f.name for f in obj.fields]
+
+
+def test_validate_rejects_invalid_enum_value():
+    problems = FunctionCatalog.load().validate("interface", "export_file", {"type": "STL"})
+    assert any("STL" in p and "STEP" in p for p in problems)
+
+
+def test_validate_enum_is_case_insensitive():
+    assert FunctionCatalog.load().validate("interface", "export_file", {"type": "step"}) == []
+
+
+def test_validate_reports_missing_required_parameter():
+    problems = FunctionCatalog.load().validate("interface", "export_file", {})
+    assert any("type" in p and "required" in p for p in problems)
+
+
+def test_validate_checks_nested_object_values():
+    data = {"model_view": "FRONT", "point": {"x": 1.0, "y": 2.0}, "display_data": {"style": "shading"}}
+    problems = FunctionCatalog.load().validate("drawing", "create_gen_view", data)
+    assert any("shading" in p and "shaded" in p for p in problems)
+
+
+def test_descriptive_value_lists_are_not_enforced():
+    assert FunctionCatalog.load().validate("interface", "export_pdf", {"sheet_range": "1-2"}) == []

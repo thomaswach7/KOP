@@ -109,8 +109,18 @@ async def run_diagnostics(
 
     if running is not None:
         if running:
-            pwd = await client.call("creo", "pwd")
-            checks.append(Check("Creo connection", True, f"Creo connected, working directory {pwd.get('dirname')}"))
+            try:
+                pwd = await client.call("creo", "pwd")
+                checks.append(Check("Creo connection", True, f"Creo connected, working directory {pwd.get('dirname')}"))
+            except CreoMCPError as exc:
+                checks.append(
+                    Check(
+                        "Creo connection",
+                        False,
+                        f"Creo is running but does not answer properly: {exc}",
+                        "Close open dialogs in Creo; if it persists, restart Creo via nitro_proe_remote.bat.",
+                    )
+                )
         else:
             checks.append(
                 Check(
@@ -122,9 +132,11 @@ async def run_diagnostics(
                     "cannot be reached (PRO_COMM_MSG_EXE missing).",
                 )
             )
+    if client.version_warning:
+        checks.append(Check("Creo version", False, client.version_warning, "Update CREOSON to 3.0.x or set CREO_VERSION=0 to skip."))
     checks.append(
         Check(
-            "Creo version",
+            "Creo version setting",
             settings.creo_version is not None,
             f"set_creo_version({settings.creo_version})" if settings.creo_version else "not set",
             "" if settings.creo_version else "Set CREO_VERSION=12, otherwise suppress/resume/delete/regenerate can fail.",

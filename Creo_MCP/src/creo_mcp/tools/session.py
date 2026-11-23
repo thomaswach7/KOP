@@ -26,7 +26,7 @@ async def status_markdown(ctx: ToolContext) -> str:
         ["CREOSON", s.creoson_url],
         ["CREOSON reachable", "yes" if running is not None else "NO – start CREOSON, then run creo_doctor"],
         ["Creo running", creo_state],
-        ["Creo version setting", s.creo_version or "not set"],
+        ["Creo version setting", f"FAILED – {ctx.client.version_warning}" if ctx.client.version_warning else (s.creo_version or "not set")],
         ["Working directory", (pwd or {}).get("dirname", "?")],
         ["Active model", (active or {}).get("file", "(none)")],
         ["Models in session", ", ".join((models or {}).get("files") or []) or "(none)"],

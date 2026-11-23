@@ -10,7 +10,8 @@ Kategorien:
 from __future__ import annotations
 
 import re
-from typing import Literal
+from collections.abc import Mapping
+from typing import Any, Literal
 
 from .config import Settings
 from .errors import SafetyError
@@ -81,8 +82,16 @@ def classify(command: str, function: str) -> Category:
     return "write"
 
 
-def guard_call(settings: Settings, command: str, function: str) -> None:
-    """Wirft SafetyError, wenn der Aufruf in der aktuellen Konfiguration nicht erlaubt ist."""
+def guard_call(settings: Settings, command: str, function: str, data: Mapping[str, Any] | None = None) -> None:
+    """Wirft SafetyError, wenn der Aufruf in der aktuellen Konfiguration nicht erlaubt ist.
+
+    Prüft auch den Inhalt: Mapkey-Skripte und Mapkey-Definitionen über set_config dürfen kein @SYSTEM enthalten.
+    """
+    data = data or {}
+    if (command, function) == ("interface", "mapkey"):
+        check_mapkey(str(data.get("script") or ""), settings.allow_system_mapkeys)
+    if (command, function) == ("creo", "set_config") and "mapkey" in str(data.get("name") or "").lower():
+        check_mapkey(str(data.get("value") or ""), settings.allow_system_mapkeys)
     category = classify(command, function)
     if settings.read_only and category in ("write", "dangerous"):
         raise SafetyError(

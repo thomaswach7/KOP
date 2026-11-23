@@ -33,6 +33,16 @@ class Constraint(BaseModel):
     offset: float | None = Field(None, description="Offset for offset constraints.")
 
 
+def _infer_type(value: object) -> str:
+    if isinstance(value, bool):
+        return "BOOL"
+    if isinstance(value, int):
+        return "INTEGER"
+    if isinstance(value, float):
+        return "DOUBLE"
+    return "STRING"
+
+
 def _bom_rows(node: dict[str, Any], depth: int, rows: list[list[Any]], counts: Counter[str]) -> None:
     for child in node.get("children") or []:
         counts[child.get("file", "?")] += 1
@@ -61,13 +71,17 @@ def register(server: MCPServer, ctx: ToolContext) -> None:
         name: Annotated[str, Field(description="Parameter name, e.g. 'BENENNUNG'.", min_length=1)],
         value: Annotated[str | float | int | bool | None, Field(description="New value (None clears it).")],
         file: Annotated[str | None, Field(description=FILE_HELP)] = None,
-        type: Annotated[Literal["STRING", "DOUBLE", "INTEGER", "BOOL", "NOTE"], Field(description="Parameter type.")] = "STRING",  # noqa: A002
+        type: Annotated[Literal["STRING", "DOUBLE", "INTEGER", "BOOL", "NOTE"] | None, Field(description="Parameter type. Default: keep the existing type, or infer it from the value for new parameters.")] = None,  # noqa: A002
         designate: Annotated[bool | None, Field(description="Designate for PDM/BOM (true/false); omit to keep.")] = None,
         description: Annotated[str | None, Field(description="Parameter description; omit to keep.")] = None,
         no_create: Annotated[bool, Field(description="Fail instead of creating a new parameter.")] = False,
     ) -> str:
         """Create or change a model parameter (z. B. BENENNUNG, WERKSTOFF, POSITION)."""
         model = await ctx.ensure_open(file)
+        if type is None:
+            existing = (await ctx.call("parameter", "list", {"file": model, "name": name})).get("paramlist") or []
+            match = next((p for p in existing if str(p.get("name", "")).upper() == name.upper()), None)
+            type = match.get("type") if match else _infer_type(value)  # noqa: A001
         await ctx.call(
             "parameter",
             "set",

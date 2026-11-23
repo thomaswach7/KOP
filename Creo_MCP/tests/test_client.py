@@ -59,3 +59,14 @@ async def test_version_call_skipped_when_disabled(mock):
     await client.call("creo", "pwd")
     assert ("creo", "set_creo_version") not in [(c[0], c[1]) for c in mock.state.calls]
     await client.aclose()
+
+
+async def test_version_failure_does_not_block_the_session(mock, settings):
+    mock.state.fail_functions[("creo", "set_creo_version")] = "Invalid function: set_creo_version"
+    client = CreosonClient(settings)
+    assert (await client.call("creo", "pwd"))["dirname"]
+    assert "set_creo_version" in (client.version_warning or "")
+    connects = [c for c in mock.state.calls if c[:2] == ("connection", "connect")]
+    await client.call("creo", "pwd")
+    assert len([c for c in mock.state.calls if c[:2] == ("connection", "connect")]) == len(connects)
+    await client.aclose()

@@ -99,3 +99,19 @@ async def test_tree_to_dict_is_json_ready(client):
     json.dumps(d)
     assert d["root"]["name"] == "abtriebsnabe.prt"
     assert d["node_count"] == result.node_count
+
+
+async def test_components_inside_a_pattern_are_expanded(client, mock):
+    from creo_mcp.mock.state import MFeature
+
+    asm = mock.state.session["fliehkraftkupplung.asm"]
+    for f in asm.features:
+        if f.component == "scheibe.prt":
+            f.pattern = "Muster_Scheiben"
+    index = next(i for i, f in enumerate(asm.features) if f.component == "scheibe.prt")
+    asm.features.insert(index, MFeature(49, "Muster_Scheiben", "PATTERN HEAD"))
+    result = await build_model_tree(client.call)
+    pattern = _find(result.root, lambda n: n.kind == "pattern" and n.name == "Muster_Scheiben")
+    assert [c.kind for c in pattern.children] == ["component", "component"]
+    assert pattern.children[0].file == "scheibe.prt"
+    assert _find(pattern.children[0], lambda n: n.name == "Scheibe") is not None

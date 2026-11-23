@@ -13,14 +13,14 @@ from ..mapkeys import normalize_mapkey
 from ..safety import check_mapkey
 from .common import DESTRUCTIVE, FILE_HELP, SESSION, WRITE, ToolContext
 
-ExportFormat = Literal["PDF", "3DPDF", "STEP", "IGES", "DXF", "STL", "VRML", "NEUTRAL", "JPEG", "TIFF", "BMP", "EPS"]
+ExportFormat = Literal["PDF", "3DPDF", "STEP", "IGES", "DXF", "VRML", "NEUTRAL", "PV", "JPEG", "TIFF", "BMP", "EPS"]
 _IMAGE = {"JPEG", "TIFF", "BMP", "EPS"}
 
 
 def register(server: MCPServer, ctx: ToolContext) -> None:
-    @server.tool(name="creo_export", title="Export (PDF, STEP, DXF, STL, image)", annotations=SESSION, structured_output=False)
+    @server.tool(name="creo_export", title="Export (PDF, STEP, DXF, IGES, image)", annotations=SESSION, structured_output=False)
     async def creo_export(
-        format: Annotated[ExportFormat, Field(description="Target format. Drawings: PDF/DXF. Parts/assemblies: STEP/IGES/STL/VRML/NEUTRAL/3DPDF/images.")],  # noqa: A002
+        format: Annotated[ExportFormat, Field(description="Target format. Drawings: PDF/DXF. Parts/assemblies: STEP/IGES/VRML/NEUTRAL/PV/3DPDF/images. STL is not offered by CREOSON (use a recorded Save-As mapkey).")],  # noqa: A002
         file: Annotated[str | None, Field(description=FILE_HELP + " Drawings: e.g. 'abtriebsnabe.drw'.")] = None,
         filename: Annotated[str | None, Field(description="Output file name. Default: model name + extension.")] = None,
         dirname: Annotated[str | None, Field(description="Output folder. Default: working directory.")] = None,

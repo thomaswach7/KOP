@@ -176,3 +176,49 @@ async def test_doctor_tool(mcp_client):
 async def test_feature_relations_needs_windows(mcp_client):
     res = await mcp_client.call_tool("creo_feature_relations", {"file": "abtriebsnabe.prt", "feat_id": 40})
     assert res.is_error and "Windows" in _text(res)
+
+
+async def test_export_offers_only_supported_formats(mcp_client, mock):
+    bad = await mcp_client.call_tool("creo_export", {"file": "abtriebsnabe.prt", "format": "STL"})
+    assert bad.is_error
+    ok = await mcp_client.call_tool("creo_export", {"file": "abtriebsnabe.prt", "format": "PV"})
+    assert not ok.is_error, _text(ok)
+
+
+async def test_drawing_view_with_shaded_style(mcp_client):
+    await mcp_client.call_tool("creo_create_drawing", {"model": "abtriebsnabe.prt", "template": "a3_iso"})
+    res = await mcp_client.call_tool(
+        "creo_add_drawing_view",
+        {"drawing": "abtriebsnabe.drw", "view_name": "ISO", "model_view": "DEFAULT", "x": 300, "y": 200, "style": "shaded"},
+    )
+    assert not res.is_error, _text(res)
+
+
+async def test_scale_view_requires_a_view_name(mcp_client):
+    await mcp_client.call_tool("creo_create_drawing", {"model": "abtriebsnabe.prt", "template": "a3_iso"})
+    res = await mcp_client.call_tool("creo_edit_drawing", {"drawing": "abtriebsnabe.drw", "action": "scale_view", "scale": 0.5})
+    assert res.is_error and "view" in _text(res)
+
+
+async def test_set_parameter_keeps_or_infers_type(mcp_client, mock):
+    model = mock.state.session["abtriebsnabe.prt"]
+    model.params["GEWICHT"] = {"type": "DOUBLE", "value": 2.5, "designate": False, "description": ""}
+    await mcp_client.call_tool("creo_set_parameter", {"file": "abtriebsnabe.prt", "name": "GEWICHT", "value": 1.5})
+    assert model.params["GEWICHT"]["type"] == "DOUBLE"
+    await mcp_client.call_tool("creo_set_parameter", {"file": "abtriebsnabe.prt", "name": "ANZAHL", "value": 3})
+    assert model.params["ANZAHL"]["type"] == "INTEGER"
+
+
+async def test_generic_call_blocks_system_mapkey_definition(mcp_client):
+    res = await mcp_client.call_tool(
+        "creo_call", {"command": "creo", "function": "set_config", "data": {"name": "mapkey", "value": "zz @SYSTEMdel x;"}}
+    )
+    assert res.is_error and "@SYSTEM" in _text(res)
+
+
+async def test_status_shows_version_warning(mock):
+    mock.state.fail_functions[("creo", "set_creo_version")] = "Invalid function: set_creo_version"
+    server = build_server(_settings(mock), CreosonClient(_settings(mock)))
+    async with Client(server) as c:
+        text = _text(await c.call_tool("creo_status", {}))
+    assert "FAILED" in text

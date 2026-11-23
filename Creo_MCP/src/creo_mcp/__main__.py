@@ -76,6 +76,18 @@ def _cmd_doctor(args: argparse.Namespace) -> None:
     print(asyncio.run(run()))
 
 
+_SUBCOMMANDS = {"serve", "demo", "mock", "doctor"}
+
+
+def normalize_argv(argv: list[str]) -> list[str]:
+    """Ohne Unterbefehl gilt `serve` (auch wenn nur Optionen wie --transport angegeben sind)."""
+    if not argv:
+        return ["serve"]
+    if argv[0] in _SUBCOMMANDS or argv[0] in ("-h", "--help"):
+        return list(argv)
+    return ["serve", *argv]
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="creo-mcp", description=f"MCP-Server für PTC Creo Parametric (v{__version__})")
     sub = parser.add_subparsers(dest="command")
@@ -103,9 +115,7 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> None:
     _logging()
     parser = build_parser()
-    args = parser.parse_args(argv)
-    if not getattr(args, "func", None):
-        args = parser.parse_args(["serve", *(argv or sys.argv[1:])])
+    args = parser.parse_args(normalize_argv(sys.argv[1:] if argv is None else argv))
     args.func(args)
 
 

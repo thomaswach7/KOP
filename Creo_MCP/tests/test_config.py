@@ -22,3 +22,16 @@ def test_flags_from_env():
 
 def test_creo_version_zero_disables_version_call():
     assert Settings.from_env({"CREO_VERSION": "0"}).creo_version is None
+
+
+def test_empty_values_fall_back_to_defaults():
+    s = Settings.from_env({"CREO_MCP_TIMEOUT": "", "CREO_VERSION": " ", "CREO_MCP_MAX_TREE_NODES": ""})
+    assert s.timeout == 120.0 and s.creo_version == 12 and s.max_tree_nodes == 400
+
+
+def test_invalid_number_names_the_variable():
+    import pytest
+
+    with pytest.raises(ValueError) as exc:
+        Settings.from_env({"CREO_MCP_TIMEOUT": "abc"})
+    assert "CREO_MCP_TIMEOUT" in str(exc.value)

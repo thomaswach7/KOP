@@ -48,7 +48,7 @@ def register(server: MCPServer, ctx: ToolContext) -> None:
         model: Annotated[str | None, Field(description="Model shown in a general view. Default: the drawing's current model.")] = None,
         sheet: Annotated[int | None, Field(description="Sheet number. Default: current sheet.", ge=1)] = None,
         scale: Annotated[float | None, Field(description="View scale for general views. Default: sheet scale.", gt=0)] = None,
-        style: Annotated[Literal["default", "wireframe", "hidden_line", "no_hidden", "shading"] | None, Field(description="Display style.")] = None,
+        style: Annotated[Literal["default", "follow_environment", "wireframe", "hidden_line", "no_hidden", "shaded"] | None, Field(description="Display style.")] = None,
     ) -> str:
         """Place a general or projection view on a drawing sheet."""
         point = {"x": x, "y": y}
@@ -122,7 +122,7 @@ def register(server: MCPServer, ctx: ToolContext) -> None:
             need(sheet=sheet, scale=scale)
             await ctx.call("drawing", "scale_sheet", {**base, "sheet": sheet, "scale": scale})
         elif action == "scale_view":
-            need(scale=scale)
+            need(view=view, scale=scale)
             await ctx.call("drawing", "scale_view", {**base, "view": view, "scale": scale})
         elif action == "move_view":
             need(view=view, x=x, y=y)

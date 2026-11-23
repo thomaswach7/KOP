@@ -21,7 +21,7 @@ Claude ──MCP (stdio)── creo-mcp (Python) ──HTTP/JSON── CREOSON (
 | Neues Teil/Baugruppe aus Vorlage | ✅ | `creo_new_model` |
 | Komponente einbauen | ⚠️ nur Koordinatensystem→Koordinatensystem oder feste Lage | `creo_assemble_component` |
 | Zeichnung anlegen, Ansichten, Blätter, Maßstab, PDF/DXF | ✅ | `creo_create_drawing`, `creo_add_drawing_view`, `creo_export` |
-| STEP/IGES importieren und exportieren | ✅ | `creo_import_geometry`, `creo_export` |
+| STEP/IGES importieren und exportieren | ✅ (STL bietet CREOSON nicht – per aufgezeichnetem „Speichern unter“-Mapkey) | `creo_import_geometry`, `creo_export` |
 | Jede CREOSON-Funktion (Familientabellen, Layer, Notizen, Windchill …) | ✅ | `creo_call` |
 | Jeder Menübefehl (Mapkey) | ✅ technisch, Rezepte müssen in Creo 12 aufgezeichnet werden | `creo_run_mapkey` |
 | Skizzen-KEs (Extrudieren/Drehen) **direkt** per API anlegen | ❌ nur mit kostenpflichtiger Toolkit-Lizenz – Ausweg: Mapkeys oder STEP-Import | – |
@@ -140,7 +140,7 @@ Hinweis: Ein Mapkey kann andere, in deiner `config.pro` definierte Mapkeys aufru
 
 ```bash
 pip install -e ".[dev]"
-pytest                      # 92 Tests gegen den simulierten CREOSON-Server
+pytest                      # 116 Tests gegen den simulierten CREOSON-Server (prüft jede Anfrage gegen die CREOSON-Spezifikation)
 python -m creo_mcp mock     # nur den simulierten CREOSON-Server auf Port 9056 starten
 ```
 

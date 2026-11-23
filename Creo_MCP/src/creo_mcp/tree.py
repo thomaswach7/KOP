@@ -175,14 +175,7 @@ class _Builder:
                 break
             ftype = str(feat.get("type", ""))
             if ftype == "COMPONENT":
-                node = self._node(feat, "component")
-                child_bom = bom_children.get(int(fid)) if fid is not None else None
-                if child_bom is not None:
-                    node.file = child_bom.get("file") or node.file
-                can_expand = self.expand_components and (self.max_depth is None or depth + 1 < self.max_depth)
-                if can_expand and node.file:
-                    node.children = await self.expand(node.file, child_bom, depth + 1)
-                nodes.append(node)
+                nodes.append(await self._component(feat, bom_children, depth))
                 continue
             kind = _head_kind(ftype) if fid is not None and int(fid) in head_members else None
             node = self._node(feat, kind or "feature")
@@ -192,9 +185,24 @@ class _Builder:
                         continue
                     if not self._take():
                         break
-                    node.children.append(self._node(member, "feature"))
+                    if member.get("type") == "COMPONENT":
+                        node.children.append(await self._component(member, bom_children, depth))
+                    else:
+                        node.children.append(self._node(member, "feature"))
             nodes.append(node)
         return nodes
+
+    async def _component(self, feat: dict[str, Any], bom_children: dict[int, dict[str, Any]], depth: int) -> TreeNode:
+        """Komponenten-KE als Knoten; Inhalt (KEs/Unterkomponenten) wird rekursiv eingehängt."""
+        node = self._node(feat, "component")
+        fid = feat.get("feat_id")
+        child_bom = bom_children.get(int(fid)) if fid is not None else None
+        if child_bom is not None:
+            node.file = child_bom.get("file") or node.file
+        can_expand = self.expand_components and (self.max_depth is None or depth + 1 < self.max_depth)
+        if can_expand and node.file:
+            node.children = await self.expand(node.file, child_bom, depth + 1)
+        return node
 
 
 async def build_model_tree(

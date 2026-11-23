@@ -8,6 +8,7 @@ import uuid
 from collections.abc import Callable
 from typing import Any
 
+from ..catalog import FunctionCatalog
 from .state import DATUM_TYPES, MDrawing, MFeature, MModel, MockCreo, MView, norm_dir
 
 
@@ -43,6 +44,11 @@ def handle_request(state: MockCreo, payload: dict[str, Any]) -> dict[str, Any]:
         return _error("No session found")
     if not state.creo_running and command not in _NO_CREO_NEEDED and (command, function) != ("creo", "set_creo_version"):
         return _error("Unable to connect to Creo through J-Link")
+    if (command, function) in state.fail_functions:
+        return _error(state.fail_functions[(command, function)])
+    problems = FunctionCatalog.load().validate(command, function, data)
+    if problems:
+        return _error("Spec violation: " + " ".join(problems))
     fn = _HANDLERS.get((command, function))
     if fn is None:
         return _error(f"Function {command}.{function} is not simulated in the CREOSON mock")
@@ -730,7 +736,7 @@ def _export(state: MockCreo, data: dict[str, Any], kind: str, ext: str) -> dict[
     return {"dirname": dirname, "filename": filename}
 
 
-_EXT = {"STEP": "stp", "IGES": "igs", "DXF": "dxf", "STL": "stl", "VRML": "wrl", "NEUTRAL": "neu", "PV": "pvz", "CATIAV5": "catpart"}
+_EXT = {"STEP": "stp", "IGES": "igs", "DXF": "dxf", "VRML": "wrl", "NEUTRAL": "neu", "PV": "pvz"}
 
 
 @handler("interface", "export_file")
