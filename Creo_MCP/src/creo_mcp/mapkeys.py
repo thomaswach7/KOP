@@ -33,6 +33,32 @@ def normalize_mapkey(script: str) -> str:
     return "".join(pieces)
 
 
+_ANY_DEFINITION = re.compile(r"^mapkey\s+(\S+)", re.IGNORECASE)
+
+
+def parse_config_mapkeys(text: str) -> dict[str, str]:
+    """Alle Mapkeys aus einer config.pro: {Tastenfolge: Makro für CREOSON}.
+
+    Eine Definition beginnt mit 'mapkey <taste> …' und geht mit 'mapkey(continued) …' weiter. Kommt eine Taste
+    mehrfach vor, gilt wie in Creo die letzte Definition.
+    """
+    blocks: dict[str, list[str]] = {}
+    current: str | None = None
+    for raw_line in text.replace("\r\n", "\n").split("\n"):
+        line = raw_line.strip()
+        if _CONTINUED.match(line):
+            if current is not None:
+                blocks[current].append(line)
+            continue
+        match = _ANY_DEFINITION.match(line)
+        if match:
+            current = match.group(1)
+            blocks[current] = [line]
+        else:
+            current = None
+    return {key: normalize_mapkey("\n".join(lines)) for key, lines in blocks.items()}
+
+
 def command(name: str, *args: str) -> str:
     """Baustein für einen Creo-Befehl, z. B. command("ProCmdModelSave")."""
     if not args:

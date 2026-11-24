@@ -7,6 +7,8 @@ Die gleiche Anleitung gibt es als PDF: `Modellbaum_Einzelteile.pdf` (eine Seite 
 
 > **Nur Abtriebsnabe (Pos. 2), von Anfang an:** `Anleitung_Abtriebsnabe.pdf` bzw. [`Anleitung_Abtriebsnabe.md`](Anleitung_Abtriebsnabe.md) – mit bemaßten Skizzen für Passfedernut, Bohrung mit Stirnsenkung und Muster.
 
+> **Abtriebsnabe automatisch in Creo bauen (Creo-MCP):** [`Mapkeys_Abtriebsnabe.md`](Mapkeys_Abtriebsnabe.md) – Mapkeys `ke1` … `ke8` aufnehmen, dann baut `Skripte/abtriebsnabe_mapkeys.py` das Teil neu und prüft nach jedem KE das Volumen.
+
 Ich habe jede Anleitung mit einem Skript Schritt für Schritt nachgebaut (`Skripte/replay.py`). Die Sollvolumen stammen aus diesem Nachbau.
 
 ## Grundregeln
