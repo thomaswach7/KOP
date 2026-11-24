@@ -27,7 +27,9 @@ ANDERE_REIHENFOLGE = [("Drehen", 356379), ("Profil (Nut)", 354875), ("Bohrung", 
 SCHRITTE = [
  ("Schritt 0 – Neues Teil anlegen", [
   "Datei → Neu → Typ „Teil“, Untertyp „Volumenkörper“ → Name POS02_ABTRIEBSNABE.",
-  "Haken bei „Standardvorlage verwenden“ entfernen → OK → Vorlage mmns_part_solid_abs → OK (Einheit mm).",
+  "Haken bei „Standardvorlage verwenden“ entfernen → OK → Vorlage standard_part (HTL-Vorlage, Einheit mm) → OK. "
+  "Steht sie nicht in der Liste: Durchsuchen → C:\\PTC\\admCreo12HTL\\bibliothek\\Vorlagen\\standard_part.prt.",
+  "! Nicht mmns_part_solid_abs: Dort fehlt die Achse A_X (für KE 7 und 8).",
   "Im Modellbaum stehen jetzt RECHTS, OBEN, VORNE, die Achsen A_X, A_Y, A_Z und BASIS.",
   "> Lage im Raum: Die Drehachse ist A_X. Die Stirnfläche der Nabe liegt auf RECHTS (x = 0), die Flanschseite zeigt nach +x.",
  ], None, None),
@@ -110,6 +112,7 @@ SCHRITTE = [
 ]
 
 FEHLER = [
+ ("Ebenen heißen RIGHT/TOP/FRONT, A_X fehlt", "Falsche Vorlage (mmns_part_solid_abs). Teil neu mit der HTL-Vorlage standard_part anlegen."),
  ("Volumen nach KE 1 stimmt nicht",
   "Freistiche F2 / F3 fehlen, die 5°-Schräge liegt falsch herum (Ø85,3 gehört ans Ende bei 72) oder ein Ø wurde als Radius bemaßt."),
  ("Volumen nach KE 6 unverändert (362.289)", "Die Nut wurde aus dem Teil hinaus extrudiert: Richtung umdrehen."),
@@ -173,7 +176,7 @@ def md():
     L += ["## Häufige Fehler", "", "| Fehlerbild | Ursache / Abhilfe |", "|---|---|"] + [f"| {a} | {b} |" for a, b in FEHLER] + [""]
     L += ["## Volumen bei anderer Reihenfolge (Nut und Bohrungen vor den Rundungen)", "", "| Schritt | Volumen danach |", "|---|---|"]
     L += [f"| {a} | {vt(v)} |" for a, v in ANDERE_REIHENFOLGE] + [""]
-    open("Anleitung_Abtriebsnabe.md", "w").write("\n".join(L) + "\n")
+    open("Anleitung_Abtriebsnabe.md", "w", encoding="utf-8").write("\n".join(L) + "\n")
 
 
 if __name__ == "__main__":

@@ -22,7 +22,8 @@ Nach jedem KE steht das Volumen, das du dann haben musst (Analyse → Masseneige
 ## Schritt 0 – Neues Teil anlegen
 
 - Datei → Neu → Typ „Teil“, Untertyp „Volumenkörper“ → Name POS02_ABTRIEBSNABE.
-- Haken bei „Standardvorlage verwenden“ entfernen → OK → Vorlage mmns_part_solid_abs → OK (Einheit mm).
+- Haken bei „Standardvorlage verwenden“ entfernen → OK → Vorlage standard_part (HTL-Vorlage, Einheit mm) → OK. Steht sie nicht in der Liste: Durchsuchen → C:\PTC\admCreo12HTL\bibliothek\Vorlagen\standard_part.prt.
+- ⚠ Nicht mmns_part_solid_abs: Dort fehlt die Achse A_X (für KE 7 und 8).
 - Im Modellbaum stehen jetzt RECHTS, OBEN, VORNE, die Achsen A_X, A_Y, A_Z und BASIS.
 - ➜ Lage im Raum: Die Drehachse ist A_X. Die Stirnfläche der Nabe liegt auf RECHTS (x = 0), die Flanschseite zeigt nach +x.
 
@@ -158,6 +159,7 @@ Nach jedem KE steht das Volumen, das du dann haben musst (Analyse → Masseneige
 
 | Fehlerbild | Ursache / Abhilfe |
 |---|---|
+| Ebenen heißen RIGHT/TOP/FRONT, A_X fehlt | Falsche Vorlage (mmns_part_solid_abs). Teil neu mit der HTL-Vorlage standard_part anlegen. |
 | Volumen nach KE 1 stimmt nicht | Freistiche F2 / F3 fehlen, die 5°-Schräge liegt falsch herum (Ø85,3 gehört ans Ende bei 72) oder ein Ø wurde als Radius bemaßt. |
 | Volumen nach KE 6 unverändert (362.289) | Die Nut wurde aus dem Teil hinaus extrudiert: Richtung umdrehen. |
 | Eine Bohrung liegt genau über der Nut | In KE 7 fehlt der Winkel 30° (Typ „Linear“ oder Winkel 0 zu VORNE). |
