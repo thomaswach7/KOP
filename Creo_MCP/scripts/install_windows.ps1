@@ -146,6 +146,17 @@ if ($isAdmin) {
   Write-Host "  New-NetFirewallRule -DisplayName '$fwName' -Direction Inbound -Protocol TCP -LocalPort $Port -Action Block"
 }
 
+Step "VB API registrieren (optional, für Eltern/Kind-Beziehungen der KEs)"
+$vbReg = if ($creo) { Join-Path $creo.FullName "Parametric\bin\vb_api_register.bat" } else { $null }
+if ($vbReg -and (Test-Path $vbReg) -and $isAdmin) {
+  & cmd.exe /c "`"$vbReg`""
+  if ($LASTEXITCODE -eq 0) { Write-Host "VB API registriert." } else { Write-Warning "vb_api_register.bat meldete Fehler $LASTEXITCODE - creo_feature_relations ist dann nicht verfügbar." }
+} elseif ($vbReg -and (Test-Path $vbReg)) {
+  Write-Host "Für die VB API dieses Skript als Administrator ausführen (oder einmal '$vbReg' als Administrator starten)."
+} else {
+  Write-Host "vb_api_register.bat nicht gefunden - VB API wird übersprungen (alle anderen Werkzeuge funktionieren)."
+}
+
 Step "Fertig - nächste Schritte"
 Write-Host "1. CREOSON starten:   $CreosonDir\creoson_run.bat   (Fenster offen lassen)"
 Write-Host "2. Creo starten:      $CreosonDir\nitro_proe_remote.bat"

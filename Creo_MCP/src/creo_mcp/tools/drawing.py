@@ -16,8 +16,8 @@ DRAWING_HELP = "Drawing name incl. .drw, e.g. 'abtriebsnabe.drw'. Default: the a
 def register(server: MCPServer, ctx: ToolContext) -> None:
     @server.tool(name="creo_create_drawing", title="Create drawing", annotations=WRITE, structured_output=False)
     async def creo_create_drawing(
-        template: Annotated[str, Field(description="Creo drawing template name, e.g. 'a3_drawing' or your school template (without .drw).", min_length=1)],
         model: Annotated[str | None, Field(description="Model to document, e.g. 'abtriebsnabe.prt'. Default: active model.")] = None,
+        template: Annotated[str | None, Field(description="Creo drawing template name without .drw. Default: CREO_DRAWING_TEMPLATE (a3_drawing, Creo standard A3).")] = None,
         drawing: Annotated[str | None, Field(description="Name of the new drawing. Default: model name + .drw.")] = None,
         scale: Annotated[float, Field(description="Sheet scale, e.g. 1.0 for 1:1, 0.5 for 1:2.", gt=0)] = 1.0,
         sheet_format: Annotated[str | None, Field(description="Optional format file (.frm) for sheet 1, e.g. 'a3_iso'.")] = None,
@@ -26,6 +26,7 @@ def register(server: MCPServer, ctx: ToolContext) -> None:
         """Create a new drawing (Zeichnung) for a model from a template and show it. Then add views with
         creo_add_drawing_view and export with creo_export(format='PDF')."""
         name = await ctx.ensure_open(model)
+        template = template or ctx.settings.drawing_template
         data = await ctx.call(
             "drawing",
             "create",

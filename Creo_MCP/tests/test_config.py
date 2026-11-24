@@ -35,3 +35,8 @@ def test_invalid_number_names_the_variable():
     with pytest.raises(ValueError) as exc:
         Settings.from_env({"CREO_MCP_TIMEOUT": "abc"})
     assert "CREO_MCP_TIMEOUT" in str(exc.value)
+
+
+def test_drawing_template_default_and_override():
+    assert Settings.from_env({}).drawing_template == "a3_drawing"
+    assert Settings.from_env({"CREO_DRAWING_TEMPLATE": "schule_a3"}).drawing_template == "schule_a3"

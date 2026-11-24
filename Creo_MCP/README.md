@@ -43,6 +43,8 @@ Claude Desktop oder Claude Code.
    - setzt `PRO_COMM_MSG_EXE` für deinen Benutzer,
    - trägt `creo` in `%APPDATA%\Claude\claude_desktop_config.json` ein (Sicherung `.bak`).
 
+   Am besten in einer **PowerShell als Administrator** ausführen: Dann setzt das Skript zusätzlich die Firewall-Regel für
+   CREOSON und registriert die VB API (für `creo_feature_relations`).
    Optionen: `-WorkDir "D:\Schule\Creo"` (Creo-Arbeitsverzeichnis), `-CreosonDir` (ohne Leerzeichen!), `-SkipCreoson`, `-SkipClaudeConfig`, `-NoUserEnv`.
 2. **CREOSON starten:** `C:\Creoson_<Benutzername>\creoson_run.bat` (Fenster offen lassen).
    Alternativ `CreosonSetup.exe` → Creo-Ordner `…\Creo 12.x\Common Files` wählen → „Start CREOSON“.
@@ -138,6 +140,7 @@ erreicht (z. B. im Schulnetz), könnte Creo steuern – einschließlich Batch-Da
 | `CREO_MCP_TIMEOUT` | `120` | Sekunden pro Aufruf |
 | `CREO_START_DIR` / `CREO_START_COMMAND` | – / `nitro_proe_remote.bat` | für `creo_connect(start_creo=true)` |
 | `CREO_TEMPLATE_DIR` | automatisch gesucht | Ordner der Creo-Startvorlagen für `creo_new_model` |
+| `CREO_DRAWING_TEMPLATE` | `a3_drawing` | Zeichnungsvorlage für `creo_create_drawing` (Creo-Standard A3) |
 | `CREO_MCP_MAX_TREE_NODES` | `400` | Knotenlimit des Modellbaums |
 | `CREO_MCP_LOG_LEVEL` | `WARNING` | Log-Ausgabe auf stderr |
 
@@ -162,7 +165,7 @@ erreicht (z. B. im Schulnetz), könnte Creo steuern – einschließlich Batch-Da
 
 ```bash
 pip install -e ".[dev]"
-pytest                      # 123 Tests gegen den simulierten CREOSON-Server (prüft jede Anfrage gegen die CREOSON-Spezifikation)
+pytest                      # 125 Tests gegen den simulierten CREOSON-Server (prüft jede Anfrage gegen die CREOSON-Spezifikation)
 python -m creo_mcp mock     # nur den simulierten CREOSON-Server auf Port 9056 starten
 ```
 

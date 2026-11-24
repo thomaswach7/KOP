@@ -222,3 +222,10 @@ async def test_status_shows_version_warning(mock):
     async with Client(server) as c:
         text = _text(await c.call_tool("creo_status", {}))
     assert "FAILED" in text
+
+
+async def test_create_drawing_uses_default_a3_template(mcp_client, mock):
+    res = await mcp_client.call_tool("creo_create_drawing", {"model": "abtriebsnabe.prt"})
+    assert not res.is_error, _text(res)
+    data = [c[2] for c in mock.state.calls if c[:2] == ("drawing", "create")][-1]
+    assert data["template"] == "a3_drawing"
