@@ -6,6 +6,7 @@ import glob
 import importlib.metadata
 import os
 import platform as _platform
+import re
 import subprocess
 import sys
 from collections.abc import Mapping
@@ -24,12 +25,20 @@ class Check:
     hint: str = ""
 
 
+JLINK_JAR = os.path.join("Common Files", "text", "java", "pfcasync.jar")
+
+
+def _version_key(path: str) -> tuple[int, ...]:
+    return tuple(int(n) for n in re.findall(r"\d+", os.path.basename(path.rstrip("\\/"))))
+
+
 class Probes:
     """Systemabfragen (Windows). In Tests ersetzbar."""
 
     def creo_installs(self) -> list[str]:
+        """Creo-Installationen, älteste zuerst (Versionsnummern numerisch verglichen: 9 < 10 < 12)."""
         roots = glob.glob(r"C:\Program Files\PTC\Creo *") + glob.glob(r"C:\PTC\Creo *")
-        return sorted(r for r in roots if os.path.isfile(os.path.join(r, "Parametric", "bin", "parametric.exe")))
+        return sorted((r for r in roots if os.path.isfile(os.path.join(r, "Parametric", "bin", "parametric.exe"))), key=_version_key)
 
     def creo_process_running(self) -> bool | None:
         try:
@@ -156,6 +165,23 @@ async def run_diagnostics(
             "" if installs else "Install Creo Parametric or set CREO_TEMPLATE_DIR/CREO_START_DIR manually.",
         )
     )
+    if installs:
+        newest = installs[-1]
+        jar = os.path.join(newest, JLINK_JAR)
+        has_jar = probes.path_exists(jar)
+        label = os.path.basename(newest.rstrip("\\/"))
+        checks.append(
+            Check(
+                "J-Link for CREOSON (pfcasync.jar)",
+                has_jar,
+                jar if has_jar else f"missing in {label}",
+                ""
+                if has_jar
+                else "CREOSON stops with 'NoClassDefFoundError: com/ptc/cipjava/jxthrowable'. Add the Creo component "
+                "'Java Object Toolkit' (Creo setup.exe → Reconfigure → Creo Parametric → API Toolkits). It installs "
+                "Common Files\\text\\java\\pfcasync.jar and otk.jar.",
+            )
+        )
     proc = probes.creo_process_running()
     checks.append(Check("Creo process (xtop.exe)", proc, {True: "running", False: "not running", None: "unknown"}[proc]))
     msg_exe = env.get("PRO_COMM_MSG_EXE")

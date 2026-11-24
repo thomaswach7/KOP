@@ -10,7 +10,7 @@ from mcp.server.mcpserver import MCPServer
 from mcp.server.mcpserver.exceptions import ToolError
 from pydantic import Field
 
-from .common import DESTRUCTIVE, FILE_HELP, READ, SESSION, WRITE, ToolContext, ext_name, md_table
+from .common import DESTRUCTIVE, FILE_HELP, READ, SESSION, WRITE, ToolContext, clean_dirname, ext_name, md_table
 
 DEFAULT_TEMPLATES = {"part": "mmns_part_solid_abs.prt", "assembly": "mmns_asm_design_abs.asm"}
 
@@ -63,7 +63,7 @@ def register(server: MCPServer, ctx: ToolContext) -> None:
             "open",
             {"file": file, "dirname": dirname, "generic": generic, "display": display, "activate": activate, "new_window": new_window},
         )
-        return f"Opened {', '.join(data.get('files') or [file])} from {data.get('dirname', '?')} (revision {data.get('revision', '?')})."
+        return f"Opened {', '.join(data.get('files') or [file])} from {clean_dirname(data.get('dirname')) or '?'} (revision {data.get('revision', '?')})."
 
     @server.tool(name="creo_new_model", title="Create new part/assembly", annotations=WRITE, structured_output=False)
     async def creo_new_model(
@@ -92,7 +92,7 @@ def register(server: MCPServer, ctx: ToolContext) -> None:
         await ctx.call("file", "backup", {"file": target, "target_dir": pwd})
         await ctx.call("file", "erase", {"file": target})
         await ctx.call("file", "open", {"file": target, "dirname": pwd, "display": True, "activate": True})
-        return f"Created {target} from template {tpl} in {pwd} and opened it as active model."
+        return f"Created {target} from template {tpl} in {clean_dirname(pwd)} and opened it as active model."
 
     @server.tool(name="creo_save_model", title="Save model", annotations=WRITE, structured_output=False)
     async def creo_save_model(file: Annotated[str | None, Field(description=FILE_HELP)] = None) -> str:
@@ -137,7 +137,7 @@ def register(server: MCPServer, ctx: ToolContext) -> None:
         """Show file info (folder, revision), units, material and bounding box of a model."""
         name = await ctx.ensure_open(file)
         info = await ctx.call("file", "get_fileinfo", {"file": name})
-        rows = [["File", info.get("file")], ["Folder", info.get("dirname")], ["Revision", info.get("revision")]]
+        rows = [["File", info.get("file")], ["Folder", clean_dirname(info.get("dirname"))], ["Revision", info.get("revision")]]
         lu = await ctx.try_call("file", "get_length_units", {"file": name})
         mu = await ctx.try_call("file", "get_mass_units", {"file": name})
         rows.append(["Units", f"{(lu or {}).get('units', '?')} / {(mu or {}).get('units', '?')}"])

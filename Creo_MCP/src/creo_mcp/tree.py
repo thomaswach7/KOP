@@ -15,19 +15,12 @@ from dataclasses import asdict, dataclass, field
 from typing import Any, Literal
 
 from .errors import CreoMCPError
+from .feattypes import DATUM_TYPES, head_kind, is_component, is_datum, same_type
 
 CallFn = Callable[[str, str, dict[str, Any] | None], Awaitable[dict[str, Any]]]
 Kind = Literal["model", "feature", "component", "group", "pattern"]
 
-DATUM_TYPES = {
-    "COORDINATE SYSTEM",
-    "CURVE",
-    "DATUM AXIS",
-    "DATUM PLANE",
-    "DATUM POINT",
-    "DATUM QUILT",
-    "DATUM SURFACE",
-}
+__all__ = ["DATUM_TYPES", "TreeNode", "TreeResult", "build_model_tree", "render_tree_markdown", "tree_to_dict"]
 _SUPPRESSED = {"SUPPRESSED", "FAMILY_TABLE_SUPPRESSED", "SIMP_REP_SUPPRESSED", "PROGRAM_SUPPRESSED"}
 
 
@@ -51,17 +44,27 @@ class TreeResult:
     warnings: list[str]
 
 
-def _is_datum(type_name: str) -> bool:
-    return type_name.upper().replace("_", " ") in DATUM_TYPES
+def _pattern_members_by_id(feats: list[dict[str, Any]], index: int) -> list[dict[str, Any]] | None:
+    """Mitglieder eines Musters ohne Namen aus der KE-Liste ableiten.
 
-
-def _head_kind(type_name: str) -> Kind | None:
-    t = type_name.upper()
-    if "PATTERN" in t:
-        return "pattern"
-    if "GROUP" in t:
-        return "group"
-    return None
+    So liefert echtes Creo 12 ein Muster: Musterkopf, direkt danach das Leit-KE (ältere ID), danach die Kopien mit
+    den IDs Kopf-ID + 1, + 2, … und gleichem Typ wie das Leit-KE. Bei Lücken, Gruppen als Leit-KE oder weniger als
+    zwei Mitgliedern wird nichts geraten.
+    """
+    head_id = feats[index].get("feat_id")
+    if head_id is None or index + 1 >= len(feats):
+        return None
+    leader = feats[index + 1]
+    if head_kind(leader.get("type")) is not None or is_component(leader.get("type")):
+        return None
+    members = [leader]
+    expected = int(head_id) + 1
+    for feat in feats[index + 2 :]:
+        if feat.get("feat_id") != expected or not same_type(feat.get("type"), leader.get("type")):
+            break
+        members.append(feat)
+        expected += 1
+    return members if len(members) >= 2 else None
 
 
 def _model_type(file: str) -> str:
@@ -97,7 +100,9 @@ class _Builder:
             self._features[file] = list(data.get("featlist") or [])
         return self._features[file]
 
-    async def members(self, file: str, head: dict[str, Any], kind: Kind, following: dict[str, Any] | None) -> list[dict[str, Any]] | None:
+    async def members(self, file: str, feats: list[dict[str, Any]], index: int, kind: Kind) -> list[dict[str, Any]] | None:
+        head = feats[index]
+        following = feats[index + 1] if index + 1 < len(feats) else None
         key = (file, int(head.get("feat_id") or 0))
         if key in self._members:
             return self._members[key]
@@ -114,18 +119,25 @@ class _Builder:
                 break
             except CreoMCPError as exc:
                 last_error = str(exc)
+        label = head.get("name") or f"id {head.get('feat_id')}"
+        if result is None and kind == "pattern" and not head.get("name"):
+            result = _pattern_members_by_id(feats, index)
+            if result is not None:
+                self.warnings.append(
+                    f"{file}: Muster {label} hat keinen Namen – Mitglieder über die Feature-IDs zugeordnet "
+                    f"(Leit-KE id {result[0].get('feat_id')} + {len(result) - 1} Kopien)."
+                )
         if result is None:
-            label = head.get("name") or f"id {head.get('feat_id')}"
             self.warnings.append(f"{file}: Mitglieder von {kind} '{label}' nicht lesbar ({last_error or 'ohne Namen'}); flach angezeigt.")
         self._members[key] = result
         return result
 
     def _visible(self, feat: dict[str, Any]) -> bool:
-        if feat.get("type") == "COMPONENT":
+        if is_component(feat.get("type")):
             return True
         if not self.include_features:
             return False
-        return self.include_datums or not _is_datum(str(feat.get("type", "")))
+        return self.include_datums or not is_datum(feat.get("type"))
 
     def _node(self, feat: dict[str, Any], kind: Kind) -> TreeNode:
         return TreeNode(
@@ -144,11 +156,10 @@ class _Builder:
         member_ids: set[int] = set()
         head_members: dict[int, list[dict[str, Any]]] = {}
         for index, feat in enumerate(feats):
-            kind = _head_kind(str(feat.get("type", "")))
+            kind = head_kind(feat.get("type"))
             if kind is None or not self.include_features:
                 continue
-            following = feats[index + 1] if index + 1 < len(feats) else None
-            members = await self.members(file, feat, kind, following)
+            members = await self.members(file, feats, index, kind)
             if members:
                 ids = {int(m["feat_id"]) for m in members if m.get("feat_id") is not None}
                 ids.discard(int(feat.get("feat_id") or -1))
@@ -173,11 +184,11 @@ class _Builder:
                 continue
             if not self._take():
                 break
-            ftype = str(feat.get("type", ""))
-            if ftype == "COMPONENT":
+            ftype = feat.get("type")
+            if is_component(ftype):
                 nodes.append(await self._component(feat, bom_children, depth))
                 continue
-            kind = _head_kind(ftype) if fid is not None and int(fid) in head_members else None
+            kind = head_kind(ftype) if fid is not None and int(fid) in head_members else None
             node = self._node(feat, kind or "feature")
             if kind:
                 for member in head_members[int(fid)]:
@@ -185,7 +196,7 @@ class _Builder:
                         continue
                     if not self._take():
                         break
-                    if member.get("type") == "COMPONENT":
+                    if is_component(member.get("type")):
                         node.children.append(await self._component(member, bom_children, depth))
                     else:
                         node.children.append(self._node(member, "feature"))

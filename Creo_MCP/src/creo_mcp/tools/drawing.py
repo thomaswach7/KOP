@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import Annotated, Any, Literal
 
 from mcp.server.mcpserver import MCPServer
@@ -11,6 +12,64 @@ from pydantic import Field
 from .common import READ, WRITE, ToolContext, ext_name, md_table
 
 DRAWING_HELP = "Drawing name incl. .drw, e.g. 'abtriebsnabe.drw'. Default: the active drawing."
+
+# Die Creo-Vorlagen (a3_drawing …) legen Ansichten aus diesen gespeicherten Modellansichten an.
+TEMPLATE_VIEWS = ("FRONT", "TOP", "RIGHT")
+# Englische Standardansicht → weitere Namen (HTL-Vorlage: "VORNE - FRONT", "HINTEN - REAR" …)
+_VIEW_ALIASES = {
+    "FRONT": {"VORNE"},
+    "BACK": {"HINTEN", "REAR"},
+    "TOP": {"OBEN"},
+    "BOTTOM": {"UNTEN"},
+    "LEFT": {"LINKS"},
+    "RIGHT": {"RECHTS"},
+}
+
+
+def resolve_view(wanted: str, available: list[str]) -> str | None:
+    """Gespeicherte Modellansicht zu `wanted` finden: exakt, ohne Groß/Klein, oder über deutsch/englische Namensteile
+    ('FRONT' → 'VORNE - FRONT', 'VORNE' → 'VORNE - FRONT')."""
+    if wanted in available:
+        return wanted
+    key = wanted.strip().upper()
+    for view in available:
+        if view.upper() == key:
+            return view
+    names = {key}
+    for english, others in _VIEW_ALIASES.items():
+        if key == english or key in others:
+            names |= {english, *others}
+    for view in available:
+        parts = {part.strip().upper() for part in re.split(r"[-–/]", view)}
+        if parts & names:
+            return view
+    return None
+
+
+async def _model_views(ctx: ToolContext, model: str | None) -> list[str] | None:
+    data = await ctx.try_call("view", "list", {"file": model})
+    return None if data is None else list(data.get("viewlist") or [])
+
+
+async def _prepare_template_views(ctx: ToolContext, model: str) -> list[str]:
+    """Fehlende FRONT/TOP/RIGHT aus gleichwertigen Ansichten (z. B. 'VORNE - FRONT') im Modell speichern.
+
+    Ohne sie bricht drawing.create mit 'Dwg Create Errors' ab (getestet mit Creo 12.4.5.0 und Teilen aus der
+    HTL-Vorlage). view.activate/view.save wirken nur im aktiven Fenster – das Modell wird deshalb kurz aktiviert.
+    """
+    views = await _model_views(ctx, model)
+    if not views:
+        return []
+    upper = {v.upper() for v in views}
+    pairs = [(v, resolve_view(v, views)) for v in TEMPLATE_VIEWS if v not in upper]
+    pairs = [(v, alias) for v, alias in pairs if alias]
+    if not pairs:
+        return []
+    await ctx.call("file", "open", {"file": model, "display": True, "activate": True})
+    for view, alias in pairs:
+        await ctx.call("view", "activate", {"file": model, "name": alias})
+        await ctx.call("view", "save", {"file": model, "name": view})
+    return [f"{view} ← {alias}" for view, alias in pairs]
 
 
 def register(server: MCPServer, ctx: ToolContext) -> None:
@@ -27,15 +86,29 @@ def register(server: MCPServer, ctx: ToolContext) -> None:
         creo_add_drawing_view and export with creo_export(format='PDF')."""
         name = await ctx.ensure_open(model)
         template = template or ctx.settings.drawing_template
-        data = await ctx.call(
-            "drawing",
-            "create",
-            {"model": name, "drawing": ext_name(drawing, "drw") if drawing else None, "template": template, "scale": scale, "display": True, "activate": True},
-        )
-        drw = data.get("drawing")
+        drw_name = ext_name(drawing, "drw") if drawing else name.rsplit(".", 1)[0] + ".drw"
+        prepared = await _prepare_template_views(ctx, name)
+        try:
+            data = await ctx.call(
+                "drawing",
+                "create",
+                {"model": name, "drawing": drw_name, "template": template, "scale": scale, "display": True, "activate": True},
+            )
+        except ToolError as exc:
+            if "Dwg Create Errors" not in str(exc):
+                raise
+            views = await _model_views(ctx, name) or []
+            raise ToolError(
+                f"{exc}\nThe template '{template}' places views from the saved model views {', '.join(TEMPLATE_VIEWS)}, "
+                f"but {name} has only: {', '.join(views) or '(none)'}. Creo left a half-created drawing in the session – "
+                f"remove it with creo_close_model(file='{drw_name}', erase_from_memory=true). Then save the views in the model "
+                "(View → Saved orientations) or use a template whose views exist."
+            ) from exc
+        drw = data.get("drawing") or drw_name
         if sheet_format:
             await ctx.call("drawing", "set_sheet_format", {"drawing": drw, "sheet": 1, "file": sheet_format, "dirname": format_dir})
-        return f"Created drawing {drw} for {name} (template {template}, scale {scale})."
+        note = f" Saved model views needed by the template in {name}: {', '.join(prepared)}." if prepared else ""
+        return f"Created drawing {drw} for {name} (template {template}, scale {scale}).{note}"
 
     @server.tool(name="creo_add_drawing_view", title="Add drawing view", annotations=WRITE, structured_output=False)
     async def creo_add_drawing_view(
@@ -54,9 +127,16 @@ def register(server: MCPServer, ctx: ToolContext) -> None:
         """Place a general or projection view on a drawing sheet."""
         point = {"x": x, "y": y}
         display: dict[str, Any] | None = {"style": style} if style else None
+        requested = model_view
         if kind == "general":
             if not model_view:
                 raise ToolError("model_view is required for general views (e.g. 'FRONT').")
+            target = model or ((await ctx.try_call("drawing", "get_cur_model", {"drawing": drawing})) or {}).get("file")
+            views = await _model_views(ctx, target) if target else None
+            if views:
+                model_view = resolve_view(requested, views)
+                if model_view is None:
+                    raise ToolError(f"Model view '{requested}' not found in {target}. Saved views: {', '.join(views)}.")
             await ctx.call(
                 "drawing",
                 "create_gen_view",
@@ -70,7 +150,8 @@ def register(server: MCPServer, ctx: ToolContext) -> None:
                 "create_proj_view",
                 {"drawing": drawing, "view": view_name, "parent_view": parent_view, "sheet": sheet, "point": point, "display_data": display},
             )
-        return f"Added {kind} view {view_name} at ({x}, {y})."
+        used = f" from model view '{model_view}'" if kind == "general" and model_view != requested else ""
+        return f"Added {kind} view {view_name}{used} at ({x}, {y})."
 
     @server.tool(name="creo_get_drawing_info", title="Drawing information", annotations=READ, structured_output=False)
     async def creo_get_drawing_info(drawing: Annotated[str | None, Field(description=DRAWING_HELP)] = None) -> str:

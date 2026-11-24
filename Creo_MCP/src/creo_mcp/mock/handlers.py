@@ -9,7 +9,11 @@ from collections.abc import Callable
 from typing import Any
 
 from ..catalog import FunctionCatalog
-from .state import DATUM_TYPES, MDrawing, MFeature, MModel, MockCreo, MView, norm_dir
+from ..feattypes import head_kind, is_datum
+from .state import MDrawing, MFeature, MModel, MockCreo, MView, norm_dir
+
+TOOLKIT_ERROR = "A Pro/TOOLKIT error has occurred: {}.  Check your model/drawing for accuracy."
+TEMPLATE_VIEWS = ("FRONT", "TOP", "RIGHT")  # braucht die Creo-Vorlage a3_drawing im Modell
 
 
 class MockError(Exception):
@@ -127,8 +131,17 @@ def _select_features(model: MModel, data: dict[str, Any]) -> list[MFeature]:
     return result
 
 
+def _head_key(f: MFeature) -> str:
+    """Gruppen-/Musterkopf: per Name oder – bei KEs ohne Namen – per '#<id>'."""
+    return f.name or f"#{f.feat_id}"
+
+
+def _dirname(state: MockCreo, dirname: str) -> str:
+    return "C:" + dirname if state.double_drive_quirk and dirname[1:2] == ":" else dirname
+
+
 def _with_members(model: MModel, feats: list[MFeature]) -> list[MFeature]:
-    heads = {f.name for f in feats if f.type in ("GROUP HEAD", "PATTERN HEAD")}
+    heads = {_head_key(f) for f in feats if head_kind(f.type)}
     extra = [f for f in model.features if (f.group in heads or f.pattern in heads) and f not in feats]
     return feats + extra
 
@@ -245,7 +258,7 @@ def _file_open(state: MockCreo, data: dict[str, Any]) -> dict[str, Any]:
         state.active = opened[0].lower()
     if state.active is None:
         state.active = opened[0].lower()
-    return {"dirname": data.get("dirname") or state.working_dir, "files": opened, "revision": 1}
+    return {"dirname": _dirname(state, data.get("dirname") or state.working_dir), "files": opened, "revision": 1}
 
 
 @handler("file", "get_active")
@@ -253,7 +266,7 @@ def _get_active(state: MockCreo, data: dict[str, Any]) -> dict[str, Any]:
     if not state.active:
         raise MockError("No active model in Creo")
     m = state.session[state.active]
-    return {"dirname": m.dirname, "file": m.file}
+    return {"dirname": _dirname(state, m.dirname), "file": m.file}
 
 
 @handler("file", "list")
@@ -484,7 +497,7 @@ def _feature_list(state: MockCreo, data: dict[str, Any]) -> dict[str, Any]:
             continue
         if not _match(data.get("status"), f.status):
             continue
-        if data.get("no_datum") and f.type in DATUM_TYPES:
+        if data.get("no_datum") and is_datum(f.type):
             continue
         if data.get("no_comp") and f.type == "COMPONENT":
             continue
@@ -496,7 +509,7 @@ def _feature_list(state: MockCreo, data: dict[str, Any]) -> dict[str, Any]:
 def _list_group(state: MockCreo, data: dict[str, Any]) -> dict[str, Any]:
     model = _model(state, data.get("file"))
     group = data.get("group_name")
-    if not any(f.name == group and f.type == "GROUP HEAD" for f in model.features):
+    if not group or not any(f.name == group and head_kind(f.type) == "group" for f in model.features):
         raise MockError(f"Group '{group}' not found")
     numbers = {f.feat_id: n for n, f in _numbered(model)}
     return {"featlist": [_feat_out(f, numbers[f.feat_id]) for f in model.features if f.group == group and _match(data.get("type"), f.type)]}
@@ -506,10 +519,10 @@ def _list_group(state: MockCreo, data: dict[str, Any]) -> dict[str, Any]:
 def _list_pattern(state: MockCreo, data: dict[str, Any]) -> dict[str, Any]:
     model = _model(state, data.get("file"))
     name = data.get("pattern_name")
-    feat = next((f for f in model.features if f.name == name), None)
+    feat = next((f for f in model.features if name and f.name == name), None)
     if feat is None:
         raise MockError(f"Feature '{name}' not found")
-    head = feat.name if feat.type == "PATTERN HEAD" else feat.pattern
+    head = _head_key(feat) if head_kind(feat.type) == "pattern" else feat.pattern
     if head is None:
         raise MockError(f"Feature '{name}' is not a pattern or pattern member")
     numbers = {f.feat_id: n for n, f in _numbered(model)}
@@ -789,6 +802,13 @@ def _drw_create(state: MockCreo, data: dict[str, Any]) -> dict[str, Any]:
         state.displayed.add(name)
     if data.get("activate"):
         state.active = name
+    if not all(v in model.views for v in TEMPLATE_VIEWS):
+        # Wie Creo 12: Die Zeichnung bleibt halb angelegt in der Sitzung, Ansichten lassen sich dort nicht mehr anlegen.
+        drw.broken = True
+        drw.sheet_scale = {1: 1 / 3}
+        raise MockError(TOOLKIT_ERROR.format("Dwg Create Errors"))
+    for i, (view, x, y) in enumerate([("FRONT", 108.75, 112.53), ("TOP", 108.75, 232.431), ("RIGHT", 267.952, 112.53)], start=1):
+        drw.views[f"VIEW_TEMPLATE_{i}"] = MView(f"VIEW_TEMPLATE_{i}", 1, model.file.lower(), x, y, drw.sheet_scale[1])
     return {"drawing": name}
 
 
@@ -798,6 +818,11 @@ def _drw_gen(state: MockCreo, data: dict[str, Any]) -> None:
     name = data.get("view") or data.get("model_view")
     if not data.get("model_view"):
         raise MockError("Missing model_view")
+    if d.broken:
+        raise MockError(TOOLKIT_ERROR.format("Bad Inputs"))
+    target = _model(state, data.get("model") or d.models[0])
+    if data["model_view"] not in target.views:
+        raise MockError(f"View does not exist on model: {data['model_view']}")
     pt = data.get("point") or {}
     if name in d.views:
         raise MockError(f"View '{name}' already exists")
@@ -978,14 +1003,32 @@ def _drw_get_format(state: MockCreo, data: dict[str, Any]) -> dict[str, Any]:
 
 @handler("view", "list")
 def _view_list(state: MockCreo, data: dict[str, Any]) -> dict[str, Any]:
-    _model(state, data.get("file"))
-    names = ["FRONT", "BACK", "RIGHT", "LEFT", "TOP", "BOTTOM", "DEFAULT"]
-    return {"viewlist": [n for n in names if _match(data.get("name"), n)]}
+    model = _model(state, data.get("file"))
+    return {"viewlist": sorted(n for n in model.views if _match(data.get("name"), n))}
+
+
+def _active_window_model(state: MockCreo, data: dict[str, Any]) -> MModel:
+    """view.activate/view.save wirken in Creo nur auf das Modell im aktiven Fenster (sonst 'General Error')."""
+    model = _model(state, data.get("file"))
+    if state.active != model.file.lower():
+        raise MockError(TOOLKIT_ERROR.format("General Error"))
+    return model
 
 
 @handler("view", "activate")
 def _view_activate(state: MockCreo, data: dict[str, Any]) -> None:
-    _model(state, data.get("file"))
+    model = _active_window_model(state, data)
+    if data.get("name") not in model.views:
+        raise MockError(TOOLKIT_ERROR.format("General Error"))
+    return None
+
+
+@handler("view", "save")
+def _view_save(state: MockCreo, data: dict[str, Any]) -> None:
+    model = _active_window_model(state, data)
+    if data["name"] not in model.views:
+        model.views.append(data["name"])
+    model.modified = True
     return None
 
 

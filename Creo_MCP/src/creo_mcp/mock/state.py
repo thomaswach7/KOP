@@ -11,18 +11,16 @@ import copy
 from dataclasses import dataclass, field
 from typing import Any
 
+from ..feattypes import DATUM_TYPES
+
 WORK_DIR = "C:/Creo_MCP/arbeit"
 TEMPLATE_DIR = "C:/Program Files/PTC/Creo 12.4.4.0/Common Files/templates"
 
-DATUM_TYPES = {
-    "COORDINATE SYSTEM",
-    "CURVE",
-    "DATUM AXIS",
-    "DATUM PLANE",
-    "DATUM POINT",
-    "DATUM QUILT",
-    "DATUM SURFACE",
-}
+STANDARD_VIEWS = ["BACK", "BOTTOM", "DEFAULT", "FRONT", "LEFT", "RIGHT", "TOP"]
+# Gespeicherte Ansichten in Teilen aus der HTL-Vorlage (so von Creo 12 gemeldet)
+HTL_VIEWS = ["DEFAULT", "GOODVIEW", "HINTEN - REAR", "LINKS - LEFT", "OBEN - TOP", "RECHTS - RIGHT", "UNTEN - BOTTOM", "VORNE - FRONT"]
+
+__all__ = ["DATUM_TYPES", "HTL_VIEWS", "STANDARD_VIEWS", "MDrawing", "MFeature", "MModel", "MView", "MockCreo", "norm_dir"]
 
 
 def norm_dir(dirname: str) -> str:
@@ -56,6 +54,7 @@ class MModel:
     length_units: str = "mm"
     mass_units: str = "kg"
     bbox: tuple[float, float, float, float, float, float] = (0, 0, 0, 0, 0, 0)
+    views: list[str] = field(default_factory=lambda: list(STANDARD_VIEWS))
     dirname: str = WORK_DIR
     revision: int = 1
     modified: bool = False
@@ -88,6 +87,7 @@ class MDrawing:
     sheet_scale: dict[int, float] = field(default_factory=lambda: {1: 1.0})
     sheet_format: dict[int, str] = field(default_factory=dict)
     views: dict[str, MView] = field(default_factory=dict)
+    broken: bool = False  # Vorlage konnte nicht angewendet werden (Creo: "Dwg Create Errors")
     dirname: str = WORK_DIR
 
 
@@ -109,6 +109,7 @@ class MockCreo:
         self.selected: list[tuple[str, int]] = []
         self.config: dict[str, str] = {}
         self.creo_running = True
+        self.double_drive_quirk = False  # echtes CREOSON meldet Verzeichnisse als "C:C:/…"
         self.fail_functions: dict[tuple[str, str], str] = {}
         self._next_id = 1000
 
@@ -222,7 +223,30 @@ def _demo_models() -> list[MModel]:
         ],
         params={"BENENNUNG": {"type": "STRING", "value": "Fliehkraftkupplung", "designate": True, "description": ""}},
     )
-    return [abtrieb, deckel, gehaeuse, antrieb, gewicht, belag, scheibe, flieh, top]
+    return [abtrieb, _htl_part(), deckel, gehaeuse, antrieb, gewicht, belag, scheibe, flieh, top]
+
+
+def _htl_part() -> MModel:
+    """Abtriebsnabe wie aus deutschem Creo 12 mit HTL-Vorlage: deutsche Typen, KEs ohne Namen, Muster ohne Namen
+    (Kopf vor dem Leit-KE, Kopien mit den IDs nach dem Kopf), Ansichten "VORNE - FRONT" usw."""
+    datums = [
+        MFeature(1, "BASIS", "KOORDINATENSYSTEM"),
+        MFeature(4, "RECHTS", "BEZUGSEBENE"),
+        MFeature(7, "OBEN", "BEZUGSEBENE"),
+        MFeature(9, "VORNE", "BEZUGSEBENE"),
+        MFeature(142, "A_X", "BEZUGSACHSE"),
+        MFeature(146, "A_Y", "BEZUGSACHSE"),
+        MFeature(150, "A_Z", "BEZUGSACHSE"),
+    ]
+    body = [
+        MFeature(154, None, "KÖRPER"),
+        MFeature(383, None, "KURVE"),
+        MFeature(396, None, "MATERIALSCHNITT"),
+        MFeature(569, None, "MUSTER"),
+        MFeature(496, None, "BOHRUNG", pattern="#569"),
+        *[MFeature(570 + i, None, "BOHRUNG", pattern="#569") for i in range(5)],
+    ]
+    return MModel(file="abtriebsnabe_htl.prt", features=datums + body, volume=350370.0, views=list(HTL_VIEWS))
 
 
 def _template_models() -> list[MModel]:

@@ -11,7 +11,7 @@ from pydantic import Field
 from ..errors import SafetyError
 from ..mapkeys import normalize_mapkey
 from ..safety import check_mapkey
-from .common import DESTRUCTIVE, FILE_HELP, SESSION, WRITE, ToolContext
+from .common import DESTRUCTIVE, FILE_HELP, SESSION, WRITE, ToolContext, join_path
 
 ExportFormat = Literal["PDF", "3DPDF", "STEP", "IGES", "DXF", "VRML", "NEUTRAL", "PV", "JPEG", "TIFF", "BMP", "EPS"]
 _IMAGE = {"JPEG", "TIFF", "BMP", "EPS"}
@@ -40,7 +40,7 @@ def register(server: MCPServer, ctx: ToolContext) -> None:
             data = await ctx.call("interface", "export_image", {**base, "type": format})
         else:
             data = await ctx.call("interface", "export_file", {**base, "type": format, "geom_flags": geom_flags})
-        return f"Exported {name} as {format}: {data.get('dirname')}/{data.get('filename')}"
+        return f"Exported {name} as {format}: {join_path(data.get('dirname'), str(data.get('filename')))}"
 
     @server.tool(name="creo_import_geometry", title="Import STEP/IGES as new model", annotations=WRITE, structured_output=False)
     async def creo_import_geometry(

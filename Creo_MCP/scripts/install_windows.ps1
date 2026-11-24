@@ -59,6 +59,14 @@ if ($creo) {
   $Parametric = Join-Path $creo.FullName "Parametric\bin\parametric.exe"
   $Templates = Join-Path $Common "templates"
   Write-Host "Gefunden: $($creo.FullName)"
+  # CREOSON braucht J-Link (Java). Fehlt die Creo-Komponente, bricht CREOSON beim Start ab
+  # (NoClassDefFoundError: com/ptc/cipjava/jxthrowable) - so geschehen mit Creo 12.4.5.0 aus dem Schulpaket.
+  $JlinkJar = Join-Path $Common "text\java\pfcasync.jar"
+  if (-not (Test-Path $JlinkJar)) {
+    Write-Warning ("In $($creo.Name) fehlt J-Link ($JlinkJar). CREOSON startet so nicht. Abhilfe: Creo-Setup (setup.exe) " +
+      "-> 'Vorhandene Software neu konfigurieren' -> Creo Parametric -> API-Toolkits -> 'Java Objekt-Toolkit' anhaken. " +
+      "Danach dieses Skript erneut ausfuehren oder 'python -m creo_mcp doctor' pruefen.")
+  }
 } else {
   Write-Warning "Keine Creo-Installation gefunden. Startskripte bitte später von Hand anpassen."
 }

@@ -7,7 +7,8 @@ from typing import Annotated
 from mcp.server.mcpserver import MCPServer
 from pydantic import Field
 
-from ..tree import DATUM_TYPES, build_model_tree, render_tree_markdown, tree_to_dict
+from ..feattypes import is_datum, same_type
+from ..tree import build_model_tree, render_tree_markdown, tree_to_dict
 from .common import FILE_HELP, READ, ResponseFormat, ToolContext, md_table, paginate, to_json
 
 
@@ -49,7 +50,7 @@ def register(server: MCPServer, ctx: ToolContext) -> None:
     async def creo_list_features(
         file: Annotated[str | None, Field(description=FILE_HELP)] = None,
         name: Annotated[str | None, Field(description="Feature name filter with * wildcards, e.g. 'Bohrung*'.")] = None,
-        type: Annotated[str | None, Field(description="Feature type filter, e.g. 'HOLE', 'CUT', 'PROTRUSION', 'DATUM PLANE', 'COMPONENT'.")] = None,  # noqa: A002
+        type: Annotated[str | None, Field(description="Feature type filter, e.g. 'HOLE', 'CUT', 'PROTRUSION', 'PATTERN', 'DATUM PLANE', 'COMPONENT'. German Creo names (BOHRUNG, MUSTER, KÖRPER …) work too.")] = None,  # noqa: A002
         status: Annotated[str | None, Field(description="Status filter, e.g. 'ACTIVE' or 'SUPPRESSED'.")] = None,
         include_datums: Annotated[bool, Field(description="Include datum features.")] = True,
         include_unnamed: Annotated[bool, Field(description="Include features without a name.")] = True,
@@ -62,9 +63,14 @@ def register(server: MCPServer, ctx: ToolContext) -> None:
         data = await ctx.call(
             "feature",
             "list",
-            {"file": model, "name": name, "type": type, "status": status, "inc_unnamed": include_unnamed, "paths": True},
+            {"file": model, "name": name, "status": status, "inc_unnamed": include_unnamed, "paths": True},
         )
-        feats = [f for f in data.get("featlist") or [] if include_datums or str(f.get("type", "")).upper() not in DATUM_TYPES]
+        # Typfilter hier statt in CREOSON: Creo meldet die Typen in der Sprache der Oberfläche (deutsch: BOHRUNG …)
+        feats = [
+            f
+            for f in data.get("featlist") or []
+            if (include_datums or not is_datum(f.get("type"))) and (not type or same_type(f.get("type"), type))
+        ]
         page = paginate(feats, limit, offset)
         if response_format == "json":
             return to_json(page)

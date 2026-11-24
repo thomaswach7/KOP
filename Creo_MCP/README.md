@@ -155,6 +155,24 @@ erreicht (z. B. im Schulnetz), könnte Creo steuern – einschließlich Batch-Da
 | `XToolkitBadContext` | in Creo ist ein Dialog offen → schließen |
 | Unterdrücken/Regenerieren schlägt fehl | `CREO_VERSION=12` gesetzt? (`creo_doctor`) |
 | Student Edition | Die Programmierschnittstellen sind dort evtl. gesperrt – `creo_doctor` zeigt es |
+| CREOSON bricht beim Start ab: `NoClassDefFoundError: com/ptc/cipjava/jxthrowable` | In Creo fehlt J-Link (`Common Files\text\java\pfcasync.jar`), z. B. im HTL-Schulpaket von Creo 12.4.5.0. Creo-Setup (`setup.exe`) → „Vorhandene Software neu konfigurieren“ → Creo Parametric → API-Toolkits → **Java Objekt-Toolkit**. `doctor` und das Installationsskript melden es |
+| `Dwg Create Errors` bei `creo_create_drawing` | Die Vorlage (`a3_drawing`) braucht die Modellansichten FRONT, TOP, RIGHT. Fehlen sie, legt der Server sie aus „VORNE - FRONT“, „OBEN - TOP“, „RECHTS - RIGHT“ (HTL-Vorlage) selbst an. Sonst bleibt eine halbe Zeichnung in der Sitzung – mit `creo_close_model(erase_from_memory=true)` entfernen |
+| `View does not exist on model` | `creo_add_drawing_view` findet zu „FRONT“ auch „VORNE - FRONT“ und listet sonst die vorhandenen Ansichten |
+| `creo_feature_relations`: `XToolkitNotFound` / `XToolkitCantModify` | Die VB API findet die Creo-Sitzung nicht (offen, getestet mit Creo 12.4.5.0). Alle CREOSON-Werkzeuge funktionieren |
+
+## Mit echtem Creo getestet
+
+Creo Parametric 12.4.5.0 (deutsche Oberfläche, HTL-Schulpaket) mit CREOSON 3.0.2: `doctor` grün; Modellbaum von
+Teil und Baugruppe, Volumen, A3-Zeichnung mit Vorlagen- und Zusatzansichten, PDF-Export. Was dabei anders war als
+im simulierten CREOSON – und jetzt abgefangen und getestet ist (`tests/test_creo12_real.py`, `tests/test_tools_creo12_de.py`):
+
+- **KE-Typen kommen in der Sprache der Oberfläche**: BEZUGSEBENE, MUSTER, KOMPONENTE, KÖRPER (= Drehen/Extrudieren) …
+  `feattypes.py` bildet sie auf die englischen Namen ab (Quelle: Creo-Meldungsdateien). Damit klappen Bezüge
+  ausblenden, Muster/Gruppen und Komponenten im Baum sowie der Typfilter (`type="HOLE"` findet auch BOHRUNG).
+- **Muster ohne Namen** (der Normalfall): CREOSON liefert Mitglieder nur per Name. Der Baum ordnet sie dann über die
+  Feature-IDs zu (Kopf, Leit-KE, Kopien mit den IDs nach dem Kopf) und sagt das dazu.
+- **Ansichten aus der HTL-Vorlage** heißen „VORNE - FRONT“ usw. (siehe Fehlerbehebung).
+- CREOSON meldet Verzeichnisse als `C:C:/…` – der Server zeigt `C:/…`.
 
 ## Weitere Doku
 
@@ -165,7 +183,8 @@ erreicht (z. B. im Schulnetz), könnte Creo steuern – einschließlich Batch-Da
 
 ```bash
 pip install -e ".[dev]"
-pytest                      # 125 Tests gegen den simulierten CREOSON-Server (prüft jede Anfrage gegen die CREOSON-Spezifikation)
+pytest                      # Tests gegen den simulierten CREOSON-Server (prüft jede Anfrage gegen die CREOSON-Spezifikation)
+                            # und gegen aufgezeichnete Antworten eines echten Creo 12.4.5.0
 python -m creo_mcp mock     # nur den simulierten CREOSON-Server auf Port 9056 starten
 ```
 

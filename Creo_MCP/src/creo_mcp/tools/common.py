@@ -60,6 +60,22 @@ def paginate(items: list[Any], limit: int, offset: int) -> dict[str, Any]:
     }
 
 
+def clean_dirname(dirname: str | None) -> str | None:
+    """CREOSON meldet unter Windows Verzeichnisse als 'C:C:/…' (Laufwerk doppelt) – auf 'C:/…' kürzen."""
+    if dirname and len(dirname) >= 4 and dirname[1] == ":" and dirname[3] == ":" and dirname[0].upper() == dirname[2].upper():
+        return dirname[2:]
+    return dirname
+
+
+def join_path(dirname: str | None, filename: str) -> str:
+    """Verzeichnis + Datei mit genau einem Trennzeichen im Stil des Verzeichnisses."""
+    dirname = clean_dirname(dirname)
+    if not dirname:
+        return filename
+    sep = "\\" if "\\" in dirname and "/" not in dirname else "/"
+    return dirname.rstrip("/\\") + sep + filename
+
+
 def ext_name(name: str, ext: str) -> str:
     name = name.strip()
     return name if name.lower().endswith(f".{ext}") else f"{name}.{ext}"

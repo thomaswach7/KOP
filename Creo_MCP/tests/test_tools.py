@@ -173,7 +173,12 @@ async def test_doctor_tool(mcp_client):
     assert "CREOSON server" in text and "✅" in text
 
 
-async def test_feature_relations_needs_windows(mcp_client):
+async def test_feature_relations_needs_windows(mcp_client, monkeypatch):
+    # Auf einem Windows-PC mit Creo würde sonst die echte VB API angesprochen (Test war dort rot).
+    from creo_mcp.vbapi import VbApiSession
+
+    real_connect = VbApiSession.connect.__func__
+    monkeypatch.setattr(VbApiSession, "connect", classmethod(lambda cls, **kw: real_connect(cls, platform="linux")))
     res = await mcp_client.call_tool("creo_feature_relations", {"file": "abtriebsnabe.prt", "feat_id": 40})
     assert res.is_error and "Windows" in _text(res)
 
