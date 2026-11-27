@@ -15,12 +15,13 @@ from ..feattypes import DATUM_TYPES
 
 WORK_DIR = "C:/Creo_MCP/arbeit"
 TEMPLATE_DIR = "C:/Program Files/PTC/Creo 12.4.4.0/Common Files/templates"
+FORMAT_DIR = "C:/PTC/admCreo12HTL/bibliothek/zeichnungsrahmen"  # Zeichnungsrahmen (.frm) des HTL-Pakets
 
 STANDARD_VIEWS = ["BACK", "BOTTOM", "DEFAULT", "FRONT", "LEFT", "RIGHT", "TOP"]
 # Gespeicherte Ansichten in Teilen aus der HTL-Vorlage (so von Creo 12 gemeldet)
 HTL_VIEWS = ["DEFAULT", "GOODVIEW", "HINTEN - REAR", "LINKS - LEFT", "OBEN - TOP", "RECHTS - RIGHT", "UNTEN - BOTTOM", "VORNE - FRONT"]
 
-__all__ = ["DATUM_TYPES", "HTL_VIEWS", "STANDARD_VIEWS", "MDrawing", "MFeature", "MModel", "MView", "MockCreo", "norm_dir"]
+__all__ = ["DATUM_TYPES", "FORMAT_DIR", "HTL_VIEWS", "STANDARD_VIEWS", "MDrawing", "MFeature", "MModel", "MView", "MockCreo", "norm_dir"]
 
 
 def norm_dir(dirname: str) -> str:
@@ -101,6 +102,7 @@ class MockCreo:
         self.working_dir = WORK_DIR
         self.disk: dict[str, dict[str, MModel | MDrawing]] = {}
         self.other_files: dict[str, set[str]] = {}
+        self.formats_in_session: set[str] = set()  # geladene Blattformate (.frm), klein geschrieben
         self.session: dict[str, MModel | MDrawing] = {}
         self.active: str | None = None
         self.displayed: set[str] = set()
@@ -142,6 +144,7 @@ class MockCreo:
         for tpl in _template_models():
             st.put_on_disk(tpl, TEMPLATE_DIR)
         st.other_files[norm_dir(WORK_DIR)] = {"anleitung_abtriebsnabe.pdf", "config.pro"}
+        st.other_files[norm_dir(FORMAT_DIR)] = {"a3_fertigung.frm", "a4_fertigung.frm"}
         return st
 
 
@@ -223,7 +226,7 @@ def _demo_models() -> list[MModel]:
         ],
         params={"BENENNUNG": {"type": "STRING", "value": "Fliehkraftkupplung", "designate": True, "description": ""}},
     )
-    return [abtrieb, _htl_part(), deckel, gehaeuse, antrieb, gewicht, belag, scheibe, flieh, top]
+    return [abtrieb, _htl_part(), _htl_deckel(), deckel, gehaeuse, antrieb, gewicht, belag, scheibe, flieh, top]
 
 
 def _htl_part() -> MModel:
@@ -247,6 +250,29 @@ def _htl_part() -> MModel:
         *[MFeature(570 + i, None, "BOHRUNG", pattern="#569") for i in range(5)],
     ]
     return MModel(file="abtriebsnabe_htl.prt", features=datums + body, volume=350370.0, views=list(HTL_VIEWS))
+
+
+def _htl_deckel() -> MModel:
+    """Deckel Pos. 4 wie am 27.11.2026 im echten Creo 12 gebaut: Kontur als DXF importiert ("KURVE AUS DATEI"),
+    Drehen um A_X, Senkbohrung im Muster 6 × 60°, Querschnitt A für den Zeichnungsschnitt (Typ "Querschnitt")."""
+    datums = [
+        MFeature(1, "BASIS", "KOORDINATENSYSTEM"),
+        MFeature(4, "RECHTS", "BEZUGSEBENE"),
+        MFeature(7, "OBEN", "BEZUGSEBENE"),
+        MFeature(9, "VORNE", "BEZUGSEBENE"),
+        MFeature(142, "A_X", "BEZUGSACHSE"),
+        MFeature(146, "A_Y", "BEZUGSACHSE"),
+        MFeature(150, "A_Z", "BEZUGSACHSE"),
+    ]
+    body = [
+        MFeature(789, "KONTUR_DXF", "KURVE AUS DATEI"),
+        MFeature(820, "GRUNDKOERPER", "KÖRPER"),
+        MFeature(1126, "LOCHKREIS_6X60", "MUSTER"),
+        MFeature(1055, "SENKBOHRUNG", "BOHRUNG", pattern="LOCHKREIS_6X60"),
+        *[MFeature(1127 + i, None, "BOHRUNG", pattern="LOCHKREIS_6X60") for i in range(5)],
+        MFeature(1613, "A", "Querschnitt"),
+    ]
+    return MModel(file="deckel_htl.prt", features=datums + body, volume=276253.6, views=list(HTL_VIEWS))
 
 
 def _template_models() -> list[MModel]:

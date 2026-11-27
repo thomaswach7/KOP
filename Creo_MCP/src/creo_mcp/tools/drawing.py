@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ntpath
 import re
 from typing import Annotated, Any, Literal
 
@@ -72,6 +73,24 @@ async def _prepare_template_views(ctx: ToolContext, model: str) -> list[str]:
     return [f"{view} ← {alias}" for view, alias in pairs]
 
 
+async def _set_format(ctx: ToolContext, drawing: str | None, sheet: int, format_file: str, format_dir: str | None) -> None:
+    """Blattformat setzen. Ein voller Pfad in `format_file` wird in Ordner und Datei zerlegt.
+
+    Echtes Creo 12 (27.11.2026): Ohne Ordner sucht CREOSON die .frm nur im Arbeitsverzeichnis
+    ("Could not open file 'a3_fertigung.frm' in directory …"); die HTL-Rahmen liegen in einer eigenen Bibliothek.
+    """
+    folder, name = ntpath.split(format_file)
+    data: dict[str, Any] = {"drawing": drawing, "sheet": sheet, "file": name or format_file}
+    if format_dir or folder:
+        data["dirname"] = format_dir or folder
+    try:
+        await ctx.call("drawing", "set_sheet_format", data)
+    except ToolError as exc:
+        if "Could not open file" not in str(exc):
+            raise
+        raise ToolError(f"{exc}\nPass format_dir = the folder that contains the .frm file (or a full path in format_file).") from exc
+
+
 def register(server: MCPServer, ctx: ToolContext) -> None:
     @server.tool(name="creo_create_drawing", title="Create drawing", annotations=WRITE, structured_output=False)
     async def creo_create_drawing(
@@ -106,7 +125,7 @@ def register(server: MCPServer, ctx: ToolContext) -> None:
             ) from exc
         drw = data.get("drawing") or drw_name
         if sheet_format:
-            await ctx.call("drawing", "set_sheet_format", {"drawing": drw, "sheet": 1, "file": sheet_format, "dirname": format_dir})
+            await _set_format(ctx, drw, 1, sheet_format, format_dir)
         note = f" Saved model views needed by the template in {name}: {', '.join(prepared)}." if prepared else ""
         return f"Created drawing {drw} for {name} (template {template}, scale {scale}).{note}"
 
@@ -190,7 +209,8 @@ def register(server: MCPServer, ctx: ToolContext) -> None:
         scale: Annotated[float | None, Field(description="Scale for scale_sheet/scale_view, e.g. 0.5 for 1:2.", gt=0)] = None,
         x: Annotated[float | None, Field(description="New X for move_view.")] = None,
         y: Annotated[float | None, Field(description="New Y for move_view.")] = None,
-        format_file: Annotated[str | None, Field(description="Format file for set_format, e.g. 'a3_iso'.")] = None,
+        format_file: Annotated[str | None, Field(description="Format file for set_format, e.g. 'a3_iso' or a full path to a .frm.")] = None,
+        format_dir: Annotated[str | None, Field(description="Folder of the format file for set_format (e.g. a school format library). Default: working directory.")] = None,
     ) -> str:
         """Change a drawing: sheet/view scale, move or delete views, add/delete/select sheets, set sheet format, regenerate."""
         base: dict[str, Any] = {"drawing": drawing}
@@ -222,7 +242,7 @@ def register(server: MCPServer, ctx: ToolContext) -> None:
             await ctx.call("drawing", "select_sheet", {**base, "sheet": sheet})
         elif action == "set_format":
             need(sheet=sheet, format_file=format_file)
-            await ctx.call("drawing", "set_sheet_format", {**base, "sheet": sheet, "file": format_file})
+            await _set_format(ctx, drawing, sheet, str(format_file), format_dir)
         else:
             await ctx.call("drawing", "regenerate", base)
         return f"Drawing action '{action}' done."

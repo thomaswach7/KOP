@@ -12,7 +12,7 @@ from mcp import Client
 
 from creo_mcp.client import CreosonClient
 from creo_mcp.config import Settings
-from creo_mcp.mock.state import TEMPLATE_DIR
+from creo_mcp.mock.state import FORMAT_DIR, TEMPLATE_DIR
 from creo_mcp.server import build_server
 from creo_mcp.tools.common import clean_dirname, join_path
 from creo_mcp.tools.drawing import resolve_view
@@ -129,3 +129,55 @@ async def test_add_view_lists_available_views_when_name_is_unknown(client):
         "creo_add_drawing_view", {"drawing": "abtriebsnabe_htl.drw", "view_name": "X", "model_view": "SCHRAEG", "x": 1, "y": 1}
     )
     assert res.is_error and "VORNE - FRONT" in _text(res)
+
+
+# -- Deckel Pos. 4 (echtes Creo 12, 27.11.2026) ------------------------------------
+
+DECKEL = "deckel_htl.prt"
+
+
+async def test_tree_hides_imported_curve_and_cross_section(client):
+    text = _text(await client.call_tool("creo_get_model_tree", {"file": DECKEL, "include_datums": False}))
+    assert "KONTUR_DXF" not in text and "[Querschnitt]" not in text
+    assert "GRUNDKOERPER" in text and "▦ LOCHKREIS_6X60" in text and "SENKBOHRUNG" in text
+    full = _text(await client.call_tool("creo_get_model_tree", {"file": DECKEL, "include_datums": True}))
+    assert "KONTUR_DXF  [KURVE AUS DATEI]" in full
+
+
+async def test_set_format_from_school_library_needs_its_folder(client, mock):
+    await client.call_tool("creo_create_drawing", {"model": DECKEL})
+    drw = "deckel_htl.drw"
+    base = {"drawing": drw, "action": "set_format", "sheet": 1, "format_file": "a3_fertigung"}
+    res = await client.call_tool("creo_edit_drawing", base)
+    assert res.is_error and "format_dir" in _text(res)
+    res = await client.call_tool("creo_edit_drawing", {**base, "format_dir": FORMAT_DIR})
+    assert not res.is_error, _text(res)
+    assert mock.state.session[drw].sheet_format[1] == "a3_fertigung"
+    res = await client.call_tool("creo_edit_drawing", {**base, "format_file": FORMAT_DIR + "/a4_fertigung.frm"})
+    assert not res.is_error, _text(res)
+    data = [c[2] for c in mock.state.calls if c[:2] == ("drawing", "set_sheet_format")][-1]
+    assert data["file"] == "a4_fertigung.frm" and data["dirname"] == FORMAT_DIR
+    # einmal geladen, findet Creo das Format auch ohne Ordner (so am echten Creo 12)
+    res = await client.call_tool("creo_edit_drawing", base)
+    assert not res.is_error, _text(res)
+
+
+async def test_create_drawing_with_format_from_folder(client, mock):
+    res = await client.call_tool("creo_create_drawing", {"model": DECKEL, "sheet_format": "a3_fertigung", "format_dir": FORMAT_DIR})
+    assert not res.is_error, _text(res)
+    assert mock.state.session["deckel_htl.drw"].sheet_format[1] == "a3_fertigung"
+
+
+async def test_set_material_regenerates_twice_for_relation_parameters(client, mock):
+    before = len(mock.state.calls)
+    res = await client.call_tool("creo_set_material", {"file": DECKEL, "material": "EN-GJS-700-2", "load_from_dir": "C:/PTC/admCreo12HTL/bibliothek/material"})
+    assert not res.is_error, _text(res)
+    calls = [c[:2] for c in mock.state.calls[before:]]
+    assert calls.count(("file", "regenerate")) == 2
+    assert calls.index(("file", "set_cur_material")) < calls.index(("file", "regenerate"))
+
+
+async def test_locked_template_parameter_explains_relation(client, mock):
+    mock.state.fail_functions[("parameter", "set")] = "A Pro/TOOLKIT error has occurred: Can't Access.  Check your model/drawing for accuracy."
+    res = await client.call_tool("creo_set_parameter", {"file": DECKEL, "name": "SACHNUMMER", "value": "14.2.5.5", "type": "STRING"})
+    assert res.is_error and "relation" in _text(res)

@@ -434,6 +434,15 @@ def _list_materials(state: MockCreo, data: dict[str, Any]) -> dict[str, Any]:
     return {"materials": [m for m in _model(state, data.get("file")).materials if _match(data.get("material"), m)]}
 
 
+@handler("file", "load_material_file")
+def _load_material(state: MockCreo, data: dict[str, Any]) -> dict[str, Any]:
+    m = _model(state, data.get("file"))
+    mat = str(data.get("material") or "").rsplit(".mtl", 1)[0]
+    if mat not in m.materials:
+        m.materials.append(mat)
+    return {"files": [m.file]}
+
+
 @handler("file", "get_cur_material")
 def _get_material(state: MockCreo, data: dict[str, Any]) -> dict[str, Any]:
     return {"material": _model(state, data.get("file")).material}
@@ -988,7 +997,16 @@ def _drw_regen(state: MockCreo, data: dict[str, Any]) -> None:
 @handler("drawing", "set_sheet_format")
 def _drw_set_format(state: MockCreo, data: dict[str, Any]) -> None:
     d = _drawing(state, data.get("drawing"))
-    d.sheet_format[int(data.get("sheet", 1))] = data.get("file", "")
+    name = str(data.get("file") or "")
+    frm = name if name.lower().endswith(".frm") else name + ".frm"
+    dirname = data.get("dirname") or state.working_dir
+    # wie echtes CREOSON 3.0.2: ohne dirname nur im Arbeitsverzeichnis gesucht – außer das Format ist schon in der
+    # Sitzung geladen (am echten Creo 12 ging der 2. Aufruf ohne Ordner durch)
+    in_session = frm.lower() in state.formats_in_session
+    if not in_session and frm.lower() not in state.other_files.get(norm_dir(dirname), set()):
+        raise MockError(f"Could not open file '{frm}' in directory {dirname}")
+    state.formats_in_session.add(frm.lower())
+    d.sheet_format[int(data.get("sheet", 1))] = name
     return None
 
 

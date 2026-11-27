@@ -22,15 +22,28 @@ log = logging.getLogger(__name__)
 
 _NO_SESSION = "No session found"
 
-# Bekannte CREOSON-/Creo-Fehlertexte → Hinweis, was zu tun ist.
+# Bekannte CREOSON-/Creo-Fehlertexte → Hinweis, was zu tun ist. Der erste Treffer zählt: genauere Texte zuerst.
 _HINTS: list[tuple[str, str]] = [
+    # Echtes Creo 12 (27.11.2026): "Unable to connect to Creo; more than one instance of Creo is running" bei
+    # feature.delete, während zwei xtop.exe liefen. Andere Funktionen gingen weiter – der Hinweis muss passen.
+    (
+        "more than one instance of Creo",
+        "Two or more Creo sessions (xtop.exe) are running, so CREOSON cannot tell which one to use; some functions "
+        "(e.g. feature.delete) then fail while others still work. Save your work, close the extra Creo session(s) "
+        "(creo_doctor shows how many run), then retry.",
+    ),
     (
         "Unable to connect to Creo",
         "Creo is not running or was not started with CREOSON support. Start Creo via CREOSON "
         "(CreosonSetup → 'Start Creo', or tool creo_connect with start_creo=true, which runs "
         "nitro_proe_remote.bat and sets PRO_COMM_MSG_EXE). Then retry.",
     ),
-    ("more than one instance of Creo", "Close all but one Creo session, then retry."),
+    (
+        "Can't Access",
+        "Creo refused to change this item. It is usually driven by a relation (school templates fill e.g. "
+        "SACHNUMMER or WERKSTOFF by relation – assign the material with creo_set_material instead) or the model "
+        "is read-only. Check creo_get_relations.",
+    ),
     ("No active model", "Open a model first (creo_open_model with activate=true) or pass 'file'."),
     ("is not in session", "Open the model first with creo_open_model (use the full name incl. extension, e.g. teil.prt)."),
     ("not found", "Check the name (incl. extension .prt/.asm/.drw) and the working directory (creo_set_working_dir)."),
@@ -117,8 +130,9 @@ class CreosonClient:
         except httpx.TimeoutException as exc:
             raise CreosonConnectionError(
                 f"CREOSON at {url} did not answer within {self.settings.timeout:.0f} s "
-                f"({payload.get('command')}.{payload.get('function')}). Creo may still be working; "
-                "raise CREO_MCP_TIMEOUT for long operations, or run creo_doctor."
+                f"({payload.get('command')}.{payload.get('function')}). Creo may still be working, or a Creo "
+                "command/dialog is still open – CREOSON waits until Creo is idle, so finish it in Creo (OK, Esc or the "
+                "middle mouse button). Raise CREO_MCP_TIMEOUT for long operations, or run creo_doctor."
             ) from exc
         except httpx.HTTPError as exc:
             raise CreosonConnectionError(

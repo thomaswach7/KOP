@@ -19,6 +19,8 @@ _GERMAN = {
     "BEZUGSACHSE": "DATUM AXIS",
     "BEZUGSPUNKT": "DATUM POINT",
     "KURVE": "CURVE",  # auch Skizzen-KEs ("Skizze 1") meldet Creo so
+    "KURVE AUS DATEI": "CURVE FROM FILE",  # importierte DXF/IGES-Kurven (Modell › Daten abrufen › Importieren, Typ Kurve)
+    "QUERSCHNITT": "X-SECTION",  # Schnitt fürs Zeichnungsschnittbild, steht im Modellbaum unter "Schnitte"
     "SKIZZE": "SKETCH",
     "KÖRPER": "PROTRUSION",  # Drehen/Extrudieren mit Material hinzufügen
     "MATERIALSCHNITT": "CUT",
@@ -38,6 +40,8 @@ DATUM_TYPES = frozenset(
     {
         "COORDINATE SYSTEM",
         "CURVE",
+        "CURVE FROM FILE",
+        "X-SECTION",
         "SKETCH",
         "DATUM AXIS",
         "DATUM PLANE",

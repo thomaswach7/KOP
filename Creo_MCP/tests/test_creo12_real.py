@@ -110,6 +110,8 @@ def _top(result):
         ("GRUPPENKOPF", "GROUP"),
         ("KOMPONENTE", "COMPONENT"),
         ("DATUM_PLANE", "DATUM PLANE"),
+        ("KURVE AUS DATEI", "CURVE FROM FILE"),  # Deckel Pos. 4, 27.11.2026: importierte DXF-Kontur
+        ("Querschnitt", "X-SECTION"),  # so (gemischt geschrieben) im Modellbaum unter "Schnitte"
         ("UNBEKANNT", "UNBEKANNT"),
     ],
 )
@@ -119,6 +121,7 @@ def test_canonical_type_maps_german_creo_names(creo, english):
 
 def test_type_helpers_work_for_both_languages():
     assert is_datum("BEZUGSEBENE") and is_datum("DATUM PLANE") and is_datum("KURVE")
+    assert is_datum("KURVE AUS DATEI") and is_datum("Querschnitt")
     assert not is_datum("KÖRPER")  # Körper = Drehen/Extrudieren, kein Bezug
     assert is_component("KOMPONENTE") and is_component("COMPONENT")
     assert head_kind("MUSTER") == "pattern" and head_kind("PATTERN HEAD") == "pattern"

@@ -185,7 +185,8 @@ def register(server: MCPServer, ctx: ToolContext) -> None:
     async def creo_set_material(
         material: Annotated[str, Field(description="Material name, e.g. 'STEEL' or a material file name without .mtl.", min_length=1)],
         file: Annotated[str | None, Field(description=FILE_HELP)] = None,
-        load_from_dir: Annotated[str | None, Field(description="Folder of the .mtl file if it is not loaded yet (default: pro_material_dir).")] = None,
+        load_from_dir: Annotated[str | None, Field(description="Folder of the .mtl file if it is not loaded yet (default: pro_material_dir), e.g. a school material library.")] = None,
+        regenerate: Annotated[bool, Field(description="Regenerate afterwards so relation-driven parameters (WERKSTOFF, DICHTE, MASSE) follow the material.")] = True,
     ) -> str:
         """Assign a material to a part (loads the material file first if needed)."""
         model = await ctx.ensure_open(file)
@@ -193,7 +194,12 @@ def register(server: MCPServer, ctx: ToolContext) -> None:
         if material.lower() not in [m.lower() for m in loaded]:
             await ctx.call("file", "load_material_file", {"file": model, "material": material, "dirname": load_from_dir})
         await ctx.call("file", "set_cur_material", {"file": model, "material": material})
-        return f"Material of {model} set to {material}."
+        if regenerate:
+            # Echtes Creo 12 mit HTL-Vorlage (27.11.2026): nach der 1. Regenerierung stimmte WERKSTOFF, DICHTE und
+            # MASSE erst nach der 2. (die Relationen lesen die Materialdichte eine Runde später).
+            for _ in range(2):
+                await ctx.call("file", "regenerate", {"file": model})
+        return f"Material of {model} set to {material}" + (" (regenerated)." if regenerate else ".")
 
     # -- Baugruppe ----------------------------------------------------------------
     @server.tool(name="creo_assemble_component", title="Assemble component", annotations=WRITE, structured_output=False)

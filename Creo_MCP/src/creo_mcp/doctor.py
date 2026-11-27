@@ -40,7 +40,8 @@ class Probes:
         roots = glob.glob(r"C:\Program Files\PTC\Creo *") + glob.glob(r"C:\PTC\Creo *")
         return sorted((r for r in roots if os.path.isfile(os.path.join(r, "Parametric", "bin", "parametric.exe"))), key=_version_key)
 
-    def creo_process_running(self) -> bool | None:
+    def creo_process_count(self) -> int | None:
+        """Anzahl laufender Creo-Sitzungen (xtop.exe), None wenn unbekannt."""
         try:
             out = subprocess.run(
                 ["tasklist", "/FI", "IMAGENAME eq xtop.exe", "/NH"],
@@ -51,7 +52,7 @@ class Probes:
             ).stdout
         except (OSError, subprocess.SubprocessError):
             return None
-        return "xtop.exe" in out.lower()
+        return sum(1 for line in out.splitlines() if line.strip().lower().startswith("xtop.exe"))
 
     def com_registered(self) -> bool | None:
         try:
@@ -182,8 +183,7 @@ async def run_diagnostics(
                 "Common Files\\text\\java\\pfcasync.jar and otk.jar.",
             )
         )
-    proc = probes.creo_process_running()
-    checks.append(Check("Creo process (xtop.exe)", proc, {True: "running", False: "not running", None: "unknown"}[proc]))
+    checks.append(_process_check(probes.creo_process_count()))
     msg_exe = env.get("PRO_COMM_MSG_EXE")
     checks.append(
         Check(
@@ -213,6 +213,25 @@ async def run_diagnostics(
         exists = probes.path_exists(bat)
         checks.append(Check("Start script", exists, bat, "" if exists else "Create it with CreosonSetup (it writes nitro_proe_remote.bat)."))
     return checks
+
+
+def _process_check(count: int | None) -> Check:
+    name = "Creo process (xtop.exe)"
+    if count is None:
+        return Check(name, None, "unknown")
+    if count == 0:
+        return Check(name, False, "not running")
+    if count == 1:
+        return Check(name, True, "1 session running")
+    # Echtes Creo 12 (27.11.2026): mit zwei xtop.exe scheiterte feature.delete ("more than one instance of Creo"),
+    # andere CREOSON-Funktionen liefen weiter.
+    return Check(
+        name,
+        False,
+        f"{count} sessions running",
+        "CREOSON needs exactly one Creo session: with more, some functions (e.g. deleting features) fail with "
+        "'more than one instance of Creo'. Save your work and close the extra session(s) (Task Manager: xtop.exe).",
+    )
 
 
 def render_checks(checks: list[Check]) -> str:

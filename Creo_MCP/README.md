@@ -150,7 +150,10 @@ erreicht (z. B. im Schulnetz), könnte Creo steuern – einschließlich Batch-Da
 |---|---|
 | `Cannot reach CREOSON …` | CREOSON läuft nicht → `creoson_run.bat` starten; Port in `CREOSON_URL` prüfen |
 | `Unable to connect to Creo through J-Link` | Creo ohne `PRO_COMM_MSG_EXE` gestartet → über `nitro_proe_remote.bat` starten |
-| `more than one instance of Creo is running` | nur eine Creo-Sitzung offen lassen |
+| `more than one instance of Creo is running` | Es laufen zwei Creo-Sitzungen (xtop.exe). Manche Funktionen (z. B. KEs löschen) scheitern dann, andere gehen weiter. Arbeit speichern, zweite Sitzung schließen; `creo_doctor` zeigt die Anzahl |
+| Zeitüberschreitung, obwohl Creo läuft | In Creo ist noch ein Befehl oder Dialog offen (z. B. ein KE-Werkzeug oder „Pfeile“) – CREOSON wartet, bis Creo frei ist. Mit OK, Esc oder mittlerer Maustaste beenden |
+| `Could not open file '….frm' in directory …` | Der Zeichnungsrahmen liegt nicht im Arbeitsverzeichnis → `format_dir` angeben (HTL: `C:/PTC/admCreo12HTL/bibliothek/zeichnungsrahmen`, z. B. `a3_fertigung`) oder vollen Pfad in `format_file` |
+| `Can't Access` bei `creo_set_parameter` | Parameter wird per Relation gesetzt (HTL-Vorlage: SACHNUMMER, WERKSTOFF) → Werkstoff mit `creo_set_material` zuweisen |
 | `No session found` | CREOSON wurde neu gestartet – der Server verbindet automatisch neu |
 | `XToolkitBadContext` | in Creo ist ein Dialog offen → schließen |
 | Unterdrücken/Regenerieren schlägt fehl | `CREO_VERSION=12` gesetzt? (`creo_doctor`) |
@@ -173,6 +176,10 @@ im simulierten CREOSON – und jetzt abgefangen und getestet ist (`tests/test_cr
   Feature-IDs zu (Kopf, Leit-KE, Kopien mit den IDs nach dem Kopf) und sagt das dazu.
 - **Ansichten aus der HTL-Vorlage** heißen „VORNE - FRONT“ usw. (siehe Fehlerbehebung).
 - CREOSON meldet Verzeichnisse als `C:C:/…` – der Server zeigt `C:/…`.
+- **Deckel Pos. 4 aus einer PDF-Zeichnung** (27.11.2026): Kontur als DXF importiert (Typ „KURVE AUS DATEI“) und
+  gedreht, Senkbohrung im Muster, Querschnitt für den Zeichnungsschnitt („Querschnitt“). Beide Typen zählen jetzt als
+  Bezug. Der HTL-Rahmen braucht seinen Ordner (`format_dir`); nach `creo_set_material` stimmen DICHTE und MASSE der
+  HTL-Vorlage erst nach zwei Regenerierungen – das Werkzeug regeneriert deshalb zweimal.
 
 ## Weitere Doku
 

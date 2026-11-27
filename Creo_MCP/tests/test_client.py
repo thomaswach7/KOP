@@ -54,6 +54,36 @@ async def test_creo_not_running_error_has_start_hint(mock, settings):
     await client.aclose()
 
 
+def test_two_creo_sessions_get_their_own_hint():
+    # Echtes Creo 12 (27.11.2026) bei feature.delete mit zwei laufenden xtop.exe. Früher griff zuerst der Hinweis
+    # "Unable to connect to Creo" (Creo starten) – falsch, Creo lief ja doppelt.
+    from creo_mcp.client import with_hint
+
+    text = with_hint("Error handling request: Unable to connect to Creo; more than one instance of Creo is running")
+    assert "close the extra Creo session" in text
+    assert "nitro_proe_remote.bat" not in text
+
+
+def test_cant_access_hint_points_to_relations():
+    from creo_mcp.client import with_hint
+
+    text = with_hint("parameter.set: A Pro/TOOLKIT error has occurred: Can't Access.  Check your model/drawing for accuracy.")
+    assert "relation" in text and "creo_set_material" in text
+
+
+async def test_timeout_message_mentions_open_creo_dialog(settings):
+    import httpx
+
+    def hang(request):
+        raise httpx.ReadTimeout("timed out", request=request)
+
+    client = CreosonClient(settings, transport=httpx.MockTransport(hang))
+    with pytest.raises(CreosonConnectionError) as exc:
+        await client.call("creo", "pwd")
+    assert "middle mouse button" in str(exc.value)
+    await client.aclose()
+
+
 async def test_version_call_skipped_when_disabled(mock):
     client = CreosonClient(Settings(creoson_url=mock.url, creo_version=None))
     await client.call("creo", "pwd")

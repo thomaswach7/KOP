@@ -7,8 +7,8 @@ class FakeProbes(Probes):
     def creo_installs(self):
         return ["C:/Program Files/PTC/Creo 12.4.4.0"]
 
-    def creo_process_running(self):
-        return True
+    def creo_process_count(self):
+        return 1
 
     def com_registered(self):
         return False
@@ -75,6 +75,25 @@ async def test_doctor_checks_jlink_jar_of_newest_creo(mock):
     settings = Settings(creoson_url=mock.url)
     checks = await run_diagnostics(settings, CreosonClient(settings), platform="win32", probes=Probes12())
     assert _by_name(checks, "J-Link").ok is True
+
+
+async def test_doctor_warns_about_two_creo_sessions(mock):
+    # Echtes Creo 12 (27.11.2026): zwei xtop.exe → feature.delete scheitert mit "more than one instance of Creo"
+    class TwoCreos(FakeProbes):
+        def creo_process_count(self):
+            return 2
+
+    settings = Settings(creoson_url=mock.url)
+    checks = await run_diagnostics(settings, CreosonClient(settings), platform="win32", probes=TwoCreos())
+    proc = _by_name(checks, "Creo process")
+    assert proc.ok is False and "2 sessions" in proc.detail
+    assert "more than one instance of Creo" in proc.hint and "xtop.exe" in proc.hint
+
+
+async def test_doctor_one_creo_session_is_ok(mock):
+    settings = Settings(creoson_url=mock.url)
+    checks = await run_diagnostics(settings, CreosonClient(settings), platform="win32", probes=FakeProbes())
+    assert _by_name(checks, "Creo process").ok is True
 
 
 def test_creo_installs_sorted_by_version_number():
